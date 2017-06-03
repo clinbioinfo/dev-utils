@@ -4,22 +4,25 @@ use Term::ANSIColor;
 use FindBin;
 use File::Copy;
 use File::Compare;
+use Getopt::Long qw(:config no_ignore_case no_auto_abbrev);
 
 use constant DEFAULT_INSTALL_DIR => '~/.config/sublime-text-3/Packages/User/';
 use constant DEFAULT_SOURCE_DIR => "$FindBin::Bin/../sublime-snippets/snippets/";
 
-my $source_dir = $ARGV[0];
-if (!defined($source_dir)){
-	$source_dir = DEFAULT_SOURCE_DIR
-}
+my $install_dir;
+my $source_dir;
+
+my $results = GetOptions (
+    'install-dir=s'  => \$install_dir, 
+    'source-dir=s'     => \$source_dir
+    );
+
+&checkCommandLineArguments();
+
 if (!-e $source_dir){
 	die "source directory '$source_dir' does not exist";
 }
 
-my $install_dir = $ARGV[1];
-if (!defined($install_dir)){
-	$install_dir = DEFAULT_INSTALL_DIR;	
-}
 
 if (!-e $install_dir){
 	die "install directory '$install_dir' does not exist";
@@ -85,6 +88,46 @@ exit(0);
 ##  END OF MAIN -- SUBROUTINES FOLLOW
 ##
 ##--------------------------------------------------------
+
+sub checkCommandLineArguments {
+   
+   	my $fatalCtr = 0;
+
+    if (!defined($install_dir)){
+
+    	$install_dir = DEFAULT_INSTALL_DIR;
+
+        printYellow("--install-dir was not specified and therefore was set to default '$install_dir'");        
+    }
+
+    if (!defined($source_dir)){
+	
+    	$source_dir = DEFAULT_SOURCE_DIR;
+
+        printYellow("--source-dir was not specified and therefore was set to default '$source_dir'");
+    }
+
+    if ($fatalCtr > 0){
+    	die "Required command-line arguments were not specified\n";
+    }
+}
+
+sub printBoldRed {
+
+    my ($msg) = @_;
+    print color 'bold red';
+    print $msg . "\n";
+    print color 'reset';
+}
+
+sub printGreen {
+
+    my ($msg) = @_;
+    print color 'green';
+    print $msg . "\n";
+    print color 'reset';
+}
+
 
 sub printYellow {
 
