@@ -1,0 +1,21 @@
+<snippet>
+	<content><![CDATA[
+sub get_lookup_from_json_file {
+
+    my (\$file) = @_;
+
+    \$logger->info("Going to retrieve data from JSON file '\$file'");
+
+    my @lines = read_file(\$file);
+
+    my \$content = join('', @lines);
+
+    my \$lookup = parse_json(\$content);
+
+    return \$lookup;
+}]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sub-get-lookup-from-json-file-executable</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>

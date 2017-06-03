@@ -1,0 +1,25 @@
+<snippet>
+	<content><![CDATA[
+sub execute_cmd {
+    
+    my (\$cmd) = @_;
+    if (!defined(\$cmd)){
+        \$logger->logconfess("cmd was not defined");
+    }
+
+    \$logger->info("About to execute '\$cmd'");
+
+    eval {
+        qx(\$cmd);
+    };
+
+    if (\$?){
+        \$logger->logconfess("Encountered some error while attempting to execute '\$cmd' : \$! \$@");
+    }
+}    
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sub-execute-cmd-function</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>

@@ -1,0 +1,10 @@
+<snippet>
+    <content><![CDATA[
+if (!defined(\$${1:var})){
+	\$self->{_logger}->logconfess("${1} was not defined");
+}
+]]></content>
+    <description>if not defined</description>
+    <tabTrigger>ifndef</tabTrigger>
+    <scope>source.perl</scope>
+</snippet>

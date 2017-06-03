@@ -1,0 +1,13 @@
+<snippet>
+	<content><![CDATA[
+open (OUTFILE, ">\$outfile") || \$self->{_logger}->logconfess("Could not open '\$outfile' in write mode : \$!");
+
+close OUTFILE;
+\$self->{_logger}->info("Wrote records to '\$outfile'");
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>open-file-write</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>

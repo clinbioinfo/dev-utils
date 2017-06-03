@@ -1,0 +1,13 @@
+<snippet>
+	<content><![CDATA[
+if (!defined($1)){
+	const error_msg = "$1 was not defined";
+	console.error(error_msg);
+	throw new Error(error_msg);
+}		
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>ifndef</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.js</scope>
+</snippet>

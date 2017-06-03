@@ -1,0 +1,27 @@
+<snippet>
+	<content><![CDATA[
+sub checkOutdirStatus {
+
+    my (\$outdir) = @_;
+
+    if (!-e \$outdir){
+        
+        mkpath(\$outdir) || die "Could not create output directory '\$outdir' : \$!";
+        
+        print color 'yellow';
+        print "Created output directory '\$outdir'\\n";
+        print color 'reset';
+    }
+    
+    if (!-d \$outdir){
+        print color 'bold red';
+        print "'\$outdir' is not a regular directory\\n";
+        print color 'reset';
+    }
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sub-check-outdir-status-executable</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>

@@ -1,0 +1,21 @@
+<snippet>
+	<content><![CDATA[
+sub _execute_cmd {
+
+    my \$self = shift;
+    my (\$cmd) = @_;
+
+    eval {
+        qx(\$cmd);
+    };
+
+    if (\$?){
+        \$self->{_logger}->logconfess("Encountered some error while attempting to execute '\$cmd' : \$! \$@");
+    }
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sub-execute-cmd</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>

@@ -1,0 +1,36 @@
+<snippet>
+	<content><![CDATA[
+sub _get_file_list {
+
+	my \$self = shift;
+	my (\$indir, \$ext) = @_;
+
+	if (!defined(\$indir)){
+		\$self->{_logger}->logconfess("indir was not defined");
+	}
+
+	if (!defined(\$ext)){
+		\$self->{_logger}->logconfess("ext was not defined");
+	}
+
+    my \$cmd = "find \$indir -name '*.\$ext'";
+
+    my @file_list;
+        
+    eval {
+        @file_list = qx(\$cmd);
+    };
+    if (\$?){
+        $self->{_logger}->logconfess("Encountered some error while attempting to execute '\$cmd' : \$@");
+    }
+
+    chomp @file_list;
+
+    return \@file_list;
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sub_get_file_list</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>

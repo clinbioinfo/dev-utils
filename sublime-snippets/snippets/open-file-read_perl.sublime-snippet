@@ -1,0 +1,32 @@
+<snippet>
+	<content><![CDATA[
+open (INFILE, "<\$infile") || \$self->{_logger}->logconfess("Could not open file '\$infile' in read mode : \$!");
+
+\$self->{_line_ctr} = 0;		
+
+while (my \$line = <INFILE>){
+
+	chomp \$line;
+	
+	\$self->{_line_ctr}++;
+	
+	if (\$line =~ /^\s*/){
+	 	\$self->{_blank_line_ctr}++;
+	 	next;
+	}
+	
+	if (\$line =~ /^\#/){
+	 	\$self->{_commented_line_ctr}++;
+	 	next;
+	}
+}
+
+close INFILE;
+
+\$self->{_logger}->info("Parsed '\$self->{_line_ctr}' lines in file '\$infile'");
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>open-file-read</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>

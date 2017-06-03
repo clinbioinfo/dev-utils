@@ -1,0 +1,17 @@
+<snippet>
+	<content><![CDATA[
+use File::Path;
+use File::Basename;
+
+my \$outdir = File::Basename::dirname(\$outfile);
+if (!-e \$outdir){
+    mkpath(\$outdir) || \$self->{_logger}->logconfess("Could not create output directory '\$outdir' : \$!");
+    \$self->{_logger}->info("Created output directory '\$outdir'");
+}
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>check-subdirectory</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>
