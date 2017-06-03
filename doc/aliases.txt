@@ -1,0 +1,22 @@
+alias e='emacs -fg white -bg black '
+alias lll='ls -ltr '
+alias lk='less '
+alias eb='e ~/.bashrc & '
+alias sb='source ~/.bashrc '
+
+##-------------------------------------------
+##
+## Git
+##
+##-------------------------------------------
+alias gss="git status "
+alias gd="git diff "
+
+##-------------------------------------------
+##
+## Perl
+##
+##-------------------------------------------
+alias fl='find . -name "*.pl"'
+alias fm='find . -name "*.pm"'
+alias pb='perlbrew '
