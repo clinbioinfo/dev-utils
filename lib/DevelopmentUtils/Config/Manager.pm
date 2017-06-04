@@ -130,6 +130,13 @@ sub getJiraPassword {
     return $self->{_parser}->getJiraPassword(@_);
 }
 
+sub getJIRABaseURL {
+
+    my $self = shift;
+
+    return $self->{_parser}->getJIRABaseURL(@_);
+}
+
 1==1; ## End of module
 
 __END__

@@ -111,6 +111,13 @@ sub getJiraPassword {
     return $self->_getValue('Jira', 'password');
 }
 
+sub getJIRABaseURL {
+
+    my $self = shift;
+
+    return $self->_getValue('Jira', 'issue_tracker_base_url');
+}
+
 sub _getValue {
 
     my $self = shift;

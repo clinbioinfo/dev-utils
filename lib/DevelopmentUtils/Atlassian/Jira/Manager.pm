@@ -12,9 +12,9 @@ use DevelopmentUtils::Config::Manager;
 use constant TRUE  => 1;
 use constant FALSE => 0;
 
-use constant DEFAULT_USERNAME => '';
+use constant DEFAULT_USERNAME => 'sundaramj';
 
-my $login =  getlogin || getpwuid($<) || "";
+my $login =  getlogin || getpwuid($<) || "sundaramj";
 
 # use constant DEFAULT_OUTDIR => '/tmp/' . $login . '/' . File::Basename::basename($0) . '/' . time();
 use constant DEFAULT_OUTDIR => '/tmp/' . File::Basename::basename($0) . '/' . time();
@@ -97,11 +97,11 @@ has 'indir' => (
     default  => DEFAULT_INDIR
     );
 
-has 'jira_ticket' => (
+has 'issue_id' => (
     is       => 'rw',
     isa      => 'Str',
-    writer   => 'setJiraTicket',
-    reader   => 'getJiraTicket',
+    writer   => 'setIssueId',
+    reader   => 'getIssueId',
     required => FALSE
     );
 
@@ -412,7 +412,138 @@ sub _execute_cmd {
 
     return \@results;
 }
-    
+
+sub askUserForReference {
+
+    my $self = shift;
+
+    my $answer;
+
+    do {
+
+        print "What is the JIRA issue identifier or URL? ";    
+        
+        $answer = <STDIN>;
+        
+        chomp $answer;      
+
+    } while ((!defined($answer)) && ($answer ne ''));
+
+    if ($answer =~ m|http://|){
+
+        ## E.g.: http://informatics/tracker/browse/BDMTNG-549
+
+        $self->setIssueURL($answer);
+        
+        $self->_derive_and_set_issue_identifier();
+
+        $self->{_logger}->info("user specified JIRA issue URL '$answer'");
+    }
+    else {
+        
+        ## E.g.: BDMTNG-549
+
+        $self->setIssueId($answer);
+        
+        $self->_derive_and_set_issue_url();
+
+        $self->{_logger}->info("user specified JIRA issue identifier '$answer'");
+    }
+}
+
+sub _derive_and_set_issue_identifier {
+
+    my $self = shift;
+    my $url = $self->getIssueURL();
+    if (!defined($url)){
+        $self->{_logger}->logconfess("url was not defined");
+    }
+
+    my $issue_id = File::Basename::basename($url);
+
+    $self->setIssueId($issue_id);
+}
+
+sub _derive_and_set_issue_url {
+
+    my $self = shift;
+    my $id = $self->getIssueId();
+    if (!defined($id)){
+        $self->{_logger}->logconfess("id was not defined");
+    }
+
+    my $base_url = $self->{_config_manager}->getJIRABaseURL();
+    if (!defined($base_url)){
+        $self->{_logger}->logconfess("base_url was not defined");
+    }
+
+    my $url = $base_url . $id;
+
+    $self->setIssueURL($url);
+}
+
+
+
+sub _get_jira_issue_id {
+
+    my $self = shift;
+
+    my $id = $self->getIssueId();
+
+    if (!defined($id)){
+        $self->_prompt_about_jira_issue_id();
+    }
+
+    if ($self->getIsAddJiraComment()){
+
+        $id = $self->getIssueId();
+
+        $self->{_logger}->info("Will add a comment to the Jira issue with identifier '$id'");
+    }
+    else {
+        $self->{_logger}->info("Will not add a comment to some Jira issue");
+    }
+}
+
+sub _prompt_about_jira_issue_id {
+
+    my $self = shift;
+
+    my $id;
+
+    do {
+
+        print "What is the Jira issue identifier? ";
+
+        $id = <STDIN>;
+
+        chomp $id;     
+
+        if ($self->_is_jira_issue_id_valid($id)){
+            $id = undef;
+        }
+
+    } while (!defined($id));
+
+    $self->setIssueId($id);
+}
+
+sub _is_jira_issue_id_valid {
+
+    my $self = shift;
+    my ($id) = @_;
+
+    $id =~ s/^\s+//;
+
+    $id =~ s/\s+$//;
+
+    if ($id =~ /\S+\-\d+/){
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
