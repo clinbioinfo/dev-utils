@@ -11,7 +11,7 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 
 use DevelopmentUtils::Logger;
-use DevelopmentUtils::Git::Manager;
+use DevelopmentUtils::Git::Branch::Manager;
 
 use constant TRUE => 1;
 use constant FALSE => 0;
@@ -27,27 +27,6 @@ my $username = $ENV{USER};
 use constant DEFAULT_OUTDIR => '/tmp/' . $username . '/' . File::Basename::basename($0) . '/' . time();
 
 use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
-
-my @qualified_project_list = qw|
-bdm-admin-toolkit-repo
-bdm-admin-operations-toolkit-repo
-bdm-create-collection-repo
-bdm-csv-profiler-repo
-bdm-data-exploratory-portal-repo
-bdm-dataset-assembly-repo
-bdm-demog-synonym-template-portal-repo
-bdm-etl-activity-dashboard-repo
-bdm-etl-plan-and-map-repo
-bdm-execute-etl-plan-repo
-bdm-flatten-demog-tables-repo
-bdm-publish-collection-repo
-bdm-rollback-collection-repo
-bdm-sql-browser-repo
-bdm-stat-transfer-repo
-bdm-study-documents-repo
-bdm-summary-plan-repo
-bdm-tng-console-repo
-|;
 
 my (
     $help, 
@@ -136,6 +115,10 @@ sub checkCommandLineArguments {
         
         $fatalCtr++;
     }
+    else {
+        &checkInfileStatus($projects_conf_file);
+    }
+
 
     if ($fatalCtr> 0 ){
         printBoldRed("Required command-line arguments were not specified");
@@ -225,76 +208,50 @@ sub printBoldRed {
     print color 'reset';
 }
 
-sub promptUserCheckDependencies {
+sub checkInfileStatus {
 
-    &promptAboutProjectList();
+    my ($infile) = @_;
 
-    my @questions = (
-        "Have you committed all modified code in local checkouts to revision control?",
-        );
-
-    foreach my $question (@questions){
-
-        my $answer = 'N';
-        
-        while (1) {
-
-            print $question . "[y/N] ";
-
-            $answer = <STDIN>;
-
-            chomp $answer;
-
-            if (uc($answer) eq 'Y'){
-
-                last;
-            }
-            else{
-
-                print "Please try again when you're ready to resume.\n";
-
-                exit(1);
-            }
-        }
+    if (!defined($infile)){
+        die ("infile was not defined");
     }
 
-    print ("Okay, looks like we're ready to proceed.\n");
-}
+    my $errorCtr = 0 ;
 
-sub promptAboutProjectList {
-
-    my $count = scalar(@qualified_project_list);
-
-    print "Here are the '$count' projects that we are going to tag:\n";
-
-    my $ctr = 0;
-
-    foreach my $project (sort @qualified_project_list){
-
-        $ctr++;
-
-        print $ctr . '. ' . $project . "\n";
+    if (!-e $infile){
+        print color 'bold red';
+        print ("input file '$infile' does not exist\n");
+        print color 'reset';
+        $errorCtr++;
     }
+    else {
 
-    my $answer = 'N';
-        
-    while (1) {
-
-        print "Is this list correct? [y/N] ";
-        
-        $answer = <STDIN>;
-        
-        chomp $answer;
-        
-        if (uc($answer) eq 'Y'){
-            
-            last;
+        if (!-f $infile){
+            print color 'bold red';
+            print ("'$infile' is not a regular file\n");
+            print color 'reset';
+            $errorCtr++;
         }
-        else{
 
-            print "Okay.  Please try again when you're ready to resume.\n";
-
-            exit(1);
+        if (!-r $infile){
+            print color 'bold red';
+            print ("input file '$infile' does not have read permissions\n");
+            print color 'reset';
+            $errorCtr++;
         }
+        
+        if (!-s $infile){
+            print color 'bold red';
+            print ("input file '$infile' does not have any content\n");
+            print color 'reset';
+            $errorCtr++;
+        }
+    }
+     
+    if ($errorCtr > 0){
+        print color 'bold red';
+        print ("Encountered issues with input file '$infile'\n");
+        print color 'reset';
+        exit(1);
     }
 }
