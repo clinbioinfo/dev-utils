@@ -11,6 +11,7 @@ use Term::ANSIColor;
 use DevelopmentUtils::Logger;
 use DevelopmentUtils::Config::Manager;
 use DevelopmentUtils::Atlassian::Jira::Manager;
+use DevelopmentUtils::Git::Branch::Manager;
 
 use constant TRUE  => 1;
 use constant FALSE => 0;
@@ -127,6 +128,8 @@ sub BUILD {
 
     $self->_initConfigManager(@_);
 
+    $self->_initGitBranchManager(@_);
+
     $self->_conditional_init_jira_manager(@_);
 
     $self->{_confirmed_asset_file_ctr} = 0;
@@ -189,6 +192,18 @@ sub _initJiraManager {
     }
 
     $self->{_jira_manager} = $manager;
+}
+
+sub _initGitBranchManager {
+
+    my $self = shift;
+
+    my $manager = DevelopmentUtils::Git::Branch::Manager::getInstance(@_);
+    if (!defined($manager)){
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Branch::Manager");
+    }
+
+    $self->{_branch_manager} = $manager;
 }
 
 sub commitCodeAndPush {
@@ -830,7 +845,20 @@ sub _execute_cmd {
 
     return \@results;
 }
+
+sub getCurrentBranches {
+
+    my $self = shift;
+
+    return $self->{_branch_manager}->getCurrentBranches(@_);
+}
 	
+sub determineNextBranches {
+
+    my $self = shift;
+    
+    return $self->{_branch_manager}->getDetermineNextBranches(@_);
+}
     
 
 no Moose;
