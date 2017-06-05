@@ -1,6 +1,7 @@
 package DevelopmentUtils::Git::Tag::Manager;
 
 use Moose;
+use Try::Tiny;
 use Cwd;
 use Data::Dumper;
 use File::Path;
@@ -10,12 +11,16 @@ use Term::ANSIColor;
 use JSON::Parse 'parse_json';
 use JSON::Parse 'json_file_to_perl';
 use JSON;
+use FindBin;
 
 use DevelopmentUtils::Logger;
 use DevelopmentUtils::Config::Manager;
+# use DevelopmentUtils::Git::Branch::Manager;
 
 use constant TRUE  => 1;
 use constant FALSE => 0;
+
+use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
 
 use constant DEFAULT_TEST_MODE => TRUE;
 
@@ -37,6 +42,15 @@ has 'test_mode' => (
     reader   => 'getTestMode',
     required => FALSE,
     default  => DEFAULT_TEST_MODE
+    );
+
+has 'config_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setConfigFile',
+    reader   => 'getConfigFile',
+    required => FALSE,
+    default  => DEFAULT_CONFIG_FILE
     );
 
 has 'verbose' => (
@@ -114,6 +128,8 @@ sub BUILD {
 
     $self->_initConfigManager(@_);
 
+    # $self->_initBranchManager(@_);
+
     $self->{_logger}->info("Instantiated ". __PACKAGE__);
 }
 
@@ -142,6 +158,30 @@ sub _initConfigManager {
     $self->{_config_manager} = $manager;
 }
 
+# sub _initBranchManager {
+
+#     my $self = shift;
+
+#     my $outdir = $self->getOutdir();
+
+#     my $report_file = $outdir . '/branch-report.rpt';
+
+#     my $manager = DevelopmentUtils::Git::Branch::Manager::getInstance(
+#         test_mode          => $self->getTestMode(),
+#         verbose            => $self->getVerbose(),
+#         config_file        => $self->getConfigFile(),
+#         outdir             => $outdir,
+#         projects_conf_file => $self->getProjectsConfFile(),
+#         report_file        => $report_file
+#     );
+
+#     if (!defined($manager)){
+#         $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Branch::Manager");
+#     }
+
+#     $self->{_branch_manager} = $manager;
+# }
+
 sub getCurrentBuildTags {
 
     my $self = shift;
@@ -156,9 +196,25 @@ sub determineNextBuildTags {
     return $self->recommendNextBuildTags(@_);
 }
 
+sub _print_banner {
+
+    my $self = shift;
+    my ($msg) = @_;
+
+    print color 'yellow';
+    print "************************************************************\n";
+    print "*\n";
+    print "* $msg\n";
+    print "*\n";
+    print "************************************************************\n";
+    print color 'reset';
+}
+
 sub recommendNextBuildTags {
 
     my $self = shift;
+
+    $self->_print_banner("Going to determine next build tags");
 
     $self->_load_project_lookup(@_);
 
@@ -260,7 +316,7 @@ sub _get_all_build_tags {
     }
 
     if ($self->getVerbose()){
-        
+
         print "Found the following '$candidate_ctr' tags:\n";
         
         print join("\n", @{$candidate_list}) . "\n";
@@ -408,6 +464,161 @@ sub _generate_report {
 
     $self->{_logger}->info("Wrote report to '$report_file'");
 }    
+
+sub setCurrentBranchLookup {
+
+    my $self = shift;
+    my ($current_branch_lookup) = @_;
+
+    if (!defined($current_branch_lookup)){
+        $self->{_logger}->logconfess("current_branch_lookup was not defined");
+    }
+
+    $self->{_current_branch_lookup} = $current_branch_lookup;
+}
+
+sub _get_current_dev_branch {
+
+    my $self = shift;
+    my ($project_name) = @_;
+
+    if (exists $self->{_current_branch_lookup}->{$project_name}){
+        return $self->{_current_branch_lookup}->{$project_name};
+    }
+
+    $self->{_logger}->logconfess("project name '$project_name' does not exist in the current branch lookup");
+}
+
+sub createNextBuildTags {
+
+    my $self = shift;
+
+    # $self->{_branch_manager}->determineNextDevBranches();
+
+    $self->recommendNextBuildTags();
+
+    $self->_create_next_build_tags();
+}
+
+sub _create_next_build_tags {
+
+    my $self = shift;
+    
+    $self->_print_banner("Going to created next build tags");
+
+    my $workdir = $self->getOutdir();
+
+    foreach my $project_name (sort keys %{$self->{_project_lookup}}){
+
+        chdir($workdir) || $self->{_logger}->logconfess("Could not change into directory '$workdir' : $!");
+
+        if ($self->getVerbose()){
+
+            print "Processing project '$project_name'\n";
+
+            print "Current working directory is '$workdir'\n";
+        }
+
+        my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
+
+        $self->_clone_project($project_name, $repo_url);
+
+        chdir($project_name) || $self->{_logger}->logconfess("Could not change into directory '$project_name' : $!");
+
+        my $next_build_tag = $self->{_project_lookup}->{$project_name}->{next_build_tag};
+
+        my $current_dev_branch = $self->_get_current_dev_branch($project_name);#{_branch_manager}->getCurrentDevBranchByProject($project_name);
+
+        my $cmd_checkout_branch = "git checkout $current_dev_branch";
+
+        $self->_execute_cmd($cmd_checkout_branch);
+
+        my $date = localtime();
+
+        my $cmd_create_tag = "git tag -a $next_build_tag -m 'Establishing $next_build_tag from dev branch $current_dev_branch on $date'";
+
+        print "About to tag code base '$project_name' with tag '$next_build_tag' with the following command\n";
+
+        print $cmd_create_tag . "\n";        
+        
+        print color 'yellow';
+        print "Shall I proceed? [Y/n/q] ";
+        print color 'reset';
+
+        my $answer;
+        
+        while (1){
+        
+            $answer = <STDIN>;
+        
+            chomp $answer;
+
+            if (!defined($answer)){
+                $answer = 'Y';
+            }
+            if ($answer eq ''){
+                $answer = 'Y';
+            }
+
+            $answer = uc($answer);
+
+            if (($answer eq 'Y') || ($answer eq 'N') || ($answer eq 'Q')){
+                last;
+            }
+        }
+
+        if ($answer eq 'Y'){
+
+            if ($self->getTestMode()){
+
+                $self->{_logger}->info("Running in test mode - would have executed '$cmd_create_tag'");
+
+                print color 'yellow';
+                print "Running in test mode - would have executed '$cmd_create_tag'\n";
+                print color 'reset';
+            }
+            else {
+                
+                $self->_execute_cmd($cmd_create_tag);
+
+                my $cmd_git_push = "git push";
+
+                $self->_execute_cmd($cmd_git_push);
+            }
+        }
+        elsif ($answer eq 'N'){
+            $self->{_logger}->info("User decided to not create tag '$next_build_tag' for code base '$project_name'");
+            next;
+        }
+        elsif ($answer eq 'Q'){
+            $self->{_logger}->info("User decided to quit just before creating tag '$next_build_tag' for code base '$project_name'");
+            exit;
+        }
+        else {
+            $self->{_logger}->logconfess("Unexpected answer '$answer'");
+        }
+    }
+}
+
+sub _clone_project {
+
+    my $self = shift;
+    
+    my ($project_name, $repo_url) = @_;
+
+    my $ex = "git clone $repo_url";
+
+    $self->{_logger}->info("About to execute '$ex'");
+
+    try {
+
+        qx($ex);
+
+    } catch {
+
+        $self->{_logger}->logconfess("Encountered some error while attempting to execute '$ex' : @_");
+    };
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

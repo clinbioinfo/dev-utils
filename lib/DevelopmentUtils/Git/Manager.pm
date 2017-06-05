@@ -12,6 +12,7 @@ use DevelopmentUtils::Logger;
 use DevelopmentUtils::Config::Manager;
 use DevelopmentUtils::Atlassian::Jira::Manager;
 use DevelopmentUtils::Git::Branch::Manager;
+use DevelopmentUtils::Git::Tag::Manager;
 
 use constant TRUE  => 1;
 use constant FALSE => 0;
@@ -106,6 +107,15 @@ has 'include_jira_reference' => (
     required => FALSE
     );
 
+has 'report_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setReportFile',
+    reader   => 'getReportFile',
+    required => FALSE
+    );
+
+
 sub getInstance {
 
     if (!defined($instance)){
@@ -129,6 +139,8 @@ sub BUILD {
     $self->_initConfigManager(@_);
 
     $self->_initGitBranchManager(@_);
+
+    $self->_initGitTagManager(@_);
 
     $self->_conditional_init_jira_manager(@_);
 
@@ -203,7 +215,45 @@ sub _initGitBranchManager {
         $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Branch::Manager");
     }
 
+    my $report_file = $self->getReportFile();
+
+    if (defined($report_file)){
+
+        my $current_report_file = $report_file;
+
+        $report_file = $self->getOutdir() . '/git-branch-report.txt';
+
+        $self->{_logger}->info("Overriding current report file '$current_report_file' with report file '$report_file");      
+    }
+
+    $manager->setReportFile($report_file);
+
     $self->{_branch_manager} = $manager;
+}
+
+sub _initGitTagManager {
+
+    my $self = shift;
+
+    my $manager = DevelopmentUtils::Git::Tag::Manager::getInstance(@_);
+    if (!defined($manager)){
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Tag::Manager");
+    }
+
+    my $report_file = $self->getReportFile();
+
+    if (defined($report_file)){
+
+        my $current_report_file = $report_file;
+
+        $report_file = $self->getOutdir() . '/git-tag-report.txt';
+
+        $self->{_logger}->info("Overriding current report file '$current_report_file' with report file '$report_file");      
+    }
+
+    $manager->setReportFile($report_file);
+
+    $self->{_tag_manager} = $manager;
 }
 
 sub commitCodeAndPush {
@@ -860,6 +910,33 @@ sub determineNextBranches {
     return $self->{_branch_manager}->getDetermineNextBranches(@_);
 }
     
+sub createNextBuildTags {
+
+    my $self = shift;       
+
+    $self->{_branch_manager}->determineNextBranches(@_);
+
+    my $current_branch_lookup = $self->{_branch_manager}->getCurrentBranchLookup();
+    if (!defined($current_branch_lookup)){
+        $self->{_logger}->logconfess("current_branch_lookup was not defined");
+    }
+
+    $self->{_tag_manager}->setCurrentBranchLookup($current_branch_lookup);
+
+    $self->{_tag_manager}->createNextBuildTags(@_);
+}
+
+sub getBranchReportFile {
+
+    my $self = shift;
+    return $self->{_branch_manager}->getReportFile()
+}
+
+sub getTagReportFile {
+
+    my $self = shift;
+    return $self->{_tag_manager}->getReportFile()
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

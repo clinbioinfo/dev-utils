@@ -155,11 +155,27 @@ sub determineNextBranches {
     return $self->recommendNextDevBranch(@_);
 }
 
+sub _print_banner {
+
+    my $self = shift;
+    my ($msg) = @_;
+
+    print color 'yellow';
+    print "************************************************************\n";
+    print "*\n";
+    print "* $msg\n";
+    print "*\n";
+    print "************************************************************\n";
+    print color 'reset';
+}
+
 sub recommendNextDevBranch {
 
     my $self = shift;
 
     $self->{_logger}->info("NOT YET IMPLEMENTED");
+
+    $self->_print_banner("Going to determine next development branches");
 
     $self->_load_project_lookup(@_);
 
@@ -429,6 +445,45 @@ sub _generate_report {
 
     $self->{_logger}->info("Wrote report to '$report_file'");
 }    
+
+sub getCurrentBranchLookup {
+
+    my $self = shift;
+
+    if (! exists $self->{_current_branch_lookup}){
+
+        foreach my $project_name (sort keys %{$self->{_project_lookup}}){
+
+            my $current_dev_branch = $self->{_project_lookup}->{$project_name}->{'current_dev_branch'};
+
+            $self->{_current_branch_lookup}->{$project_name} = $current_dev_branch;
+        }   
+    }
+
+    return $self->{_current_branch_lookup};
+}
+
+sub getCurrentDevBranchByProject {
+
+    my $self = shift;
+    my ($project_name) = @_;
+
+    if (!defined($project_name)){
+        $self->{_logger}->logconfess("project_name was not defined");
+    }
+
+    if (! exists $self->{_current_branch_lookup}){
+        $self->getCurrentBranchLookup();
+    }
+
+    if (!exists $self->{_current_branch_lookup}->{$project_name}){
+        $self->{_logger}->logconfess("project name '$project_name' does not exist in the current branch lookup");
+    }
+    else {
+        return $self->{_current_branch_lookup}->{$project_name};
+    }
+}
+
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
