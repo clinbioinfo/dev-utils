@@ -212,7 +212,9 @@ sub checkAliases {
     if ($need_to_install_aliases_ctr > 0){
         
         printYellow("Need to install the following '$need_to_install_aliases_ctr' aliases to '$bashrc_file':");
-        
+    
+        $self->{_need_to_install_aliases_list} = $need_to_install_aliases_list;
+
         foreach my $alias_list_ref (@{$need_to_install_aliases_list}){
         
             my $alias_name = $alias_list_ref->[0];
@@ -220,11 +222,15 @@ sub checkAliases {
             my $alias_val  = $alias_list_ref->[1];
         
             print "alias $alias_name=$alias_val\n";
-        # print join("\n", @{$need_to_install_aliases_list}) . "\n";
         }
+
+
+        $self->_prompt_user_whether_should_install();
     }
 
     if ($need_to_save_aliases_ctr > 0){
+
+        $self->{_need_to_save_aliases_list} = $need_to_save_aliases_list;
 
         printYellow("Need to save the following '$need_to_save_aliases_ctr' aliases to '$source_aliases_file':");
     
@@ -236,10 +242,193 @@ sub checkAliases {
         
             print "alias $alias_name=$alias_val\n";
         }
-        # print join("\n", @{$need_to_save_aliases_list}) . "\n";
+
+        $self->_prompt_user_whether_should_save();
     }
 }
 
+
+sub _prompt_user_whether_should_install {
+
+    my $self = shift;
+    
+
+    my $answer;
+
+    while (1){
+
+        print "Shall I install these aliases? [Y/n/q]";
+        
+        $answer = <STDIN>;
+        
+        chomp $answer;
+        
+        $answer = uc($answer);
+        
+        if ((!defined($answer)) || ($answer eq '')){
+            $answer = 'Y';
+        }
+        
+        if ($answer eq 'Y'){
+        
+            $self->_install_aliases();
+        
+            last;
+        }        
+        elsif ($answer eq 'N'){
+        
+            $self->{_logger}->info("User does not want to install aliases");
+        
+            last;
+        }
+        elsif ($answer eq 'Q'){
+        
+            $self->{_logger}->info("User wants to quit");
+        
+            printBoldRed("Okay, bye.");
+        
+            exit(1);
+        }
+    }
+}
+
+sub _install_aliases {
+
+    my $self = shift;
+
+
+    my $file = $self->getBashrcFile();
+    
+    my $bakfile = $file. '.bak';
+
+    copy($file, $bakfile) || $self->{_logger}->logconfess("Could not copy file '$file' to '$bakfile' : $!");
+    
+
+    my @lines = read_file($bakfile);
+
+    open (OUTFILE, ">$file") || $self->{_logger}->logconfess("Could not open '$file' in write mode : $!");
+    
+
+    print OUTFILE join("", @lines);
+
+
+    my $date = localtime();
+
+    print OUTFILE "\n\n## Added aliases on $date\n";
+    
+
+    my $ctr = 0;
+
+    foreach my $alias_list_ref (@{$self->{_need_to_install_aliases_list}}){
+    
+        my $alias_name = $alias_list_ref->[0];
+    
+        my $alias_val  = $alias_list_ref->[1];
+    
+        $ctr++;
+
+        print OUTFILE "alias $alias_name=$alias_val\n";
+    }
+
+
+    close OUTFILE;
+
+    $self->{_logger}->info("Wrote '$ctr' new aliases to '$file'");
+
+    printGreen("Wrote '$ctr' new aliases to '$file'");
+    
+}
+
+
+sub _prompt_user_whether_should_save {
+
+    my $self = shift;
+    
+
+    my $answer;
+
+    while (1){
+
+        print "Shall I save these aliases? [Y/n/q]";
+        
+        $answer = <STDIN>;
+        
+        chomp $answer;
+        
+        $answer = uc($answer);
+        
+        if ((!defined($answer)) || ($answer eq '')){
+            $answer = 'Y';
+        }
+        
+        if ($answer eq 'Y'){
+        
+            $self->_save_aliases();
+        
+            last;
+        }        
+        elsif ($answer eq 'N'){
+        
+            $self->{_logger}->info("User does not want to save aliases");
+        
+            last;
+        }
+        elsif ($answer eq 'Q'){
+        
+            $self->{_logger}->info("User wants to quit");
+        
+            printBoldRed("Okay, bye.");
+        
+            exit(1);
+        }
+    }
+}
+
+
+sub _save_aliases {
+
+    my $self = shift;
+
+    my $file = $self->getSourceAliasesFile();
+    
+    my $bakfile = $file. '.bak';
+
+    copy($file, $bakfile) || $self->{_logger}->logconfess("Could not copy file '$file' to '$bakfile' : $!");
+    
+
+    my @lines = read_file($bakfile);
+
+    open (OUTFILE, ">$file") || $self->{_logger}->logconfess("Could not open '$file' in write mode : $!");
+    
+
+    print OUTFILE join("", @lines);
+
+
+    my $date = localtime();
+
+    print OUTFILE "\n\n## Added aliases on $date\n";
+    
+
+    my $ctr = 0;
+
+    foreach my $alias_list_ref (@{$self->{_need_to_save_aliases_list}}){
+    
+        my $alias_name = $alias_list_ref->[0];
+    
+        my $alias_val  = $alias_list_ref->[1];
+    
+        $ctr++;
+
+        print OUTFILE "alias $alias_name=$alias_val\n";
+    }
+
+    close OUTFILE;
+
+    $self->{_logger}->info("Wrote '$ctr' new aliases to '$file'");
+    
+    printGreen("Wrote '$ctr' new aliases to '$file'");
+    
+}
 
 # sub installAliases {
 
