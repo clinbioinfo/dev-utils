@@ -529,6 +529,11 @@ sub _create_next_build_tags {
 
         my $current_dev_branch = $self->_get_current_dev_branch($project_name);#{_branch_manager}->getCurrentDevBranchByProject($project_name);
 
+        ## For situation where the current development branch has no tag-
+        ## this software should recommend that the first tag for the
+        ## branch should be created.
+        $next_build_tag = $self->_verify_tag_against_branch($next_build_tag, $current_dev_branch);
+
         my $cmd_checkout_branch = "git checkout $current_dev_branch";
 
         $self->_execute_cmd($cmd_checkout_branch);
@@ -542,7 +547,7 @@ sub _create_next_build_tags {
         print $cmd_create_tag . "\n";        
         
         print color 'yellow';
-        print "Shall I proceed? [Y/n/q] ";
+        print "Shall I proceed? [Y/n/o/q] ";
         print color 'reset';
 
         my $answer;
@@ -562,32 +567,33 @@ sub _create_next_build_tags {
 
             $answer = uc($answer);
 
-            if (($answer eq 'Y') || ($answer eq 'N') || ($answer eq 'Q')){
+            if (($answer eq 'Y') || ($answer eq 'N') ||  ($answer eq 'O') || ($answer eq 'Q')){
                 last;
             }
         }
 
         if ($answer eq 'Y'){
 
-            if ($self->getTestMode()){
-
-                $self->{_logger}->info("Running in test mode - would have executed '$cmd_create_tag'");
-
-                print color 'yellow';
-                print "Running in test mode - would have executed '$cmd_create_tag'\n";
-                print color 'reset';
-            }
-            else {
-                
-                $self->_execute_cmd($cmd_create_tag);
-
-                my $cmd_git_push = "git push";
-
-                $self->_execute_cmd($cmd_git_push);
-            }
+            $self->_do_create_tag_and_push($cmd_create_tag, $next_build_tag);
         }
         elsif ($answer eq 'N'){
             $self->{_logger}->info("User decided to not create tag '$next_build_tag' for code base '$project_name'");
+            next;
+        }
+        elsif ($answer eq 'O'){
+
+            $self->{_logger}->info("User decided to supply a different tag than '$next_build_tag' for code base '$project_name'");
+
+            $next_build_tag = $self->_prompt_user_for_tag();
+
+            $date = localtime();
+
+            $cmd_create_tag = "git tag -a $next_build_tag -m 'Establishing $next_build_tag from dev branch $current_dev_branch on $date'";
+
+            print "About to tag code base '$project_name' with tag '$next_build_tag' with the following command\n";
+
+            $self->_do_create_tag_and_push($cmd_create_tag, $next_build_tag);
+
             next;
         }
         elsif ($answer eq 'Q'){
@@ -597,6 +603,94 @@ sub _create_next_build_tags {
         else {
             $self->{_logger}->logconfess("Unexpected answer '$answer'");
         }
+    }
+}
+
+sub _verify_tag_against_branch {
+
+    my $self = shift;
+    my ($next_build_tag, $current_dev_branch) = @_;
+
+    my $current_dev_branch_revision_number;
+    my $current_dev_branch_version_number;
+
+    if ($current_dev_branch =~ m|^v(\d+)\.(\d+)$|){
+        $current_dev_branch_version_number = $1;
+        $current_dev_branch_revision_number = $2;
+    }
+    else {
+        $self->{_logger}->logconfess("Unexpected branch '$current_dev_branch'");
+    }
+   
+    my $next_build_tag_revision_number;
+        
+    if ($next_build_tag =~ m|^v\d+\.(\d+)\.\d+$|){
+        $next_build_tag_revision_number = $1;
+    }
+    else {
+        $self->{_logger}->logconfess("Unexpected build tag '$next_build_tag'");
+    }
+    
+
+    if ($current_dev_branch_revision_number != $next_build_tag_revision_number){
+
+        my $recommended_next_build_tag = 'v' . $current_dev_branch_version_number . '.' . $current_dev_branch_revision_number . '.1';
+
+        $self->{_logger}->info("Recommending next build tag '$recommended_next_build_tag' instead of '$next_build_tag' because current development branch '$current_dev_branch'");
+
+        return $recommended_next_build_tag;
+    }
+    else {
+        return $next_build_tag;
+    }
+}
+
+
+sub _prompt_user_for_tag {
+
+    my $self = shift;
+    
+    my $answer;
+
+    while(1){    
+        
+        print "Please provide the tag: ";
+        
+        $answer  = <STDIN>;
+        
+        chomp $answer;
+        
+        if ((!defined($answer)) || ($answer eq '')){
+            next;
+        }
+        else {
+            last;
+        }
+    }
+
+    return $answer;
+}
+
+sub _do_create_tag_and_push {
+
+    my $self = shift;
+    my ($cmd_create_tag, $next_build_tag) = @_;
+
+    if ($self->getTestMode()){
+
+        $self->{_logger}->info("Running in test mode - would have executed '$cmd_create_tag' (re-execute with --test_mode 0)");
+
+        print color 'yellow';
+        print "Running in test mode - would have executed '$cmd_create_tag' (re-execute with --test_mode 0)\n";
+        print color 'reset';
+    }
+    else {
+
+        $self->_execute_cmd($cmd_create_tag);
+
+        my $cmd_git_push = "git push origin $next_build_tag";
+
+        $self->_execute_cmd($cmd_git_push);
     }
 }
 
