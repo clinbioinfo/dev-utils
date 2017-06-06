@@ -1,0 +1,14 @@
+<snippet>
+	<content><![CDATA[
+sub $1 {
+
+    my \$self = shift;
+    my (\$$2) = @_;
+}
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sub-self-shift</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>
