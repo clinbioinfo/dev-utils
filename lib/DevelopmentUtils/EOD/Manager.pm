@@ -117,6 +117,7 @@ sub run {
     $self->_check_sublime_snippets();
     $self->_recommend_new_aliases();
     $self->_check_git_status();
+    $self->_check_status_of_services();
 }
 
 sub _prompt_about_reminder_email {
@@ -180,7 +181,20 @@ sub _check_git_status {
     $self->{_logger}->fatal("NOT YET IMPLEMENTED");
 }
  
+sub _check_status_of_services {
 
+    my $self = shift;
+    
+    ## Will check for heartbeat for following services:
+    ## 1. important servers
+    ## 2. important databases
+    ## 3. applications deployed by this team
+    ## 4. important productivity services/tools like Atlassian Stash Git 
+    ## 5. team Atlassian JIRA
+
+    $self->{_logger}->fatal("NOT YET IMPLEMENTED");
+}
+ 
 sub _prompt_user_about_jira {
 
     my $self = shift;
