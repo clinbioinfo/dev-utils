@@ -115,7 +115,7 @@ sub BUILD {
     $self->_initConfigManager(@_);
 
     $self->_load_project_lookup(@_);
-    
+
     $self->_set_report_file(@_);
 
     $self->{_logger}->info("Instantiated ". __PACKAGE__);
@@ -165,6 +165,23 @@ sub _set_report_file {
 sub getCurrentBranches {
 
     my $self = shift;
+    my ($project)  = @_;
+
+    if (defined($project)){
+
+        $self->_get_all_dev_branches($project);
+
+        $self->_generate_current_branch_report($project);
+    }
+    else {
+        
+        foreach my $project (sort keys %{$self->{_project_lookup}}){
+            $self->_get_all_dev_branches($project);
+        }
+
+        $self->_generate_current_branch_report();
+    }
+
 
 }
 
@@ -530,6 +547,46 @@ sub getBranchListByProject {
 
     return $self->{_project_to_branch_list_lookup}->{$project};
 }
+
+sub _generate_current_branch_report {
+
+    my $self = shift;
+    my ($project) = @_;
+
+    my $report_file = $self->getReportFile();
+
+    open (OUTFILE, ">$report_file") || die "Could not open report file '$report_file' in write mode : $!";
+
+    print OUTFILE "## method-created: " . File::Spec->rel2abs($0) . "\n";
+    print OUTFILE "## date-created: " . localtime() . "\n";
+    print OUTFILE "## created-by: " . getlogin . "\n";
+
+    foreach my $project_name (sort keys %{$self->{_project_lookup}}){
+
+        if ((defined($project)) && ($project ne $project_name)){
+            next;
+        }
+
+        my $branch_list = $self->{_project_lookup}->{$project_name}->{'branch-list'};
+                
+        my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
+
+        print OUTFILE "\n$project_name:\n\n";
+        
+        print OUTFILE "\tBranch list:\n\n";
+        
+        foreach my $branch (@{$branch_list}){
+            print OUTFILE "\t$branch\n";
+        }
+        
+        print OUTFILE "\n\tRepository URL: '$repo_url'\n";
+    }
+
+
+    close OUTFILE;
+
+    $self->{_logger}->info("Wrote report to '$report_file'");
+}    
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
