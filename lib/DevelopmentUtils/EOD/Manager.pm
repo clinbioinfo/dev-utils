@@ -2,6 +2,7 @@ package DevelopmentUtils::EOD::Manager;
 
 use Moose;
 use Cwd;
+use Try::Tiny;
 use Data::Dumper;
 use File::Path;
 use FindBin;
@@ -9,6 +10,7 @@ use FindBin;
 use Term::ANSIColor;
 
 use DevelopmentUtils::Logger;
+use DevelopmentUtils::Mailer;
 use DevelopmentUtils::Config::Manager;
 use DevelopmentUtils::Sublime::Snippets::Manager;
 use DevelopmentUtils::Alias::Manager;
@@ -31,6 +33,8 @@ use constant DEFAULT_SUBLIME_REPOSITORY_DIR => "$FindBin::Bin/../sublime-snippet
 use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
 
 use constant DEFAULT_BASHRC_FILE=> '~/.bashrc';
+
+use constant DEFAULT_BASHRC_CONFIG_FILE=> "$FindBin::Bin/../doc/aliases.txt";
 
 ## Singleton support
 my $instance;
@@ -98,6 +102,16 @@ has 'bashrc_file' => (
     default  => DEFAULT_BASHRC_FILE
     );
 
+has 'bashrc_config_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setBashrcConfigFile',
+    reader   => 'getBashrcConfigFile',
+    required => FALSE,
+    default  => DEFAULT_BASHRC_CONFIG_FILE
+    );
+
+
 
 sub getInstance {
 
@@ -121,7 +135,11 @@ sub BUILD {
 
     $self->_initConfigManager(@_);
 
+    $self->_initMailer(@_);
+
     $self->_initSublimeSnippetsManager(@_);
+
+    $self->_initAliasManager(@_);
 
     $self->{_logger}->info("Instantiated ". __PACKAGE__);
 }
@@ -151,30 +169,16 @@ sub _initConfigManager {
     $self->{_config_manager} = $manager;
 }
 
-sub _initSublimeSnippetsManager {
+sub _initMailer {
 
     my $self = shift;
 
-    my $install_dir = $self->getSublimeInstallDir();
-
-    my $repo_dir = $self->getSublimeRepoDir();
-
-    my $outdir = $self->getOutdir();
-
-    my $config_file = $self->getConfigFile();
-
-    my $manager = DevelopmentUtils::Sublime::Snippets::Manager::getInstance(
-        install_dir => $install_dir,
-        repo_dir    => $repo_dir,
-        outdir      => $outdir,
-        config_file => $config_file
-        );
-
-    if (!defined($manager)){
-        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Sublime::Snippets::Manager");
+    my $mailer = DevelopmentUtils::Mailer::getInstance(@_);
+    if (!defined($mailer)){
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Mailer");
     }
 
-    $self->{_sublime_snippets_manager} = $manager;
+    $self->{_mailer} = $mailer;
 }
 
 sub _initSublimeSnippetsManager {
@@ -201,6 +205,32 @@ sub _initSublimeSnippetsManager {
     }
 
     $self->{_sublime_snippets_manager} = $manager;
+}
+
+sub _initAliasManager {
+
+    my $self = shift;
+
+    my $bashrc_file = $self->getBashrcFile();
+
+    my $bashrc_config_file = $self->getBashrcConfigFile();
+
+    my $outdir = $self->getOutdir();
+
+    my $config_file = $self->getConfigFile();
+
+    my $manager = DevelopmentUtils::Alias::Manager::getInstance(
+        bashrc_file        => $bashrc_file,
+        bashrc_config_file => $bashrc_config_file,
+        outdir             => $outdir,
+        config_file        => $config_file
+        );
+
+    if (!defined($manager)){
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Alias::Manager");
+    }
+
+    $self->{_alias_manager} = $manager;
 }
 
 
@@ -253,6 +283,8 @@ sub _send_reminder {
     my ($notes) = @_;
 
     $self->{_mailer}->setEmail(message => $notes);
+
+    $self->{_mailer}->sendNotification();
 }
 
 sub _check_sublime_snippets {
@@ -260,8 +292,16 @@ sub _check_sublime_snippets {
     my $self = shift;
 
     ## Detect new Sublime snippets and prompt me to commit those to dev-utils repository.
+    $self->_print_banner("Will check Sublime snippets");
 
-    $self->{_sublime_snippets_manager}->checkSnippets();
+    try {
+        $self->{_sublime_snippets_manager}->checkSnippets();
+    } catch {
+
+        $self->{_logger}->error("Caught some exception while attempting to check Sublime snippets : $_");
+
+        printBoldRed("Caught some exception while attempting to check Sublime snippets : $_");
+    }
 }
 
 sub _recommend_new_aliases {
@@ -269,8 +309,18 @@ sub _recommend_new_aliases {
     my $self = shift;
 
     ## Scan my history and recommend aliases to be added to .bashrc.    
+    $self->_print_banner("Will recommend aliases");
 
-    $self->{_alias_manager}->recommendAliases();
+    try {
+
+        $self->{_alias_manager}->recommendAliases();
+
+    } catch {
+
+        $self->{_logger}->error("Caught some exception while attempting to recommend aliases : $_");
+
+        printBoldRed("Caught some exception while attempting to recommend aliases : $_");
+    };
 }
 
 sub _check_git_status {
@@ -278,6 +328,7 @@ sub _check_git_status {
     my $self = shift;
     
     ## If in a project folder - perform a git status and prompt me it modified or untracked assets need to be staged and committed to revision control.
+    $self->_print_banner("Will check (git) status of current project directory");
 
     $self->{_logger}->fatal("NOT YET IMPLEMENTED");
 }
@@ -292,6 +343,7 @@ sub _check_status_of_services {
     ## 3. applications deployed by this team
     ## 4. important productivity services/tools like Atlassian Stash Git 
     ## 5. team Atlassian JIRA
+    $self->_print_banner("Will status of services");
 
     $self->{_logger}->fatal("NOT YET IMPLEMENTED");
 }
@@ -344,6 +396,44 @@ sub _ask_whether_user_wants_to_send_reminder_email {
     }
 }
 
+
+sub _print_banner {
+
+    my $self = shift;
+    my ($msg) = @_;
+
+    print color 'yellow';
+    print "************************************************************\n";
+    print "*\n";
+    print "* $msg\n";
+    print "*\n";
+    print "************************************************************\n";
+    print color 'reset';
+}
+
+sub printBoldRed {
+
+    my ($msg) = @_;
+    print color 'bold red';
+    print $msg . "\n";
+    print color 'reset';
+}
+
+sub printGreen {
+
+    my ($msg) = @_;
+    print color 'green';
+    print $msg . "\n";
+    print color 'reset';
+}
+
+sub printYellow {
+
+    my ($msg) = @_;
+    print color 'yellow';
+    print $msg . "\n";
+    print color 'reset';
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
