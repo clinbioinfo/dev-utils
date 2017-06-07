@@ -5,11 +5,13 @@ use Cwd;
 use Data::Dumper;
 use File::Path;
 use FindBin;
-use File::Slurp;
+# use File::Slurp;
 use Term::ANSIColor;
 
 use DevelopmentUtils::Logger;
 use DevelopmentUtils::Config::Manager;
+use DevelopmentUtils::Sublime::Snippets::Manager;
+use DevelopmentUtils::Alias::Manager;
 
 use constant TRUE  => 1;
 use constant FALSE => 0;
@@ -21,6 +23,14 @@ my $login =  getlogin || getpwuid($<) || "sundaramj";
 use constant DEFAULT_OUTDIR => '/tmp/' . $login . '/' . File::Basename::basename($0) . '/' . time();
 
 use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
+
+use constant DEFAULT_SUBLIME_INSTALL_DIR => '~/.config/sublime-text-3/Packages/User/';
+
+use constant DEFAULT_SUBLIME_REPOSITORY_DIR => "$FindBin::Bin/../sublime-snippets/snippets/";
+
+use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
+
+use constant DEFAULT_BASHRC_FILE=> '~/.bashrc';
 
 ## Singleton support
 my $instance;
@@ -37,9 +47,10 @@ has 'test_mode' => (
 has 'config_file' => (
     is       => 'rw',
     isa      => 'Str',
-    writer   => 'setConfigfile',
-    reader   => 'getConfigfile',
+    writer   => 'setConfigFile',
+    reader   => 'getConfigFile',
     required => FALSE,
+    default  => DEFAULT_CONFIG_FILE
     );
 
 has 'outdir' => (
@@ -59,6 +70,34 @@ has 'indir' => (
     required => FALSE,
     default  => DEFAULT_INDIR
     );
+
+has 'sublime_install_dir' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setSublimeInstallDir',
+    reader   => 'getSublimeInstallDir',
+    required => FALSE,
+    default  => DEFAULT_SUBLIME_INSTALL_DIR
+    );
+
+has 'sublime_repo_dir' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setSublimeRepoDir',
+    reader   => 'getSublimeRepoDir',
+    required => FALSE,
+    default  => DEFAULT_SUBLIME_REPOSITORY_DIR
+    );
+
+has 'bashrc_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setBashrcFile',
+    reader   => 'getBashrcFile',
+    required => FALSE,
+    default  => DEFAULT_BASHRC_FILE
+    );
+
 
 sub getInstance {
 
@@ -81,6 +120,8 @@ sub BUILD {
     $self->_initLogger(@_);
 
     $self->_initConfigManager(@_);
+
+    $self->_initSublimeSnippetsManager(@_);
 
     $self->{_logger}->info("Instantiated ". __PACKAGE__);
 }
@@ -110,13 +151,71 @@ sub _initConfigManager {
     $self->{_config_manager} = $manager;
 }
 
+sub _initSublimeSnippetsManager {
+
+    my $self = shift;
+
+    my $install_dir = $self->getSublimeInstallDir();
+
+    my $repo_dir = $self->getSublimeRepoDir();
+
+    my $outdir = $self->getOutdir();
+
+    my $config_file = $self->getConfigFile();
+
+    my $manager = DevelopmentUtils::Sublime::Snippets::Manager::getInstance(
+        install_dir => $install_dir,
+        repo_dir    => $repo_dir,
+        outdir      => $outdir,
+        config_file => $config_file
+        );
+
+    if (!defined($manager)){
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Sublime::Snippets::Manager");
+    }
+
+    $self->{_sublime_snippets_manager} = $manager;
+}
+
+sub _initSublimeSnippetsManager {
+
+    my $self = shift;
+
+    my $install_dir = $self->getSublimeInstallDir();
+
+    my $repo_dir = $self->getSublimeRepoDir();
+
+    my $outdir = $self->getOutdir();
+
+    my $config_file = $self->getConfigFile();
+
+    my $manager = DevelopmentUtils::Sublime::Snippets::Manager::getInstance(
+        install_dir => $install_dir,
+        repo_dir    => $repo_dir,
+        outdir      => $outdir,
+        config_file => $config_file
+        );
+
+    if (!defined($manager)){
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Sublime::Snippets::Manager");
+    }
+
+    $self->{_sublime_snippets_manager} = $manager;
+}
+
+
 sub run {
 
     my $self = shift;
+
     $self->_prompt_about_reminder_email();
+    
     $self->_check_sublime_snippets();
+    
     $self->_recommend_new_aliases();
+    
     $self->_check_git_status();
+    
     $self->_check_status_of_services();
 }
 
@@ -128,7 +227,9 @@ sub _prompt_about_reminder_email {
 
         my $notes = $self->_get_reminder_notes();
 
-        $self->_send_reminder($notes);
+        $self->{_reminder_notes} = $notes;
+
+        # $self->_send_reminder($notes);
     }
 }
 
@@ -160,7 +261,7 @@ sub _check_sublime_snippets {
 
     ## Detect new Sublime snippets and prompt me to commit those to dev-utils repository.
 
-    $self->{_logger}->fatal("NOT YET IMPLEMENTED");
+    $self->{_sublime_snippets_manager}->checkSnippets();
 }
 
 sub _recommend_new_aliases {
@@ -169,7 +270,7 @@ sub _recommend_new_aliases {
 
     ## Scan my history and recommend aliases to be added to .bashrc.    
 
-    $self->{_logger}->fatal("NOT YET IMPLEMENTED");
+    $self->{_alias_manager}->recommendAliases();
 }
 
 sub _check_git_status {
@@ -195,7 +296,7 @@ sub _check_status_of_services {
     $self->{_logger}->fatal("NOT YET IMPLEMENTED");
 }
  
-sub _prompt_user_about_jira {
+sub _ask_whether_user_wants_to_send_reminder_email {
 
     my $self = shift;
   
@@ -203,7 +304,7 @@ sub _prompt_user_about_jira {
 
     while (1) {
 
-        print "Do you want to include a reference to some JIRA issue? [Y/n/q] ";    
+        print "Do you want to send yourself an email reminder? [Y/n/q] ";    
         
         $answer = <STDIN>;
         
@@ -231,22 +332,16 @@ sub _prompt_user_about_jira {
 
     if ($answer eq 'Y'){
 
-        $self->{_logger}->info("User wants to include JIRA reference");
+        $self->{_logger}->info("User wants to send an email reminder");
 
-        $self->_initJiraManager();
-
-        $self->{_jira_manager}->askUserForReference();
-
-        $self->setIncludeJiraReference(TRUE);
+        $self->{_send_email_reminder} = TRUE;
     }
     else {
 
-        $self->{_logger}->info("User does not want to include JIRA reference");
+        $self->{_logger}->info("User does not want to send an email reminder");
 
-        $self->setIncludeJiraReference(FALSE);
+        $self->{_send_email_reminder} = FALSE;
     }
-}
-
 }
 
 
