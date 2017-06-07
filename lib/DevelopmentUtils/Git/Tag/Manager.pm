@@ -202,12 +202,66 @@ sub _set_report_file {
 #     $self->{_branch_manager} = $manager;
 # }
 
-sub getCurrentBuildTags {
+sub getCurrentTags {
 
     my $self = shift;
+    my ($project)  = @_;
 
-    $self->{_logger}->fatal("NOT YET IMPLEMENTED");
+    if (defined($project)){
+
+        $self->_get_all_build_tags($project);
+
+        $self->_generate_current_tag_report($project);
+    }
+    else {
+        
+        foreach my $project (sort keys %{$self->{_project_lookup}}){
+            $self->_get_all_build_tags($project);
+        }
+
+        $self->_generate_current_tag_report();
+    }
 }
+
+sub _generate_current_tag_report {
+
+    my $self = shift;
+    my ($project) = @_;
+
+    my $report_file = $self->getReportFile();
+
+    open (OUTFILE, ">$report_file") || die "Could not open report file '$report_file' in write mode : $!";
+
+    print OUTFILE "## method-created: " . File::Spec->rel2abs($0) . "\n";
+    print OUTFILE "## date-created: " . localtime() . "\n";
+    print OUTFILE "## created-by: " . getlogin . "\n";
+
+    foreach my $project_name (sort keys %{$self->{_project_lookup}}){
+
+        if ((defined($project)) && ($project ne $project_name)){
+            next;
+        }
+
+        my $tag_list = $self->{_project_lookup}->{$project_name}->{'tag-list'};
+                
+        my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
+
+        print OUTFILE "\n$project_name:\n\n";
+        
+        print OUTFILE "\tTag list:\n\n";
+        
+        foreach my $tag (@{$tag_list}){
+            print OUTFILE "\t$tag\n";
+        }
+        
+        print OUTFILE "\n\tRepository URL: '$repo_url'\n";
+    }
+
+    close OUTFILE;
+
+    $self->{_logger}->info("Wrote report to '$report_file'");
+}    
+
 
 sub determineNextBuildTags {
 
