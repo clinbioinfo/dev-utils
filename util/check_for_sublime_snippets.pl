@@ -54,7 +54,10 @@ if (!defined($logger)){
 
 
 if (!-e $install_dir){
-	$logger->logdie("install directory '$install_dir' does not exist");
+
+	$logger->warn("Perl seems to believe that the install directory '$install_dir' does not exist, but will press on and see what happens.");
+
+    printYellow("Perl seems to believe that the install directory '$install_dir' does not exist, but will press on and see what happens.");
 }
 
 if (!-e $repo_dir){
