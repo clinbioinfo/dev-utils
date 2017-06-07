@@ -13,6 +13,7 @@ use DevelopmentUtils::Config::Manager;
 use DevelopmentUtils::Atlassian::Jira::Manager;
 use DevelopmentUtils::Git::Branch::Manager;
 use DevelopmentUtils::Git::Tag::Manager;
+use DevelopmentUtils::Git::Clone::Manager;
 
 use constant TRUE  => 1;
 use constant FALSE => 0;
@@ -142,6 +143,8 @@ sub BUILD {
 
     $self->_initGitTagManager(@_);
 
+    $self->_initGitCloneManager(@_);
+
     $self->_conditional_init_jira_manager(@_);
 
     $self->{_confirmed_asset_file_ctr} = 0;
@@ -221,12 +224,12 @@ sub _initGitBranchManager {
 
         my $current_report_file = $report_file;
 
-        $report_file = $self->getOutdir() . '/git-branch-report.txt';
+        $report_file = $self->getOutdir() . '/' . File::Basename::basename($0) . '.branch-report.txt';
 
         $self->{_logger}->info("Overriding current report file '$current_report_file' with report file '$report_file");      
-    }
 
-    $manager->setReportFile($report_file);
+        $manager->setReportFile($report_file);
+    }
 
     $self->{_branch_manager} = $manager;
 }
@@ -246,14 +249,39 @@ sub _initGitTagManager {
 
         my $current_report_file = $report_file;
 
-        $report_file = $self->getOutdir() . '/git-tag-report.txt';
+        $report_file = $self->getOutdir() . '/' . File::Basename::basename($0) . '.tag-report.txt';
 
         $self->{_logger}->info("Overriding current report file '$current_report_file' with report file '$report_file");      
+
+        $manager->setReportFile($report_file);
+    }
+    
+    $self->{_tag_manager} = $manager;
+}
+
+sub _initGitCloneManager {
+
+    my $self = shift;
+
+    my $manager = DevelopmentUtils::Git::Clone::Manager::getInstance(@_);
+    if (!defined($manager)){
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Tag::Manager");
     }
 
-    $manager->setReportFile($report_file);
+    my $report_file = $self->getReportFile();
 
-    $self->{_tag_manager} = $manager;
+    if (defined($report_file)){
+
+        my $current_report_file = $report_file;
+
+        $report_file = $self->getOutdir() . '/' . File::Basename::basename($0) . '.clone-report.txt';
+
+        $self->{_logger}->info("Overriding current report file '$current_report_file' with report file '$report_file");      
+
+        $manager->setReportFile($report_file);
+    }
+
+    $self->{_clone_manager} = $manager;
 }
 
 sub commitCodeAndPush {
@@ -937,6 +965,28 @@ sub getTagReportFile {
     my $self = shift;
     return $self->{_tag_manager}->getReportFile()
 }
+
+sub cloneProject {
+
+    my $self = shift;
+    
+    $self->{_clone_manager}->cloneProject(@_);
+}
+
+sub checkoutBranch {
+
+    my $self = shift;
+    
+    $self->{_clone_manager}->checkoutBranch(@_);
+}
+
+sub checkoutTag {
+
+    my $self = shift;
+    
+    $self->{_clone_manager}->checkoutTag(@_);
+}
+
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

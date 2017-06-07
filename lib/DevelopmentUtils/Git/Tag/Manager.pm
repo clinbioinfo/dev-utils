@@ -130,6 +130,10 @@ sub BUILD {
 
     # $self->_initBranchManager(@_);
 
+    $self->_load_project_lookup(@_);
+
+    $self->_set_report_file(@_);
+
     $self->{_logger}->info("Instantiated ". __PACKAGE__);
 }
 
@@ -156,6 +160,22 @@ sub _initConfigManager {
     }
 
     $self->{_config_manager} = $manager;
+}
+
+sub _set_report_file {
+
+    my $self = shift;
+
+    my $report_file = $self->getReportFile();
+
+    if (!defined($report_file)){
+
+        $report_file = $self->getOutdir() . '/' . File::Basename::basename($0) . '.tag-report.txt';
+
+        $self->{_logger}->info("report_file was not defined and therefore was set to '$report_file'");
+
+        $self->setReportFile($report_file);
+    }
 }
 
 # sub _initBranchManager {
@@ -215,8 +235,6 @@ sub recommendNextBuildTags {
     my $self = shift;
 
     $self->_print_banner("Going to determine next build tags");
-
-    $self->_load_project_lookup(@_);
 
     foreach my $project_name (sort keys %{$self->{_project_lookup}}){
         
@@ -712,6 +730,26 @@ sub _clone_project {
 
         $self->{_logger}->logconfess("Encountered some error while attempting to execute '$ex' : @_");
     };
+}
+
+sub getTagListByProject {
+
+    my $self = shift;
+    my ($project) = @_;
+    if (!defined($project)){
+        $self->{_logger}->logconfess("project was not defined");
+    }
+
+    if (! exists $self->{_project_to_tag_list_lookup}){
+        
+        $self->_get_all_build_tags($project);
+
+        my $tag_list = $self->{_project_lookup}->{$project}->{'tag-list'};
+
+        $self->{_project_to_tag_list_lookup}->{$project} = $tag_list;
+    }
+
+    return $self->{_project_to_tag_list_lookup}->{$project};
 }
 
 no Moose;

@@ -114,6 +114,10 @@ sub BUILD {
 
     $self->_initConfigManager(@_);
 
+    $self->_load_project_lookup(@_);
+    
+    $self->_set_report_file(@_);
+
     $self->{_logger}->info("Instantiated ". __PACKAGE__);
 }
 
@@ -140,6 +144,22 @@ sub _initConfigManager {
     }
 
     $self->{_config_manager} = $manager;
+}
+
+sub _set_report_file {
+
+    my $self = shift;
+
+    my $report_file = $self->getReportFile();
+
+    if (!defined($report_file)){
+
+        $report_file = $self->getOutdir() . '/' . File::Basename::basename($0) . '.branch-report.txt';
+
+        $self->{_logger}->info("report_file was not defined and therefore was set to '$report_file'");
+        
+        $self->setReportFile($report_file);
+    }
 }
 
 sub getCurrentBranches {
@@ -176,8 +196,6 @@ sub recommendNextDevBranch {
     $self->{_logger}->info("NOT YET IMPLEMENTED");
 
     $self->_print_banner("Going to determine next development branches");
-
-    $self->_load_project_lookup(@_);
 
     foreach my $project_name (sort keys %{$self->{_project_lookup}}){
         
@@ -246,7 +264,16 @@ sub _get_all_dev_branches {
     my $self = shift;
     my ($project_name) = @_;
 
-    my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
+    my $repo_url;
+
+    if (( exists $self->{_project_lookup}->{$project_name}->{'repo-url'}) &&
+        (defined $self->{_project_lookup}->{$project_name}->{'repo-url'})){
+        
+        $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
+    }
+    else{
+        $self->{_logger}->logconfess("repo-url was not defined for project '$project_name'");
+    }
 
     my $cmd = "git ls-remote --heads $repo_url";
 
@@ -484,6 +511,25 @@ sub getCurrentDevBranchByProject {
     }
 }
 
+sub getBranchListByProject {
+
+    my $self = shift;
+    my ($project) = @_;
+    if (!defined($project)){
+        $self->{_logger}->logconfess("project was not defined");
+    }
+
+    if (! exists $self->{_project_to_branch_list_lookup}){
+        
+        $self->_get_all_dev_branches($project);
+
+        my $branch_list = $self->{_project_lookup}->{$project}->{'branch-list'};
+
+        $self->{_project_to_branch_list_lookup}->{$project} = $branch_list;
+    }
+
+    return $self->{_project_to_branch_list_lookup}->{$project};
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
