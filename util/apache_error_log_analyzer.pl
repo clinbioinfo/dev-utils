@@ -10,12 +10,15 @@ use constant FALSE => 0;
 
 use constant DEFAULT_ERROR_LOG => '/var/log/apache2/error.log';
 
+use constant DEFAULT_ERROR_LOG_REDHAT => '/var/log/httpd/error_log';
+
 use constant DEFAULT_LINE_COUNT => 100;
 
 my (
     $man,
     $help,
     $error_log,
+    $error_log2,
     $line_count
     );
 
@@ -25,6 +28,8 @@ my $results = GetOptions (
     'error_log=s'  => \$error_log,
     'line_count=s' => \$line_count,
     );
+
+$error_log2 = DEFAULT_ERROR_LOG_REDHAT;
 
 &checkCommandLineArguments();
 
@@ -85,7 +90,18 @@ sub checkCommandLineArguments {
     }
 
     $error_log = File::Spec->rel2abs($error_log);
+
+    if (!-e $error_log){
     
+        printYellow("'$error_log' does not exist, will check for '$error_log2'");
+    
+        $error_log = $error_log2;
+    
+        if (!-e $error_log2){
+            printBoldRed("'$error_log' does not exist either");
+        }
+    }
+
     &checkInfileStatus($error_log);
         
     if ($fatalCtr> 0 ){
