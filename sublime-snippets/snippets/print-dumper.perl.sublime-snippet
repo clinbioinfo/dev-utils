@@ -1,0 +1,9 @@
+<snippet>
+	<content><![CDATA[
+print "$1 : " . Dumper $2; die "testing";
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>print-dumper</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>
