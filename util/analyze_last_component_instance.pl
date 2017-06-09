@@ -32,7 +32,7 @@ my $file_list = get_file_list($instance_outdir);
 
 my $file_count = scalar(@{$file_list});
 
-print "Found the following '$file_count':\n";
+print "\nFound the following '$file_count':\n\n";
 
 foreach my $file (@{$file_list}){
 
@@ -48,7 +48,7 @@ foreach my $file (@{$file_list}){
     print "\n";
 }
 
-printGreen(File::Spec->rel2abs($0) . " execution completed");
+printGreen("\n" . File::Spec->rel2abs($0) . " execution completed");
 
 exit(0);
 
@@ -83,7 +83,7 @@ sub checkCommandLineArguments {
 
 sub get_directory {
 
-    my $cmd = "ls -ltr /var/www/html/ | grep bdm | grep $component";
+    my $cmd = "ls -ltr /var/www/html/ | grep bdm | grep -v bdm-csv-profiler-bin | grep $component ";
 
     my $dir_list = execute_cmd($cmd);
 
@@ -290,12 +290,12 @@ sub report_log_details {
     print " line count '$count' unique lines count '$uniq_ctr'";
     
     if ($fatal_ctr > 0){
-        print color 'red';
+        print color 'bold red';
         print " FATAL: '$fatal_ctr'";        
         print color 'reset';
     }
     if ($error_ctr > 0){
-        print color 'orange';
+        print color 'red';
         print " ERROR: '$error_ctr'";        
         print color 'reset';
     }
