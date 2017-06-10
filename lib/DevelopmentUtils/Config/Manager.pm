@@ -137,6 +137,13 @@ sub getJIRABaseURL {
     return $self->{_parser}->getJIRABaseURL(@_);
 }
 
+sub getGitProjectsLookupFile {
+
+    my $self = shift;
+
+    return $self->{_parser}->getGitProjectsLookupFile(@_);
+}
+
 1==1; ## End of module
 
 __END__

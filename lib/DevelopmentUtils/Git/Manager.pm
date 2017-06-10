@@ -7,6 +7,7 @@ use File::Path;
 use FindBin;
 use File::Slurp;
 use Term::ANSIColor;
+use JSON::Parse 'json_file_to_perl';
 
 use DevelopmentUtils::Logger;
 use DevelopmentUtils::Config::Manager;
@@ -66,11 +67,11 @@ has 'indir' => (
     default  => DEFAULT_INDIR
     );
 
-has 'jira_ticket' => (
+has 'jira_issue_id' => (
     is       => 'rw',
     isa      => 'Str',
-    writer   => 'setJiraTicket',
-    reader   => 'getJiraTicket',
+    writer   => 'setJiraIssueId',
+    reader   => 'getJiraIssueId',
     required => FALSE
     );
 
@@ -82,6 +83,13 @@ has 'commit_comment_file' => (
     required => FALSE
     );
 
+has 'commit_comment_content' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setCommitCommentContent',
+    reader   => 'getCommitCommentContent',
+    required => FALSE
+    );
 
 has 'commit_asset_list_file' => (
     is       => 'rw',
@@ -116,6 +124,29 @@ has 'report_file' => (
     required => FALSE
     );
 
+has 'commit_hash' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setCommitHash',
+    reader   => 'getCommitHash',
+    required => FALSE
+    );
+
+has 'commit_url' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setCommitURL',
+    reader   => 'getCommitURL',
+    required => FALSE
+    );
+
+has 'repo_name' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setRepoName',
+    reader   => 'getRepoName',
+    required => FALSE
+    );
 
 sub getInstance {
 
@@ -149,6 +180,8 @@ sub BUILD {
 
     $self->{_confirmed_asset_file_ctr} = 0;
 
+    $self->{_is_commit_pushed} = FALSE;
+
     $self->{_logger}->info("Instantiated ". __PACKAGE__);
 }
 
@@ -157,13 +190,13 @@ sub _conditional_init_jira_manager {
 
     my $self = shift;
     
-    my $jira_ticket = $self->getJiraTicket();
+    my $jira_issue_id = $self->getJiraIssueId();
 
     my $jira_url = $self->getJiraURL();
 
-    if (defined($jira_ticket)){
+    if (defined($jira_issue_id)){
         $self->_initJiraManager(@_);
-        $self->{_jira_manager}->setIssueId($jira_ticket);
+        $self->{_jira_manager}->setIssueId($jira_issue_id);
     }
 
     if (defined($jira_url)){
@@ -288,8 +321,6 @@ sub commitCodeAndPush {
 
     my $self = shift;
 
-    $self->{_logger}->info("NOT YET IMPLEMENTED");
-
     $self->commitCode(@_);
 
     $self->_push_to_remote(@_);
@@ -299,34 +330,46 @@ sub _push_to_remote {
 
     my $self = shift;
 
-    $self->{_logger}->fatal("NOT YET IMPLEMENTED");
-
     my $cmd  = 'git push';
 
     if ($self->getTestMode()){
-        print color 'yellow';
-        print "Running in test mode - would have executed: '$cmd'\n";
-        print color 'reset';
-        $self->{_logger}->info("Running in test mode - would have executed '$cmd'");
+        
+        printYellow("Running in test mode - would have executed: $cmd");
+        
+        $self->{_logger}->info("Running in test mode - would have executed: $cmd");
+        
+        $self->{_is_commit_pushed} = FALSE;
     }
+    else {
+
+        $self->_execute_cmd($cmd);
+
+        $self->{_is_commit_pushed} = TRUE;
+    }
+}
+
+sub isCommitPushed {
+
+    my $self = shift;
+
+    return $self->{_is_commit_pushed};
+
 }
 
 sub commitCode {
 
     my $self = shift;
 
-    $self->{_logger}->info("NOT YET IMPLEMENTED");
-
     $self->_prepare_commit_comment(@_);
 
     $self->_commit_code();
+
+    $self->{_is_commit_pushed} = FALSE;
 }
 
 sub _commit_code {
 
     my $self = shift;
-
-    $self->{_logger}->error("NOT YET IMPLEMENTED");
 
     my $comment_file = $self->getCommitCommentFile();
 
@@ -336,13 +379,172 @@ sub _commit_code {
     
     my $asset_list_content  = $self->_get_asset_list_content();
 
+    my $cmd = "git commit -F $comment_file " . $asset_list_content;
+
     if ($self->getTestMode()){
 
-        print color 'yellow';
-        print "Running in test mode - would have execute: git commit -F $comment_file " . $asset_list_content . "\n";
-        print color 'reset';
+        printYellow("Running in test mode - would have executed: $cmd");
 
-        $self->{_logger}->info("Running in test mode - would have execute: git commit -F $comment_file " . $asset_list_content);
+        $self->{_logger}->info("Running in test mode - would have executed: $cmd");
+    }
+    else {
+
+        $self->_execute_cmd($cmd);
+
+        my $commit_url = $self->_get_commit_url(); 
+
+        if (defined($commit_url)){
+        
+            print "Here is the commit URL:\n";
+        
+            print $commit_url . "\n\n";
+        
+            # if (exists $self->{_jira_manager}){
+
+            #     $self->{_jira_manager}->setCommitURL($commit_url);
+            # }
+        }
+        # else {
+        
+        #     if (exists $self->{_jira_manager}){
+
+        #         $self->{_logger}->warn("Could not set the commit URL commit '$commit_hash'");
+        #     }
+        # }
+    }
+}
+sub _get_commit_url {
+
+    my $self = shift;
+
+    my $commit_hash = $self->_get_commit_hash();
+    if (!defined($commit_hash)){
+        $self->{_logger}->logconfess("commit_hash was not defined");
+    }
+
+    $self->setCommitHash($commit_hash);
+
+    my $commits_base_url = $self->_get_commits_base_url();
+
+    if (defined($commits_base_url)){
+    
+        if ($commits_base_url =~ m|/$|){
+            $commits_base_url =~ s|/+$||;
+        }
+        
+        my $commit_url = $commits_base_url . '/' . $commit_hash;
+
+        $self->setCommitURL($commit_url);
+
+        return $commit_url;
+    }
+}
+
+sub _get_commit_hash {
+
+    my $self = shift;
+
+    my $cmd = "git rev-parse HEAD";
+
+    my $results = $self->_execute_cmd($cmd);
+
+    if ($results->[0] =~ m|^(\S+)\s*$|){
+        return $1;
+    }
+}
+
+sub _get_commits_base_url {
+
+    my $self = shift;
+
+    if (!exists $self->{_git_projects_lookup}){
+
+        my $file = $self->{_config_manager}->getGitProjectsLookupFile();
+        if (!defined($file)){
+            $self->{_logger}->logconfess("file was not defined");
+        }
+
+        if (!-e $file){
+            $self->{_logger}->logconfess("git project lookup file '$file' does not exist");
+        }
+
+        my $lookup = json_file_to_perl($file);
+        if (!defined($lookup)){
+            $self->{_logger}->logconfess("lookup was not defined for file '$file'");
+        }
+
+        $self->{_git_projects_lookup} = $lookup;
+    }
+
+    my $repo_name = $self->_get_repo_name();
+
+    if (exists $self->{_git_projects_lookup}->{$repo_name}->{commits_url}){
+        return $self->{_git_projects_lookup}->{$repo_name}->{commits_url};
+    }
+    else {        
+
+        my $file = $self->{_config_manager}->getGitProjectsLookupFile();
+        if (!defined($file)){
+            $self->{_logger}->logconfess("file was not defined");
+        }
+
+        printBoldRed("repository name '$repo_name' does not have a record in '$file'");
+    }
+}
+
+sub _get_repo_name {
+
+    my $self = shift;
+    
+    my $repo_name = $self->getRepoName();
+
+    if (!defined($repo_name)){
+
+        my $cmd = "git remote show origin";
+
+        my $results = $self->_execute_cmd($cmd);
+
+        if ($results->[1] =~ m|^\s+Fetch\s+URL:\s+(ssh:\S+)\s*$|){
+
+            my $url = $1;
+
+            my $basename = File::Basename::basename($url);
+
+            $self->{_logger}->info("url '$url' basename '$basename'");
+
+            if ($basename =~ m|\.git|){
+
+                $basename =~ s|\.git||;
+            }
+
+            $repo_name = $basename;
+
+            $self->setRepoName($repo_name);
+        }
+        else {
+            $self->{_logger}->fatal("DEBUG:" . Dumper $results);
+            $self->{_logger}->logconfess("Unexpected content '" . $results->[1] . "'");
+        }
+    }
+
+    return $repo_name;
+}
+
+sub getFormattedCommitURL {
+
+    my $self = shift;
+
+    my $commit_url = $self->getCommitURL();
+
+    if (defined($commit_url)){
+
+        my $repo_name = $self->getRepoName();
+
+        my $content = "Committed the following to [" . $repo_name . " | " . $commit_url . "].";
+
+        $self->{_logger}->info("formatted commit URL '$content'");
+
+        return $content;
     }
 }
 
@@ -400,10 +602,8 @@ sub _prompt_user_about_jira {
         }
         elsif ($answer eq 'Q'){
 
-            print color 'bold red';
-            print "Umm, okay- bye!\n";
-            print color 'reset';
-
+            printBoldRed("Umm, okay- bye!");
+            
             exit(1);
         }
     }
@@ -440,6 +640,8 @@ sub _prompt_user_about_commit_comment {
     my @content = <STDIN>;
 
     my $joined_content = join("", @content);
+
+    $self->setCommitCommentContent($joined_content);
 
     return $joined_content;
 }
@@ -667,32 +869,51 @@ sub _stage_files {
 
     my $self = shift;
 
-    if (($self->{_stage_modified_file_ctr} == 0) && ($self->{_stage_untracked_file_ctr} == 0)){
-        print color 'bold red';
-        print "User does not have any files to be staged.\n";
-        print color 'reset';
+    if ((! exists $self->{_stage_modified_file_ctr}) && (! exists $self->{_stage_untracked_file_ctr})){
+
+        printBoldRed("User does not have any files to be staged.");
+        
         exit(2);
     }
 
-    if ($self->{_stage_modified_file_ctr} > 0){
-        $self->_stage_modified_files();
-    }
-    else {
-        print color 'yellow';
-        print "User does not want to stage any of the '$self->{_modified_file_ctr}' modified files\n";
-        print color 'reset';
-        $self->{_logger}->warn("User does not want to stage any of the '$self->{_modified_file_ctr}' modified files");
+    if (($self->{_stage_modified_file_ctr} == 0) && ($self->{_stage_untracked_file_ctr} == 0)){
+        
+        printBoldRed("User does not have any files to be staged.");
+        
+        exit(2);
     }
 
-    if ($self->{_stage_untracked_file_ctr} > 0){
-        $self->_stage_untracked_files();
+    if (exists $self->{_stage_modified_file_ctr}){
+
+        if ($self->{_stage_modified_file_ctr} > 0){
+
+            $self->_stage_modified_files();
+        }
+        else {
+            
+            printYellow("User does not want to stage any of the '$self->{_modified_file_ctr}' modified files");
+            
+            $self->{_logger}->warn("User does not want to stage any of the '$self->{_modified_file_ctr}' modified files");
+        }
     }
     else {
-        print color 'yellow';
-        print "User does not want to stage any of the '$self->{_untracked_file_ctr}' untracked files\n";
-        print color 'reset';
+        $self->{_logger}->info("There are no modified files to be staged");
+    }
+
+    if (exists $self->{_stage_untracked_file_ctr}){
+
+        if ($self->{_stage_untracked_file_ctr} > 0){
+            $self->_stage_untracked_files();
+        }
+        else {
         
-        $self->{_logger}->warn("User does not want to stage any of the '$self->{_untracked_file_ctr}' untracked files");
+            printYellow("User does not want to stage any of the '$self->{_untracked_file_ctr}' untracked files");
+                
+            $self->{_logger}->warn("User does not want to stage any of the '$self->{_untracked_file_ctr}' untracked files");
+        }
+    }
+    else {
+        $self->{_logger}->info("There are no untracked files to be staged");
     }
 }
 
@@ -723,7 +944,7 @@ sub _ask_user_about_modified_files {
             
             $answer = uc($answer);
 
-            if ($answer eq ''){
+            if ((!defined($answer eq '')) || ($answer eq '')){
                 $answer = 'Y';
             }
             
@@ -743,10 +964,8 @@ sub _ask_user_about_modified_files {
             }
             elsif ($answer eq 'Q'){
 
-                print color 'red';
-                print "Umm, okay- bye\n";
-                print color 'reset';
-                
+                printBoldRed("Umm, okay- bye");
+                                
                 $self->{_logger}->info("user asked to quit");
                 
                 exit(1);
@@ -771,10 +990,13 @@ sub _stage_modified_files {
     my $cmd = "git add " . join(' ', @{$self->{_stage_modified_file_list}});
     
     if ($self->getTestMode()){
-        print color 'yellow';
-        print "Running in test mode - would have executed '$cmd'\n";
-        print color 'reset';
-        $self->{_logger}->info("Running in test mode - would have executed '$cmd'");
+        
+        printYellow("Running in test mode - would have executed: $cmd");
+        
+        $self->{_logger}->info("Running in test mode - would have executed: $cmd");
+    }
+    else {
+        $self->_execute_cmd($cmd);
     }
 }
 
@@ -823,10 +1045,8 @@ sub _ask_user_about_untracked_files {
                 goto NEXT_UNTRACKED_FILE;
             }
             elsif ($answer eq 'Q'){
-            
-                print color 'red';
-                print "Umm, okay- bye\n";
-                print color 'reset';
+                            
+                printBoldRed("Umm, okay- bye");
 
                 $self->{_logger}->info("user asked to quit");
                 
@@ -852,10 +1072,13 @@ sub _stage_untracked_files {
     my $cmd = "git add " . join(' ', @{$self->{_stage_untracked_file_list}});
 
     if ($self->getTestMode()){
-        print color 'yellow';
-        print "Running in test mode - would have executed '$cmd'\n";
-        print color 'reset';
+        
+        printYellow("Running in test mode - would have executed '$cmd'");
+        
         $self->{_logger}->info("Running in test mode - would have executed '$cmd'");
+    }
+    else {
+        $self->_execute_cmd($cmd);
     }
 }
 
@@ -987,6 +1210,29 @@ sub checkoutTag {
     $self->{_clone_manager}->checkoutTag(@_);
 }
 
+sub printBoldRed {
+
+    my ($msg) = @_;
+    print color 'bold red';
+    print $msg . "\n";
+    print color 'reset';
+}
+
+sub printYellow {
+
+    my ($msg) = @_;
+    print color 'yellow';
+    print $msg . "\n";
+    print color 'reset';
+}
+
+sub printGreen {
+
+    my ($msg) = @_;
+    print color 'green';
+    print $msg . "\n";
+    print color 'reset';
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

@@ -16,6 +16,10 @@ use constant TRUE => 1;
 
 use constant FALSE => 0;
 
+use constant DEFAULT_TEST_MODE => TRUE;
+
+use constant DEFAULT_IS_COMMIT_AND_PUSH => TRUE;
+
 use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
 
 use constant DEFAULT_VERBOSE   => FALSE;
@@ -49,12 +53,14 @@ my (
     $logfile, 
     $man, 
     $verbose,
-    $jira_ticket,
+    $jira_issue_id,
     $jira_comment,
     $jira_comment_file,
     $git_commit_comment_file,
     $git_commit_asset_list_file,    
     $admin_email_address,
+    $is_commit_and_push,
+    $test_mode
     );
 
 my $results = GetOptions (
@@ -65,12 +71,14 @@ my $results = GetOptions (
     'man|m'                          => \$man,
     'indir=s'                        => \$indir,
     'outdir=s'                       => \$outdir,
-    'jira_ticket=s'                  => \$jira_ticket,
+    'jira_issue_id=s'                => \$jira_issue_id,
     'jira_comment=s'                 => \$jira_comment,
     'jira_comment_file=s'            => \$jira_comment_file,
     'git_commit_comment_file=s'      => \$git_commit_comment_file,
     'git_commit_asset_list_file=s'   => \$git_commit_asset_list_file,    
     'admin_email_address=s'          => \$admin_email_address,
+    'commit-push=s'                  => \$is_commit_and_push,
+    'test_mode=s'                    => \$test_mode,
     );
 
 &checkCommandLineArguments();
@@ -91,8 +99,9 @@ if (!defined($config_manager)){
 }
 
 my $git_manager = DevelopmentUtils::Git::Manager::getInstance(
-    indir  => $indir,
-    outdir => $outdir
+    indir     => $indir,
+    outdir    => $outdir,
+    test_mode => $test_mode
     );
 
 if (!defined($git_manager)){
@@ -108,50 +117,73 @@ if (defined($git_commit_asset_list_file)){
 }
 
 my $jira_manager = DevelopmentUtils::Atlassian::Jira::Manager::getInstance(
-    jira_ticket => $jira_ticket,
-    indir       => $indir,
-    outdir      => $outdir
+    indir     => $indir,
+    outdir    => $outdir,
+    test_mode => $test_mode
     );
 
 if (!defined($git_manager)){
     $logger->logdie("Could not instantiate DevelopmentUtils::Atlassian::Jira::Manager");
 }
 
-
-my $code_commit_status = TRUE;
+if (defined($jira_issue_id)){
+    $jira_manager->setIssueId($jira_issue_id);
+}
 
 if ($is_commit_and_push){
     
-    $code_commit_status = $git_manager->commitCodeAndPush();
+    $git_manager->commitCodeAndPush();
 }
 else {
     
-    $code_commit_status = $git_manager->commitCode();
+    $git_manager->commitCode();
 }
 
-if ($code_commit_status){
+if ($git_manager->isCommitPushed()){
 
     if (defined($jira_comment_file)){
+
     	$jira_manager->setCommentFile($jira_comment_file);
     }
 
     if (defined($jira_comment)){
+
       $jira_manager->setComment($jira_comment);
+    }
+    else {
+
+        $jira_comment = $git_manager->getCommitCommentContent();
+
+        my $commit_url = $git_manager->getFormattedCommitURL();
+        
+        if (!defined($commit_url)){
+            $logger->warn("The formatted commit URL was not defined so I cannot add it to the JIRA issue comment.  Note that the comment content is '$jira_comment'");
+        }
+        else {
+            $jira_comment =~ s|\n|\\n|g;
+            $jira_comment .= ' ' . $commit_url;
+        }
+
+        $jira_manager->setComment($jira_comment);
     }
 
     $jira_manager->addComment();
 }
 else {
 
-    $logger->warn("Will not add code commit comment because some error was occurred during the code commit");
+    $logger->warn("Will not add code commit comment to JIRA because the code commit was not pushed");
 
-    printBoldRed("Will not add code commit comment because some error was occurred during the code commit");
+    printBoldRed("Will not add code commit comment to JIRA because the code commit was not pushed");
 }
 
 
 printGreen(File::Spec->rel2abs($0) . " execution completed\n");
 
 print "The log file is '$logfile'\n";
+
+if ($test_mode){
+    printYellow("Ran in test mode.  To disable test mode, run with: --test_mode 0");
+}
 
 exit(0);
 
@@ -169,6 +201,13 @@ sub checkCommandLineArguments {
     
     if ($help){
     	&pod2usage({-exitval => 1, -verbose => 1, -output => \*STDOUT});
+    }
+
+    if (!defined($test_mode)){
+
+        $test_mode = DEFAULT_TEST_MODE;
+            
+        printYellow("--test_mode was not specified and therefore was set to default '$test_mode'");
     }
 
     if (!defined($config_file)){
@@ -237,17 +276,15 @@ sub checkCommandLineArguments {
 
     $logfile = File::Spec->rel2abs($logfile);
 
+   if (!defined($is_commit_and_push)){
 
-    my $fatalCtr=0;
+        $is_commit_and_push = DEFAULT_IS_COMMIT_AND_PUSH;
 
-        
-    if (!defined($jira_ticket)){
-
-    	printBoldRed("--jira_ticket was not specified");
-
-    	$fatalCtr++;
+        printYellow("--commit-push was not specified and therefore was set to default '$is_commit_and_push'");
     }
 
+
+    my $fatalCtr=0;
 
     if ($fatalCtr> 0 ){
     	die "Required command-line arguments were not specified\n";
@@ -357,7 +394,7 @@ __END__
 
 =head1 SYNOPSIS
 
- perl util/commit_code.pl --jira_ticket BDMTNG-552
+ perl util/commit_code.pl --issue_id BDMTNG-552
 
 =head1 OPTIONS
 

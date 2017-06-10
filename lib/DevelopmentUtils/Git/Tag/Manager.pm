@@ -15,7 +15,7 @@ use FindBin;
 
 use DevelopmentUtils::Logger;
 use DevelopmentUtils::Config::Manager;
-# use DevelopmentUtils::Git::Branch::Manager;
+use DevelopmentUtils::Git::Helper;
 
 use constant TRUE  => 1;
 use constant FALSE => 0;
@@ -128,7 +128,7 @@ sub BUILD {
 
     $self->_initConfigManager(@_);
 
-    # $self->_initBranchManager(@_);
+    $self->_initHelper(@_);
 
     $self->_load_project_lookup(@_);
 
@@ -160,6 +160,18 @@ sub _initConfigManager {
     }
 
     $self->{_config_manager} = $manager;
+}
+
+sub _initHelper {
+
+    my $self = shift;
+
+    my $helper = DevelopmentUtils::Git::Helper::getInstance(@_);
+    if (!defined($helper)){
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Helper");
+    }
+
+    $self->{_helper} = $helper;
 }
 
 sub _set_report_file {
@@ -317,15 +329,11 @@ sub recommendNextBuildTags {
 sub _load_project_lookup {
 
     my $self = shift;
-    
-    my $file = $self->getProjectsConfFile();
-    if (!-e $file){
-        $self->{_logger}->logconfess("project config JSON file '$file' does not exist");
-    }
 
-    my $lookup = json_file_to_perl($file);
+    my $lookup = $self->{_helper}->getProjectsLookup();
+
     if (!defined($lookup)){
-        $self->{_logger}->logconfess("lookup was not defined for file '$file'");
+        $self->{_logger}->logconfess("lookup was not defined");
     }
 
     $self->{_project_lookup} = $lookup;

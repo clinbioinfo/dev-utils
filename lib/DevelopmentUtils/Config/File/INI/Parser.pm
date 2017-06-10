@@ -118,6 +118,13 @@ sub getJIRABaseURL {
     return $self->_getValue('Jira', 'issue_tracker_base_url');
 }
 
+sub getGitProjectsLookupFile {
+
+    my $self = shift;
+
+    return $self->_getValue('Git', 'projects_lookup_file');
+}
+
 sub _getValue {
 
     my $self = shift;

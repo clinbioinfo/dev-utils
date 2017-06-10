@@ -177,19 +177,30 @@ sub addCommentN {
     my $self = shift;
     my (%args) = @_;
 
-    return $self->addComment($args{jira_ticket}, $args{comment});
+    return $self->addComment($args{issue_id}, $args{comment});
 }
 
 
 sub addComment {
 
     my $self = shift;
-    my ($jira_ticket, $comment) = @_;
+    my ($issue_id, $comment) = @_;
 
-    if (!defined($jira_ticket)){
-        $jira_ticket = $self->getJiraTicket();
-        if (!defined($jira_ticket)){
-            $self->{_logger}->logconfess("jira_ticket was not defined");
+    if (!defined($issue_id)){
+
+        $issue_id = $self->getIssueId();
+
+        if (!defined($issue_id)){
+
+            $self->{_logger}->info("issue_id was not defined");
+
+            $self->askUserForReference();
+
+            $issue_id = $self->getIssueId();
+
+            if (!defined($issue_id)){
+                $self->{_logger}->logconfess("issue_id was not defined");
+            }
         }
     }
 
@@ -209,9 +220,9 @@ sub addComment {
 
     my $data = $self->_getData($comment);
     
-    my $url = $self->_getIssueURL($jira_ticket);
+    my $url = $self->_get_rest_api_issue_end_point($issue_id);
     if (!defined($url)){
-        $self->{_logger}->logconfess("url was not defined");
+        $self->{_logger}->logconfess("url was not defined for issue_id '$issue_id'");
     }
 
     my $cmd = "curl -D- -u $username:$password -X POST --data '$data' -H 'Content-Type: application/json' $url";
@@ -336,54 +347,36 @@ sub _prompt_for_jira_password {
     $self->{_logger}->fatal("DEBUG: NOT YET IMPLEMENTED");
 }
 
-
-
-sub _getIssueURL {
+sub _get_rest_api_issue_end_point {
 
     my $self = shift;
-    my ($jira_ticket_id) = @_;
+    my ($issue_id) = @_;
 
-    my $issue_url = $self->getIssueURL();
+    my $jira_rest_url = $self->_get_jira_rest_url();
 
-    if (!defined($issue_url)){
-
-        if (!defined($jira_ticket_id)){
-            $self->{_logger}->logconfess("jira_ticket_id was not defined");
-        }
-
-        $issue_url = $self->_getURL() . '/' . $jira_ticket_id . '/comment';
-
-        $self->setIssueURL($issue_url);
+    if ($jira_rest_url =~ m|/$|){
+        $jira_rest_url =~ s|/+$||;  ## remove all trailing forward slashes
     }
 
-    return $issue_url;
+    my $final_url = $jira_rest_url . '/' . $issue_id . '/comment';
+
+    return $final_url;
 }
 
-sub _getURL {
+sub _get_jira_rest_url {
 
     my $self = shift;
     
-    my $url = $self->getJiraIssueRESTURL();
+    my $jira_rest_url = $self->{_config_manager}->getJiraIssueRESTURL();
 
-    if (!defined($url)){
-
-        $url = $self->{_config_manager}->getJiraIssueRESTURL();
+    if ((!defined($jira_rest_url)) || ($jira_rest_url eq '')){
 
         my $config_file = $self->{_config_manager}->getConfigFile();
 
-        $self->{_logger}->info("Jira issue REST URL was not defined so was set to '$url' from the configuration file '$config_file'");        
-
-        if (!defined($url)){
-
-            $url = DEFAULT_JIRA_ISSUE_REST_URL;
-
-            $self->{_logger}->warn("Jira issue REST URL was not defined so was set to default '$url'");
-        }
-
-        $self->setJiraIssueRESTURL($url);
+        $self->{_logger}->logconfess("JIRA issue REST URL could not be retrieved from configuration file '$config_file'");
     }
 
-    return $url;
+    return $jira_rest_url;
 }
 
 sub _execute_cmd {
