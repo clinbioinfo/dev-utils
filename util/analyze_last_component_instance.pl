@@ -325,17 +325,34 @@ sub report_stderr_details {
 
         my $uniq_ctr = 0;
 
+        my $uninit_ctr = 0;
+
         foreach my $line (@lines){
 
             chomp $line;
 
-            if (!exists $lookup->{$line}){
-                $lookup->{$line}++;
+            if ($line =~ m|^Use of uninitialized value|){
+                $uninit_ctr++;
+                next;
+            }
+
+            if ($line =~ m|<INFILE> line \d+\.\s*$|){
+                $line =~ s|<INFILE> line \d+\.\s*$||;
+            }
+
+            if (! exists $lookup->{$line}){                
                 $uniq_ctr++;
             }
+
+            $lookup->{$line}++;
+
         }
 
         print " line count '$count' unique lines count '$uniq_ctr'";
+
+        if ($uninit_ctr > 0){
+            print " uninitialized values line counts '$uninit_ctr'";
+        }
     }
     else {
         print " (empty)";
