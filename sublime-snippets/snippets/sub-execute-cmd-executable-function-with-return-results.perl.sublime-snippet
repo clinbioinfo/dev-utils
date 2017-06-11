@@ -1,0 +1,32 @@
+<snippet>
+	<content><![CDATA[
+sub execute_cmd {
+    
+    my (\$cmd) = @_;
+
+    if (!defined(\$cmd)){
+        confess("cmd was not defined");
+    }
+
+    print "About to execute '\$cmd'\n";
+
+    my @results;
+
+    eval {
+        @results = qx(\$cmd);
+    };
+
+    if (\$?){
+        confess("Encountered some error while attempting to execute '\$cmd' : \$! \$@");
+    }
+
+    chomp @results;
+    
+    return \@results;
+}   
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sub-execute-cmd-executable-function-with-return-results</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>
