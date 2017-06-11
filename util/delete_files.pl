@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 use strict;
+use Term::ANSIColor;
 use File::Slurp;
 
 my $file = $ARGV[0];
@@ -22,13 +23,14 @@ foreach my $delete_file (@files){
 
 	if (-e $delete_file){
 
-		print "Will attempt to delete '$delete_file'\n";
+		printYellow("Will attempt to delete '$delete_file'");
 
 		unlink($delete_file) || die "Could not delete '$delete_file' : $!";
 
 		$deleted_file_ctr++;
 	}
 	else {
+
 		print "File '$delete_file' does not exist\n";
 	}
 }
@@ -36,3 +38,17 @@ foreach my $delete_file (@files){
 print "Processed '$ctr' files\n";
 print "Deleted '$deleted_file_ctr' files\n";
 exit(0);
+
+##--------------------------------------------------------------
+##
+##     END OF MAIN -- SURBOUTINES FOLLOW
+##
+##--------------------------------------------------------------
+
+sub printYellow {
+
+    my ($msg) = @_;
+    print color 'yellow';
+    print $msg . "\n";
+    print color 'reset';
+}
