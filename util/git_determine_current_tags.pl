@@ -124,14 +124,12 @@ sub checkCommandLineArguments {
 
     if (!defined($projects_conf_file)){
 
-        printBoldRed("--projects_conf_file was not specified");
-        
-        $fatalCtr++;
-    }
-    else {
-        &checkInfileStatus($projects_conf_file);
+        $projects_conf_file = '/home/' . $username . '/git_projects_lookup.json';
+
+        printYellow("--projects_conf_file was not specified and therefore was set to '$projects_conf_file");        
     }
 
+    &checkInfileStatus($projects_conf_file);
 
     if ($fatalCtr> 0 ){
         printBoldRed("Required command-line arguments were not specified");
