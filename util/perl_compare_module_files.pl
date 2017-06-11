@@ -181,7 +181,7 @@ sub compare_module_files {
         print "* file 1: $module_file1\n";
         print "* file 2: $module_file2\n";
         print "*\n";
-        print "* diff $module_file1 $module_file2 | less\n";
+        print "  diff $module_file1 $module_file2 | less\n";
         
         my $contents_lookup1 = get_contents_lookup($module_file1);
 
@@ -224,6 +224,12 @@ sub get_contents_lookup {
             
             $lookup->{has_statements}->{$line}++;
         }
+        elsif ($line =~ m|^extends|){
+            
+            $line =~ s|\s+| |g;  ## replace all whitespaces with a single whitespace
+            
+            $lookup->{extends_statements}->{$line}++;
+        }
         elsif ($line =~ m|^sub|){
             
             $line =~ s|\s+| |g;  ## replace all whitespaces with a single whitespace
@@ -249,33 +255,16 @@ sub compare_contents {
 
     my $missing_ctr = 0;
 
-    foreach my $use_statement (sort keys %{$contents_lookup1->{use_statements}}){
+    foreach my $statement_type (sort keys %{$contents_lookup1}){
 
-        if (!exists $contents_lookup2->{use_statements}->{$use_statement}){
+        foreach my $statement (sort keys %{$contents_lookup1->{$statement_type}}){
 
-            $missing_ctr++;
+            if (!exists $contents_lookup2->{$statement_type}->{$statement}){
 
-            push(@{$missing_list}, $use_statement);
-        }
-    }
+                $missing_ctr++;
 
-    foreach my $has_statement (sort keys %{$contents_lookup1->{has_statements}}){
-
-        if (!exists $contents_lookup2->{has_statements}->{$has_statement}){
-
-            $missing_ctr++;
-
-            push(@{$missing_list}, $has_statement);
-        }
-    }
-
-    foreach my $subroutine (sort keys %{$contents_lookup1->{subroutines}}){
-
-        if (!exists $contents_lookup2->{subroutines}->{$subroutine}){
-
-            $missing_ctr++;
-
-            push(@{$missing_list}, $subroutine);
+                push(@{$missing_list}, $statement);
+            }
         }
     }
 
