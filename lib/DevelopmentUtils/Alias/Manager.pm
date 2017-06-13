@@ -18,17 +18,15 @@ use constant FALSE => 0;
 
 use constant DEFAULT_TEST_MODE => TRUE;
 
-my $login =  getlogin || getpwuid($<) || "sundaramj";
+my $login =  getlogin || getpwuid($<) || $ENV{USER} || "sundaramj";
 
 use constant DEFAULT_OUTDIR => '/tmp/' . $login . '/' . File::Basename::basename($0) . '/' . time();
 
 use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
 
-use constant DEFAULT_BASHRC_CONFIG_FILE=> "$FindBin::Bin/../doc/aliases.txt";
-
 use constant DEFAULT_USERNAME => $login;
 
-use constant DEFAULT_SOURCE_ALIASES_FILE => "$FindBin::Bin/../doc/aliases.txt";
+use constant DEFAULT_SOURCE_FILE => "$FindBin::Bin/../doc/aliases.txt";
 
 
 ## Singleton support
@@ -69,20 +67,20 @@ has 'indir' => (
     default  => DEFAULT_INDIR
     );
 
-has 'source_aliases_file' => (
+has 'source_file' => (
     is       => 'rw',
     isa      => 'Str',
-    writer   => 'setSourceAliasesFile',
-    reader   => 'getSourceAliasesFile',
+    writer   => 'setSourceFile',
+    reader   => 'getSourceFile',
     required => FALSE,
-    default  => DEFAULT_SOURCE_ALIASES_FILE
+    default  => DEFAULT_SOURCE_FILE
     );
 
-has 'bashrc_file' => (
+has 'target_file' => (
     is       => 'rw',
     isa      => 'Str',
-    writer   => 'setBashrcFile',
-    reader   => 'getBashrcFile',
+    writer   => 'setTargetFile',
+    reader   => 'getTargetFile',
     required => FALSE
     );
 
@@ -118,7 +116,7 @@ sub BUILD {
 
     $self->_initConfigManager(@_);
 
-    $self->_set_default_bashrc_file(@_);
+    $self->_set_default_target_file(@_);
 
     $self->{_logger}->info("Instantiated ". __PACKAGE__);
 }
@@ -148,17 +146,17 @@ sub _initConfigManager {
     $self->{_config_manager} = $manager;
 }
 
-sub _set_default_bashrc_file {
+sub _set_default_target_file {
 
     my $self = shift;
     
-    my $file = $self->getBashrcFile();
+    my $file = $self->getTargetFile();
 
     if (!defined($file)){
 
-        $file = '/home/' . $self->getUsername() . '/.bashrc';
+        $file = '/home/' . $self->getUsername() . '/aliases.txt';
         
-        $self->setBashrcFile($file);
+        $self->setTargetFile($file);
     }
 }
 
@@ -166,13 +164,13 @@ sub checkAliases {
 
     my $self = shift;
 
-    my $bashrc_file = $self->getBashrcFile();
+    my $target_file = $self->getTargetFile();
 
-    my $source_aliases_file = $self->getSourceAliasesFile();
+    my $source_file = $self->getSourceFile();
 
-    my $installed_aliases_lookup = $self->_load_alias_lookup($bashrc_file);
+    my $installed_aliases_lookup = $self->_load_alias_lookup($target_file);
 
-    my $repo_aliases_lookup = $self->_load_alias_lookup($source_aliases_file);
+    my $repo_aliases_lookup = $self->_load_alias_lookup($source_file);
 
     my $need_to_save_aliases_list = [];
 
@@ -211,7 +209,7 @@ sub checkAliases {
 
     if ($need_to_install_aliases_ctr > 0){
         
-        printYellow("Need to install the following '$need_to_install_aliases_ctr' aliases to '$bashrc_file':");
+        printYellow("Need to install the following '$need_to_install_aliases_ctr' aliases to '$target_file':");
     
         $self->{_need_to_install_aliases_list} = $need_to_install_aliases_list;
 
@@ -232,7 +230,7 @@ sub checkAliases {
 
         $self->{_need_to_save_aliases_list} = $need_to_save_aliases_list;
 
-        printYellow("Need to save the following '$need_to_save_aliases_ctr' aliases to '$source_aliases_file':");
+        printYellow("Need to save the following '$need_to_save_aliases_ctr' aliases to '$source_file':");
     
         foreach my $alias_list_ref (@{$need_to_save_aliases_list}){
         
@@ -297,7 +295,7 @@ sub _install_aliases {
     my $self = shift;
 
 
-    my $file = $self->getBashrcFile();
+    my $file = $self->getTargetFile();
     
     my $bakfile = $file. '.bak';
 
@@ -389,7 +387,7 @@ sub _save_aliases {
 
     my $self = shift;
 
-    my $file = $self->getSourceAliasesFile();
+    my $file = $self->getSourceFile();
     
     my $bakfile = $file. '.bak';
 

@@ -29,9 +29,9 @@ use constant DEFAULT_OUTDIR => '/tmp/' . $username . '/' . File::Basename::basen
 
 use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
 
-use constant DEFAULT_BASHRC_FILE => '~/.bashrc';
+use constant DEFAULT_TARGET_FILE => '~/aliases.txt';
 
-use constant DEFAULT_SOURCE_ALIASES_FILE => "$FindBin::Bin/../doc/aliases.txt";
+use constant DEFAULT_SOURCE_FILE => "$FindBin::Bin/../doc/aliases.txt";
 
 my $help;
 my $man;
@@ -41,8 +41,8 @@ my $outdir;
 my $config_file;
 my $log_file;
 my $log_level;
-my $bashrc_file;
-my $source_aliases_file;
+my $target_file;
+my $source_file;
 my $username;
 
 
@@ -56,28 +56,12 @@ my $results = GetOptions (
     'log_file=s'    => \$log_file,
     'config_file=s' => \$config_file,
     'username=s'    => \$username,
-    'bashrc-file=s'         => \$bashrc_file, 
-    'source-aliases-file=s' => \$source_aliases_file
+    'target-file=s' => \$target_file, 
+    'source-file=s' => \$source_file
     );
 
 &checkCommandLineArguments();
 
-if (!-e $source_aliases_file){
-	die "source aliases file '$source_aliases_file' does not exist";
-}
-
-
-if (!-e $bashrc_file){
-
-	$bashrc_file = '/home/'. $username . '/.bashrc';
-
-	if (!-e $bashrc_file){
-
-		die "target .bashrc file '$bashrc_file' does not exist";
-	}
-}
-
-&checkCommandLineArguments();
 
 my $logger = DevelopmentUtils::Logger::getInstance(
     log_level => $log_level,
@@ -88,13 +72,36 @@ if (!defined($logger)){
     $logger->logconfess("Could not instantiate DevelopmentUtils::Logger");
 }
 
+
+if (!-e $source_file){
+    $logger->logdie("source file '$source_file' does not exist");
+}
+
+
+if (!-e $target_file){
+
+    $target_file = '/home/'. $username . '/aliases.txt';
+
+    if (!-e $target_file){
+
+        copy($source_file, $target_file) || $logger->logdie("Could not copy '$source_file' to '$target_file' : $!");
+        
+        $logger->info("Copied '$source_file' to '$target_file'");
+        
+        print "Copied '$source_file' to '$target_file\n";
+        
+        print "Make sure you add 'source $target_file' to ~/.bashrc\n";
+        exit(0); 
+    }
+}
+
 my $manager = DevelopmentUtils::Alias::Manager::getInstance(
     test_mode            => $test_mode,
     verbose              => $verbose,
     config_file          => $config_file,
     outdir               => $outdir,
-    source_aliases_file  => $source_aliases_file,
-    bashrc_file          => $bashrc_file,
+    source_file          => $source_file,
+    target_file          => $target_file,
     username             => $username
     );
 
@@ -144,20 +151,20 @@ sub checkCommandLineArguments {
     }
 
 
-    if (!defined($bashrc_file)){
+    if (!defined($target_file)){
 
-        $bashrc_file = DEFAULT_BASHRC_FILE;
+        $target_file = DEFAULT_TARGET_FILE;
         
-        printYellow("--bashrc_file was not specified and therefore was set to default '$bashrc_file'");
+        printYellow("--target_file was not specified and therefore was set to default '$target_file'");
         
     }
 
 
-    if (!defined($source_aliases_file)){
+    if (!defined($source_file)){
 
-        $source_aliases_file = DEFAULT_SOURCE_ALIASES_FILE;
+        $source_file = DEFAULT_SOURCE_FILE;
         
-        printYellow("--source_aliases_file was not specified and therefore was set to default '$source_aliases_file'");
+        printYellow("--source_file was not specified and therefore was set to default '$source_file'");
         
     }
 
