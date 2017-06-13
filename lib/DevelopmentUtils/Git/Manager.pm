@@ -1234,6 +1234,18 @@ sub printGreen {
     print color 'reset';
 }
 
+sub getCommitHashURL {
+
+    my $self = shift;
+
+    my $indir = $self->getIndir();
+    
+    chdir($indir) || $self->{_logger}->logconfess("Could not change into directory '$indir' : $!");
+
+    return $self->_get_commit_url();
+}
+
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
