@@ -15,6 +15,7 @@ use DevelopmentUtils::Atlassian::Jira::Manager;
 use DevelopmentUtils::Git::Branch::Manager;
 use DevelopmentUtils::Git::Tag::Manager;
 use DevelopmentUtils::Git::Clone::Manager;
+use DevelopmentUtils::Git::Stage::Manager;
 
 use constant TRUE  => 1;
 use constant FALSE => 0;
@@ -176,6 +177,8 @@ sub BUILD {
 
     $self->_initGitCloneManager(@_);
 
+    $self->_initGitStageManager(@_);
+
     $self->_conditional_init_jira_manager(@_);
 
     $self->{_confirmed_asset_file_ctr} = 0;
@@ -298,7 +301,7 @@ sub _initGitCloneManager {
 
     my $manager = DevelopmentUtils::Git::Clone::Manager::getInstance(@_);
     if (!defined($manager)){
-        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Tag::Manager");
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Clone::Manager");
     }
 
     my $report_file = $self->getReportFile();
@@ -316,6 +319,19 @@ sub _initGitCloneManager {
 
     $self->{_clone_manager} = $manager;
 }
+
+sub _initGitStageManager {
+
+    my $self = shift;
+
+    my $manager = DevelopmentUtils::Git::Stage::Manager::getInstance(@_);
+    if (!defined($manager)){
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Stage::Manager");
+    }
+
+    $self->{_stage_manager} = $manager;
+}
+
 
 sub commitCodeAndPush {
 
@@ -692,437 +708,8 @@ sub _get_asset_list_content {
 
     my $self = shift;
 
-    my $asset_file = $self->getCommitAssetListFile();
-
-    if (!defined($asset_file)){
-    
-        $self->{_logger}->info("asset_file was not defined");
-    
-        $asset_file = $self->getOutdir() . '/asset-list-file.txt';
-
-        $self->setCommitAssetListFile($asset_file);
-
-        $self->_derive_asset_list_file_via_status($asset_file);
-    }
-
-    if (!-e $asset_file){
-
-        $self->{_logger}->info("asset list file '$asset_file' does not exist");
-
-        $self->_derive_asset_list_file_via_status($asset_file);
-    }
-
-    $self->_parse_asset_list_file($asset_file);
-
-    if ($self->{_confirmed_asset_file_ctr} > 0){
-        return join(' ', @{$self->{_confirmed_asset_file_list}});
-    }
+    return $self->{_stage_manager}->getAssetListContent(@_);
 }
-
-sub _parse_asset_list_file {
-
-    my $self = shift;
-    my ($asset_file) = @_;
-
-    my @content = read_file($asset_file);
-
-    my $asset_content_list;
-
-    my $found_changes_not_staged_section = FALSE;
-    my $found_untracked_files_section = FALSE;
-    my $found_the_end = FALSE;
-
-    my $changes_not_staged_ctr = 0;
-    my $untracked_files_ctr = 0;
-
-    $self->{_modified_file_list} = [];
-    $self->{_modified_file_ctr} = 0;
-
-    $self->{_untracked_file_list} = [];
-    $self->{_untracked_file_ctr} = 0;
-
-    foreach my $line (@content){
-
-        chomp $line;
-
-        if ($line =~ /^\s*$/){
-            next;
-        }
-
-        if ($line =~ /^\s*\(/){
-            $self->{_logger}->info("Ignoring this line '$line'");
-            next;
-        }
-
-        if ($line =~ m|^Changes not staged for commit:|){
-
-            print "Found unstaged modified files section\n";
-        
-            $found_changes_not_staged_section = TRUE;
-        
-            next;
-        }
-
-        if ($line =~ m|^Untracked files:|){
-        
-            print "Found untracked files section\n";
-
-            $found_untracked_files_section = TRUE;
-            
-            $found_changes_not_staged_section = FALSE;
-
-            next;
-        }
-
-        if ($line =~ m|no changes added to commit|){
-
-            print "Found end section\n";
-
-            $found_the_end = TRUE;
-
-            $found_untracked_files_section = FALSE;
-            
-            $found_changes_not_staged_section = FALSE;
-
-        } 
-
-        if ($found_changes_not_staged_section){
-
-            if ($line =~ m|^\s+modified:\s+(\S+)\s*$|){
-
-                my $modified_file = $1;
-
-                if (!-e $modified_file){
-                    $self->{_logger}->logconfess("modified file '$modified_file' does not exist");
-                }
-
-                push(@{$self->{_modified_file_list}}, $modified_file);
-
-                $self->{_modified_file_ctr}++;                
-            }
-            elsif ($line =~ m|^\s+deleted:\s+(\S+)\s*$|){
-
-                my $deleted_file = $1;
-
-                $self->{_logger}->info("Going to ignored deleted file '$deleted_file'");
-            }
-            else {
-                $self->{_logger}->logconfess("Unexpected line '$line'");
-            }
-
-            next;
-        }
-
-        if ($found_untracked_files_section){
-
-            if ($line =~ m|^\s+(\S+)\s*$|){
-
-                my $untracked_file = $1;
-
-                if (!-e $untracked_file){
-                    $self->{_logger}->logconfess("untracked file '$untracked_file' does not exist");
-                }
-
-                push(@{$self->{_untracked_file_list}}, $untracked_file);
-
-                $self->{_untracked_file_ctr}++;
-            }
-            else {
-                $self->{_logger}->logconfess("Unexpected line '$line'");
-            }
-        }
-    }
-
-    if ($self->{_modified_file_ctr} > 0){
-        
-        print "\nFound the following '$self->{_modified_file_ctr}' modified files:\n";
-        
-        print join("\n", @{$self->{_modified_file_list}}) . "\n";
-
-        $self->_ask_user_about_modified_files();
-    }
-    else {
-        $self->{_logger}->info("Did not find any modified files");
-    }
-
-    if ($self->{_untracked_file_ctr} > 0){
-
-        print "\nFound the following '$self->{_untracked_file_ctr}' untracked files:\n";
-        
-        print join("\n", @{$self->{_untracked_file_list}}) . "\n";
-
-        $self->_ask_user_about_untracked_files();
-    }
-    else {
-        $self->{_logger}->info("Did not find any untracked files");
-    }
-
-    if (($self->{_modified_file_ctr} == 0)  && ($self->{_untracked_file_ctr} == 0)){
-        $self->{_logger}->logconfess("Did not find any modified files nor any untracked files");
-    }
-
-    $self->_stage_files();
-}
-
-
-sub _stage_files {
-
-    my $self = shift;
-
-    if ((! exists $self->{_stage_modified_file_ctr}) && (! exists $self->{_stage_untracked_file_ctr})){
-
-        printBoldRed("User does not have any files to be staged.");
-        
-        exit(2);
-    }
-
-    if (($self->{_stage_modified_file_ctr} == 0) && ($self->{_stage_untracked_file_ctr} == 0)){
-        
-        printBoldRed("User does not have any files to be staged.");
-        
-        exit(2);
-    }
-
-    if (exists $self->{_stage_modified_file_ctr}){
-
-        if ($self->{_stage_modified_file_ctr} > 0){
-
-            $self->_stage_modified_files();
-        }
-        else {
-            
-            printYellow("User does not want to stage any of the '$self->{_modified_file_ctr}' modified files");
-            
-            $self->{_logger}->warn("User does not want to stage any of the '$self->{_modified_file_ctr}' modified files");
-        }
-    }
-    else {
-        $self->{_logger}->info("There are no modified files to be staged");
-    }
-
-    if (exists $self->{_stage_untracked_file_ctr}){
-
-        if ($self->{_stage_untracked_file_ctr} > 0){
-            $self->_stage_untracked_files();
-        }
-        else {
-        
-            printYellow("User does not want to stage any of the '$self->{_untracked_file_ctr}' untracked files");
-                
-            $self->{_logger}->warn("User does not want to stage any of the '$self->{_untracked_file_ctr}' untracked files");
-        }
-    }
-    else {
-        $self->{_logger}->info("There are no untracked files to be staged");
-    }
-}
-
-
-sub _ask_user_about_modified_files {
-
-    my $self = shift;
-
-    print "\nLooks like there are '$self->{_modified_file_ctr}' modified files to be staged to be committed to git.\n";
-    print "Please confirm which ones you'd like to stage.\n";
-
-    $self->{_stage_modified_file_list} = [];
-    $self->{_stage_modified_file_ctr} = 0;
-
-    my $file_ctr = 0;
-
-    foreach my $modified_file (sort @{$self->{_modified_file_list}}){
-    
-        $file_ctr++;
-
-        while (1) {
-
-            print $file_ctr . ". " . $modified_file . " [Y/n/q]";
-            
-            my $answer = <STDIN>;
-            
-            chomp $answer;
-            
-            $answer = uc($answer);
-
-            if ((!defined($answer eq '')) || ($answer eq '')){
-                $answer = 'Y';
-            }
-            
-            if ($answer eq 'Y'){
-
-                push(@{$self->{_stage_modified_file_list}}, $modified_file);
-
-                $self->{_stage_modified_file_ctr}++;
-
-                goto NEXT_MODIFIED_FILE;
-            }
-            elsif ($answer eq 'N'){
-                
-                $self->{_logger}->info("user did not want to stage modified file '$modified_file'");
-
-                goto NEXT_MODIFIED_FILE;
-            }
-            elsif ($answer eq 'Q'){
-
-                printBoldRed("Umm, okay- bye");
-                                
-                $self->{_logger}->info("user asked to quit");
-                
-                exit(1);
-            }
-        }
-
-        NEXT_MODIFIED_FILE: 
-    }
-}
-
-sub _stage_modified_files {
-
-    my $self = shift;
-
-    foreach my $file (@{$self->{_stage_modified_file_list}}){
-    
-        push(@{$self->{_confirmed_asset_file_list}}, $file);
-    
-        $self->{_confirmed_asset_file_ctr}++;
-    }
-
-    my $cmd = "git add " . join(' ', @{$self->{_stage_modified_file_list}});
-    
-    if ($self->getTestMode()){
-        
-        printYellow("Running in test mode - would have executed: $cmd");
-        
-        $self->{_logger}->info("Running in test mode - would have executed: $cmd");
-    }
-    else {
-        $self->_execute_cmd($cmd);
-    }
-}
-
-sub _ask_user_about_untracked_files {
-
-    my $self = shift;
-
-    print "\nLooks like there are '$self->{_untracked_file_ctr}' untracked files to be staged to be committed to git.\n";
-    print "Please confirm which ones you'd like to stage.\n";
-
-    $self->{_stage_untracked_file_list} = [];
-    $self->{_stage_untracked_file_ctr} = 0;
-
-    my $file_ctr = 0;
-
-    foreach my $untracked_file (sort @{$self->{_untracked_file_list}}){
-    
-        $file_ctr++;
-
-        while (1) {
-
-            print $file_ctr . ". " . $untracked_file . " [Y/n/q]";
-            
-            my $answer = <STDIN>;
-            
-            chomp $answer;
-            
-            $answer = uc($answer);
-            
-            if ($answer eq ''){
-                $answer = 'Y';
-            }
-
-            if ($answer eq 'Y'){
-
-                push(@{$self->{_stage_untracked_file_list}}, $untracked_file);
-
-                $self->{_stage_untracked_file_ctr}++;
-
-                goto NEXT_UNTRACKED_FILE;
-            }
-            elsif ($answer eq 'N'){
-                
-                $self->{_logger}->info("user did not want to stage untracked file '$untracked_file'");
-
-                goto NEXT_UNTRACKED_FILE;
-            }
-            elsif ($answer eq 'Q'){
-                            
-                printBoldRed("Umm, okay- bye");
-
-                $self->{_logger}->info("user asked to quit");
-                
-                exit(1);
-            }
-        }
-
-        NEXT_UNTRACKED_FILE: 
-    }
-}
-
-sub _stage_untracked_files {
-
-    my $self = shift;
-
-    foreach my $file (@{$self->{_stage_untracked_file_list}}){
-    
-        push(@{$self->{_confirmed_asset_file_list}}, $file);
-    
-        $self->{_confirmed_asset_file_ctr}++;
-    }
-
-    my $cmd = "git add " . join(' ', @{$self->{_stage_untracked_file_list}});
-
-    if ($self->getTestMode()){
-        
-        printYellow("Running in test mode - would have executed '$cmd'");
-        
-        $self->{_logger}->info("Running in test mode - would have executed '$cmd'");
-    }
-    else {
-        $self->_execute_cmd($cmd);
-    }
-}
-
-sub _derive_asset_list_file_via_status {
-
-    my $self = shift;
-    my ($asset_file) = @_;
-
-    my $cmd = "git status";
-
-    my $results = $self->_execute_cmd($cmd);
-
-    open (OUTFILE, ">$asset_file") || $self->{_logger}->logconfess("Could not open '$asset_file' in write mode : $!");
-    
-    foreach my $line (@{$results}){
-        print OUTFILE $line . "\n";
-    }
-
-    close OUTFILE;
-
-    $self->{_logger}->info("Wrote to '$asset_file'");
-}
-
-
-#     my $jira_url = $self->getJiraURL();
-
-#     if (!defined($jira_url)){
-
-#         $self->{_config_manager}->getJiraURL();
-    
-#         if (!defined($jira_url)){
-        
-#             $jira_url = DEFAULT_JIRA_URL;
-        
-#             $self->{_logger}->info("Jira URL was not defined and therefore was set to default '$jira_url'");
-#         }
-
-#         $self->setJiraURL($jira_url);
-#     }
-
-#     return $jira_url;
-# }
-
-
 
 sub _execute_cmd {
 
