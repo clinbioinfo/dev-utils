@@ -11,17 +11,11 @@ use Getopt::Long qw(:config no_ignore_case no_auto_abbrev);
 
 use lib "$FindBin::Bin/../lib";
 
-use DevelopmentUtils::Logger;
-use DevelopmentUtils::Config::Manager;
 
 use constant TRUE => 1;
-
 use constant FALSE => 0;
 
-use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
-
 use constant DEFAULT_VERBOSE   => FALSE;
-
 use constant DEFAULT_LOG_LEVEL => 4;
 
 use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
@@ -36,18 +30,12 @@ $|=1; ## do not buffer output stream
 my (
     $indir, 
     $outdir,
-    $config_file,
-    $log_level, 
     $help, 
-    $logfile, 
     $man, 
     $verbose,
     );
 
 my $results = GetOptions (
-    'log-level|d=s'                  => \$log_level, 
-    'logfile=s'                      => \$logfile,
-    'config_file=s'                  => \$config_file,
     'help|h'                         => \$help,
     'man|m'                          => \$man,
     'indir=s'                        => \$indir,
@@ -56,25 +44,60 @@ my $results = GetOptions (
 
 &checkCommandLineArguments();
 
-my $logger = new DevelopmentUtils::Logger(
-    logfile   => $logfile, 
-    log_level => $log_level
-    );
+my $module_file_list = [];
 
-if (!defined($logger)){
-    die "Could not instantiate DevelopmentUtils::Logger";
+my @dir_list = split(',', $indir);
+
+foreach my $dir (@dir_list){
+
+  if (!-e $dir){
+    confess("'$dir' is not a regular directory");
+  }
+
+  _load_module_list($dir);
 }
 
-my $config_manager = DevelopmentUtils::Config::Manager::getInstance(config_file => $config_file);
-if (!defined($config_manager)){
-    $logger->logdie("Could not instantiate DevelopmentUtils::Config::Manager");
+
+my $libraries = join(" -I ", @dir_list);
+
+my $module_file_ctr = 0;
+my $error_ctr = 0;
+my @error_list;
+
+foreach my $module_file (@{$module_file_list}){
+
+  $module_file_ctr++;
+  
+  my $cmd = "perl -wc -I $libraries $module_file";
+  
+  my $results = execute_cmd($cmd);
+  
+  if ($results->[0] !~ m/syntax OK\s*$/){
+  
+    push(@error_list, $module_file);
+  
+    $error_ctr++;
+  }
 }
 
-$logger->logdie("NOT YET IMPLEMENTED");
+print "Processed '$module_file_ctr' module files\n";
+
+if ($error_ctr > 0){
+
+  print "Found the following '$error_ctr' modules with syntax errors:\n";
+
+
+  foreach my $module_file (@error_list){
+
+    print "\t$module_file\n";
+  }
+}
+else {
+  print "All modules had good sytnax\n";
+}
+
 
 printGreen(File::Spec->rel2abs($0) . " execution completed\n");
-
-print "The log file is '$logfile'\n";
 
 exit(0);
 
@@ -94,27 +117,11 @@ sub checkCommandLineArguments {
     	&pod2usage({-exitval => 1, -verbose => 1, -output => \*STDOUT});
     }
 
-    if (!defined($config_file)){
-
-        $config_file = DEFAULT_CONFIG_FILE;
-            
-        printYellow("--config_file was not specified and therefore was set to default '$config_file'");
-    }
-
-    &checkInfileStatus($config_file);
-
     if (!defined($verbose)){
 
         $verbose = DEFAULT_VERBOSE;
 
         printYellow("--verbose was not specified and therefore was set to default '$verbose'");
-    }
-
-    if (!defined($log_level)){
-
-        $log_level = DEFAULT_LOG_LEVEL;
-
-        printYellow("--log_level was not specified and therefore was set to default '$log_level'");
     }
 
     if (!defined($indir)){
@@ -142,16 +149,7 @@ sub checkCommandLineArguments {
         printYellow("Created output directory '$outdir'");
 
     }
-    
-    if (!defined($logfile)){
-
-    	$logfile = $outdir . '/' . File::Basename::basename($0) . '.log';
-
-    	printYellow("--logfile was not specified and therefore was set to '$logfile'");
-
-    }
-
-    $logfile = File::Spec->rel2abs($logfile);
+  
 
     my $fatalCtr=0;
 
@@ -251,7 +249,47 @@ sub checkInfileStatus {
     }
 }
 
+sub _load_module_list {
 
+  my ($dir) = @_;
+
+  my $cmd = "find $dir -name '*.pm'";
+
+  my $results = execute_cmd($cmd);
+
+  foreach my $module_file (@{$results}){
+
+    chomp $module_file;
+
+    push(@{$module_file_list}, $module_file);
+  }
+}
+
+
+sub execute_cmd {
+    
+    my ($cmd) = @_;
+
+    if (!defined($cmd)){
+        confess("cmd was not defined");
+    }
+
+    print "About to execute '$cmd'\n";
+
+    my @results;
+
+    eval {
+        @results = qx($cmd);
+    };
+
+    if ($?){
+        confess("Encountered some error while attempting to execute '$cmd' : $! $@");
+    }
+
+    chomp @results;
+    
+    return \@results;
+}   
 
 
 __END__
