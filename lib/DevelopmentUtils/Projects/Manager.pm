@@ -135,7 +135,71 @@ sub _initGitManager {
 sub run {
 
     my $self = shift;
+
     $self->{_logger}->logconfess("NOT YET IMPLEMENTED");
+
+    $self->_analyze_project_dir();
+    $self->_display_findings();
+}
+
+sub _analyze_project_dir {
+
+    my $self = shift;
+    
+    my $cmd = "find $self->{_project_dir} -maxdepth 1 -type d";
+
+    my $results = $self->_execute_cmd($cmd);
+
+    foreach my $project_dir (@{$results}){
+
+        my $subdir = $self->{_project_dir} . '/' . $project_dir;
+
+        if (!-e $subdir){
+            $self->{_logger}->logconfess("project directory '$subdir' does not exist");
+        }
+
+        if (!-d $subdir){
+            $self->{_logger}->logconfess("'$subdir' is not a regular directory");
+        }
+
+        $self->_analyze_subdirectory($subdir, $project_dir);
+    }
+}
+
+sub _analyze_subdirectory {
+
+    my $self = shift;
+    my ($subdir, $project_dir) = @_;
+
+    my $cmd = "find $subdir -maxdepth 1 -type d";
+
+    my $results = $self->_execute_cmd($cmd);
+
+    foreach my $project_subdir (@{$results}){
+
+        my $subdir = $self->{_project_dir} . '/' . $project_dir;
+
+        if (!-e $subdir){
+            $self->{_logger}->logconfess("project directory '$subdir' does not exist");
+        }
+
+        if (!-d $subdir){
+            $self->{_logger}->logconfess("'$subdir' is not a regular directory");
+        }
+
+        $self->_analyze_subdirectory($subdir);
+    }
+
+
+}
+
+
+sub _display_findings {
+
+    my $self = shift;
+    
+    print "Found the following '$self->{_project_dir_count}' project directories under '$self->{_project_dir}'\n";
+
 }
 
 sub _execute_cmd {
