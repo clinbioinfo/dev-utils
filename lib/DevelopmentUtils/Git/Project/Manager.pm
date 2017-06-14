@@ -239,6 +239,143 @@ sub _check_indir_status {
     }
 }
 
+sub removeProject {
+
+
+    my $self = shift;
+
+    my $indir = $self->getIndir();
+    if (!defined($indir)){
+        $self->{_logger}->logconfess("indir was not defined");
+    }
+
+    $self->_check_indir_status($indir);
+
+
+    my $answer;
+
+    while (1) {
+
+        print "Shall I remove/delete project directory '$indir'? [Y/n/q] ";    
+        
+        $answer = <STDIN>;
+        
+        chomp $answer;
+        
+        $answer = uc($answer);
+        
+        if ((!defined($answer)) || ($answer eq '')){
+            $answer = 'Y';
+            last;
+        }
+        elsif (($answer eq 'Y') || ($answer eq 'N')){
+            ## okay            
+            last;
+        }
+        elsif ($answer eq 'Q'){
+
+            printBoldRed("Umm, okay- bye!");
+            
+            exit(1);
+        }
+    }
+
+    if ($answer eq 'Y'){
+
+
+        $self->_has_uncommitted_assets($indir);
+        
+
+        $self->_delete_project_directory($indir);
+
+
+        $self->{_logger}->info("Project directory '$indir' has been archived to '$target'");
+    }
+    else {
+
+        print "Okay, I will not delete this project directory.\n";
+
+        $self->{_logger}->info("User does not want to delete project directory '$indir'");
+    }    
+}
+
+
+sub _has_uncommitted_assets {
+
+    my $self = shift;
+    my ($indir) = @_;
+
+    my $status_manager = DevelopmentUtils::Git::Status::Manager::getInstance();
+    if (!defined($status_manager)){
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Status::Manager");
+    }    
+
+    $self->{_logger}->logconfess("NOT YET IMPLEMENTED");
+
+    if ($status_manager->hasUncommittedAssets()){
+
+        print "Looks like project directory '$indir' contains some uncommitted assets.\n";
+
+        my $answer;
+
+        while (1) {
+
+            print "Shall I still go ahead and remove/delete project directory '$indir'? [Y/n/q] ";    
+            
+            $answer = <STDIN>;
+            
+            chomp $answer;
+            
+            $answer = uc($answer);
+            
+            if ((!defined($answer)) || ($answer eq '')){
+                $answer = 'Y';
+                last;
+            }
+            elsif (($answer eq 'Y') || ($answer eq 'N')){
+                ## okay            
+                last;
+            }
+            elsif ($answer eq 'Q'){
+
+                printBoldRed("Umm, okay- bye!");
+                
+                exit(1);
+            }
+        }
+
+        if ($answer eq 'Y'){
+
+
+            $self->_delete_project_directory($indir);
+
+
+            $self->{_logger}->info("Project directory '$indir' has been deleted");
+        }
+        else {
+
+            print "Okay, I will not delete this project directory.\n";
+
+            $self->{_logger}->info("User does not want to delete project directory '$indir'");
+        }    
+    }
+}
+
+
+
+sub _delete_project_directory {
+
+    my $self = shift;
+    my ($indir) = @_;
+
+    my $cmd = "rm -rf $indir";
+
+    $self->_execute_cmd($cmd);
+
+    $self->{_logger}->info("Project directory '$indir' has been deleted");
+}
+
+
 sub _execute_cmd {
 
     my $self = shift;
