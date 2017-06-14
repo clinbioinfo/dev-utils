@@ -1,0 +1,49 @@
+<snippet>
+	<content><![CDATA[
+sub checkIndirectoryStatus {
+
+    my \$self = shift;
+    my (\$indir) = @_;
+
+    if (!defined(\$indir)){
+        \$self->{_logger}->logconfess("indir was not defined");
+    }
+
+    my \$errorCtr = 0 ;
+
+    if (!-e \$indir){
+        
+        \$self->{_logger}->error("input directory '\$indir' does not exist");
+        
+        \$errorCtr++;
+    }
+    else {
+
+        if (!-d \$indir){
+        
+            \$self->{_logger}->error("'\$indir' is not a regular directory");
+            
+            \$errorCtr++;
+        }
+
+        if (!-r \$indir){
+            
+            \$self->{_logger}->error("input directory '\$indir' does not have read permissions");
+            
+            \$errorCtr++;
+        }        
+    }
+     
+    if (\$errorCtr > 0){
+        
+        \$self->{_logger}->logconfess("Encountered issues with input directory '\$indir'");
+        
+    }
+}
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sub-check-indir-status-method</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>
