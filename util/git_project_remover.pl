@@ -80,7 +80,7 @@ if (!defined($git_project_manager)){
     $logger->logdie("Could not instantiate DevelopmentUtils::Git::Project::Manager");
 }
 
-$git_project_manager->archiveProject();
+$git_project_manager->removeProject();
 
 printGreen(File::Spec->rel2abs($0) . " execution completed\n");
 
