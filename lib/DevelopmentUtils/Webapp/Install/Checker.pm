@@ -184,12 +184,12 @@ sub runSmokeTests {
 
         if ($self->getVerbose()){
 
-            printYellow("Processing project '$project'");
-            print "\tname: '$name'\n";
-            print "\tdesc: '$desc'\n";
-            print "\twait: '$wait'\n";
-            print "\ttarget xpath: '$target_xpath'\n";
-            print "\tURL: '$url'\n";
+            printYellow("\nProcessing project '$project'");
+            print "name: '$name'\n";
+            print "desc: '$desc'\n";
+            print "wait: '$wait'\n";
+            print "target xpath: '$target_xpath'\n";
+            print "URL: '$url'\n";
         }
 
         $self->{_logger}->info("project '$project'");
@@ -210,7 +210,7 @@ sub runSmokeTests {
             $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Webapp::SmokeTest::Runner");
         }
 
-        print "Running smoke test now...\n";
+        print "\nRunning smoke test now...\n";
 
         $runner->run();
 
@@ -219,14 +219,16 @@ sub runSmokeTests {
             $self->{_logger}->logconfess("status was not defined");
         }
 
+        print "status was '$status'\n";
+
         # $lookup->{$project}->{status} = $status;
 
         if ($status eq 'successful'){
-            push(@{$self->{_successful_lookup}}, $project);
+            push(@{$self->{_successful_list}}, $project);
             $self->{_successful_ctr}++;
         }
         else {
-             push(@{$self->{_unsuccessful_lookup}}, $project);
+            push(@{$self->{_unsuccessful_list}}, $project);
             $self->{_unsuccessful_ctr}++;   
         }
 
@@ -242,11 +244,15 @@ sub _generate_report {
 
     print "Processed '$self->{_project_ctr}' projects\n";
 
+    $self->{_logger}->info("Processed $self->{_project_ctr}' projects");
+
     if ($self->{_successful_ctr} > 0){
         
         printGreen("Checks for the following '$self->{_successful_ctr}' projects were successful");
+
+        $self->{_logger}->info("Checks for the following '$self->{_successful_ctr}' projects were successful");
         
-        foreach my $project (sort keys %{$self->{_successful_lookup}}){
+        foreach my $project (sort @{$self->{_successful_list}}){
         
             my $name = $self->{_project_lookup}->{$project}->{name};
         
@@ -254,7 +260,7 @@ sub _generate_report {
         
             print "$project ($name)\n";
         
-            print "\t$url\n";        
+            $self->{_logger}->info("project '$project' name '$name' url '$url'");
         }
     }
 
@@ -262,7 +268,9 @@ sub _generate_report {
         
         printBoldRed("Checks for the following '$self->{_unsuccessful_ctr}' projects were unsuccessful");
         
-        foreach my $project (sort keys %{$self->{_unsuccessful_lookup}}){
+        $self->{_logger}->error("Checks for the following '$self->{_unsuccessful_ctr}' projects were unsuccessful");
+
+        foreach my $project (sort @{$self->{_unsuccessful_list}}){
         
             my $name = $self->{_project_lookup}->{$project}->{name};
         
@@ -270,9 +278,12 @@ sub _generate_report {
         
             print "$project ($name)\n";
         
-            print "\t$url\n";        
+            $self->{_logger}->error("project '$project' name '$name' url '$url'");
         }
     }
+
+    print "See the log file for details\n";
+
 }
 
 sub printBoldRed {

@@ -2,6 +2,7 @@ package DevelopmentUtils::Webapp::SmokeTest::Runner;
 
 use Moose;
 use Cwd;
+use Try::Tiny;
 use Term::ANSIColor;
 use Selenium::Remote::Driver;
 
@@ -232,10 +233,25 @@ sub run {
 
     $self->{_driver}->set_implicit_wait_timeout($wait);
 
-    
+
     while (1){
 
-        my $xpath = $self->{_driver}->find_element($target_xpath);
+        my $xpath;
+
+        try {
+            
+            $xpath = $self->{_driver}->find_element($target_xpath);
+
+        } catch {
+
+            $self->{_logger}->error("Encountered some error while attempting to find element '$target_xpath' : $_");
+            
+            printBoldRed("Encountered some error while attempting to find element '$target_xpath' : $_");
+            
+            $self->setStatus('unsuccessful');
+            
+            last;
+        };
 
         if (!defined($xpath)){
             
@@ -248,6 +264,8 @@ sub run {
             $self->{_logger}->info("Found element for target_xpath '$target_xpath'");
             
             $self->setStatus('successful');
+
+            last;
         }
 
 
