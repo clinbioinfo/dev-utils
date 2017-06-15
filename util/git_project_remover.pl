@@ -19,6 +19,8 @@ use constant TRUE => 1;
 
 use constant FALSE => 0;
 
+use constant DEFAULT_TEST_MODE => TRUE;
+
 use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
 
 use constant DEFAULT_VERBOSE   => FALSE;
@@ -43,6 +45,7 @@ my (
     $logfile, 
     $man, 
     $verbose,
+    $test_mode
     );
 
 my $results = GetOptions (
@@ -53,6 +56,7 @@ my $results = GetOptions (
     'man|m'                          => \$man,
     'indir=s'                        => \$indir,
     'outdir=s'                       => \$outdir,
+    'test_mode=s'                    => \$test_mode,
     );
 
 &checkCommandLineArguments();
@@ -73,7 +77,8 @@ if (!defined($config_manager)){
 
 my $git_project_manager = DevelopmentUtils::Git::Project::Manager::getInstance(
     indir  => $indir,
-    outdir => $outdir
+    outdir => $outdir,
+    test_mode => $test_mode
     );
 
 if (!defined($git_project_manager)){
@@ -82,9 +87,13 @@ if (!defined($git_project_manager)){
 
 $git_project_manager->removeProject();
 
-printGreen(File::Spec->rel2abs($0) . " execution completed\n");
+printGreen(File::Spec->rel2abs($0) . " execution completed");
 
 print "The log file is '$logfile'\n";
+
+if ($test_mode){
+  print "Ran in test mode.  Next time try: --test_mode 0\n";
+}
 
 exit(0);
 
@@ -102,6 +111,13 @@ sub checkCommandLineArguments {
     
     if ($help){
     	&pod2usage({-exitval => 1, -verbose => 1, -output => \*STDOUT});
+    }
+
+    if (!defined($test_mode)){
+
+        $test_mode = DEFAULT_TEST_MODE;
+            
+        printYellow("--test_mode was not specified and therefore was set to default '$test_mode'");
     }
 
     if (!defined($config_file)){

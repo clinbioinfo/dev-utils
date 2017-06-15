@@ -12,6 +12,7 @@ use Term::ANSIColor;
 use DevelopmentUtils::Logger;
 use DevelopmentUtils::Config::Manager;
 use DevelopmentUtils::Date::Util;
+use DevelopmentUtils::Git::Status::Manager;
 
 use constant TRUE  => 1;
 use constant FALSE => 0;
@@ -282,14 +283,10 @@ sub removeProject {
 
     if ($answer eq 'Y'){
 
-
-        $self->_has_uncommitted_assets($indir);
+        if (!$self->_has_uncommitted_assets($indir)){
         
-
-        $self->_delete_project_directory($indir);
-
-
-        $self->{_logger}->info("Project directory '$indir' has been archived to '$target'");
+            $self->_delete_project_directory($indir);
+        }
     }
     else {
 
@@ -310,9 +307,7 @@ sub _has_uncommitted_assets {
         $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Status::Manager");
     }    
 
-    $self->{_logger}->logconfess("NOT YET IMPLEMENTED");
-
-    if ($status_manager->hasUncommittedAssets()){
+    if ($status_manager->checkForUncommittedAssets()){
 
         print "Looks like project directory '$indir' contains some uncommitted assets.\n";
 
@@ -346,11 +341,8 @@ sub _has_uncommitted_assets {
 
         if ($answer eq 'Y'){
 
-
             $self->_delete_project_directory($indir);
 
-
-            $self->{_logger}->info("Project directory '$indir' has been deleted");
         }
         else {
 
@@ -358,10 +350,12 @@ sub _has_uncommitted_assets {
 
             $self->{_logger}->info("User does not want to delete project directory '$indir'");
         }    
+
+        return TRUE;  ## Did have uncommitted assets
     }
+
+    return FALSE; ## Did not have uncommitted assets
 }
-
-
 
 sub _delete_project_directory {
 
@@ -370,9 +364,22 @@ sub _delete_project_directory {
 
     my $cmd = "rm -rf $indir";
 
-    $self->_execute_cmd($cmd);
+    if ($self->getTestMode()){
+        
+        printYellow("Running in test mode - would have executed: $cmd");
+        
+        $self->{_logger}->info("Running in test mode - would have executed: $cmd");
+        
+        $self->{_is_commit_pushed} = FALSE;
+    }
+    else {
 
-    $self->{_logger}->info("Project directory '$indir' has been deleted");
+        $self->_execute_cmd($cmd);
+
+        printYellow("Project directory '$indir' has been deleted");
+        
+        $self->{_logger}->info("Project directory '$indir' has been deleted");
+    }    
 }
 
 

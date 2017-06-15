@@ -335,6 +335,9 @@ sub _parse_asset_list_file {
 
                     $self->{_untracked_file_ctr}++;
                 }
+                elsif ($line eq 'nothing added to commit but untracked files present (use "git add" to track)'){
+                    next;
+                }
                 else {
                     $self->{_logger}->logconfess("Unexpected line '$line'");
                 }
