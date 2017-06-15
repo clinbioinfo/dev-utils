@@ -93,6 +93,33 @@ sub BUILD {
 
     $self->_initConfigManager(@_);
 
+    $self->{_modified_staged_file_list} = [];
+    $self->{_modified_staged_file_ctr} = 0;
+
+    $self->{_deleted_staged_file_list} = [];
+    $self->{_deleted_staged_file_ctr} = 0;
+
+    $self->{_modified_not_staged_file_list} = [];
+    $self->{_modified_not_staged_file_ctr} = 0;
+
+    $self->{_deleted_not_staged_file_list} = [];
+    $self->{_deleted_not_staged_file_ctr} = 0;
+    
+    $self->{_untracked_file_list} = [];
+    $self->{_untracked_file_ctr} = 0;
+
+    $self->{_final_deleted_not_staged_file_list} = [];
+    $self->{_final_deleted_not_staged_file_ctr} = 0;
+
+    $self->{_final_modified_not_staged_file_list} = [];
+    $self->{_final_modified_not_staged_file_ctr} = 0;
+
+    $self->{_final_untracked_file_list} = [];
+    $self->{_final_untracked_file_ctr} = 0;
+
+    $self->{_confirmed_asset_file_ctr} = 0;
+    $self->{_confirmed_asset_file_list} = [];
+
     $self->{_logger}->info("Instantiated ". __PACKAGE__);
 }
 
@@ -169,27 +196,10 @@ sub _parse_asset_list_file {
 
     my $asset_content_list;
 
-    my $found_changes_not_staged_section = FALSE;
-    my $found_changes_staged_section = FALSE;
-    my $found_untracked_files_section = FALSE;
-    my $found_deleted_files_section = FALSE;
+    my $found_modified_not_staged_section = FALSE;
+    my $found_modified_staged_section = FALSE;
+    my $found_untracked_files_section = FALSE;    
     my $found_the_end = FALSE;
-
-    $self->{_modified_staged_file_list} = [];
-    $self->{_modified_staged_file_ctr} = 0;
-
-    $self->{_deleted_staged_file_list} = [];
-    $self->{_deleted_staged_file_ctr} = 0;
-
-    $self->{_modified_not_staged_file_list} = [];
-    $self->{_modified_not_staged_file_ctr} = 0;
-
-    $self->{_deleted_not_staged_file_list} = [];
-    $self->{_deleted_not_staged_file_ctr} = 0;
-    
-    $self->{_untracked_file_list} = [];
-    $self->{_untracked_file_ctr} = 0;
-
 
     foreach my $line (@content){
 
@@ -203,39 +213,43 @@ sub _parse_asset_list_file {
             $self->{_logger}->info("Ignoring this line '$line'");
             next;
         }
-
-        if ($line =~ m|^Changes to be committed:|){
+        elsif ($line =~ m|^Changes to be committed:|){
 
             print "Found changes (staged) to be committed\n";
         
-            $found_changes_staged_section = TRUE;
-        
+            $found_modified_staged_section = TRUE;
+            
+            $found_modified_not_staged_section = TRUE;
+
+            $found_untracked_files_section = FALSE;        
+
             next;
         }
-
-        if ($line =~ m|^Changes not staged for commit:|){
+        elsif ($line =~ m|^Changes not staged for commit:|){
 
             print "Found changes not staged for commit\n";
         
-            $found_changes_not_staged_section = TRUE;
-        
+            $found_modified_not_staged_section = TRUE;
+
+            $found_modified_staged_section = FALSE;
+
+            $found_untracked_files_section = FALSE;        
+
             next;
         }
-
-        if ($line =~ m|^Untracked files:|){
+        elsif ($line =~ m|^Untracked files:|){
         
             print "Found untracked files section\n";
 
             $found_untracked_files_section = TRUE;
             
-            $found_change_staged_section = FALSE;
+            $found_modified_staged_section = FALSE;
 
-            $found_changes_not_staged_section = FALSE;
+            $found_modified_not_staged_section = FALSE;
 
             next;
         }
-
-        if ($line =~ m|no changes added to commit|){
+        elsif ($line =~ m|no changes added to commit|){
 
             print "Found end section\n";
 
@@ -243,88 +257,87 @@ sub _parse_asset_list_file {
 
             $found_untracked_files_section = FALSE;
             
-            $found_change_staged_section = FALSE;
+            $found_modified_staged_section = FALSE;
 
-            $found_changes_not_staged_section = FALSE;
+            $found_modified_not_staged_section = FALSE;
         } 
+        else {
 
+            if ($found_modified_staged_section){
 
-        if ($found_changes_staged_section){
+                if ($line =~ m|^\s+modified:\s+(\S+)\s*$|){
 
-            if ($line =~ m|^\s+modified:\s+(\S+)\s*$|){
+                    my $file = $1;
 
-                my $file = $1;
+                    if (!-e $file){
+                        $self->{_logger}->logconfess("modified staged file '$file' does not exist");
+                    }
 
-                if (!-e $file){
-                    $self->{_logger}->logconfess("modified staged file '$file' does not exist");
+                    push(@{$self->{_modified_staged_file_list}}, $file);
+
+                    $self->{_modified_staged_file_ctr}++;                
+                }
+                elsif ($line =~ m|^\s+deleted:\s+(\S+)\s*$|){
+
+                    my $file = $1;
+
+                    push(@{$self->{_deleted_staged_file_list}}, $file);
+
+                    $self->{_deleted_staged_file_ctr}++;                
+
+                }
+                else {
+                    $self->{_logger}->logconfess("Unexpected line '$line'");
                 }
 
-                push(@{$self->{_modified_staged_file_list}}, $file);
-
-                $self->{_modified_staged_file_ctr}++;                
+                next;
             }
-            elsif ($line =~ m|^\s+deleted:\s+(\S+)\s*$|){
+            elsif ($found_modified_not_staged_section){
 
-                my $file = $1;
+                if ($line =~ m|^\s+modified:\s+(\S+)\s*$|){
 
-                push(@{$self->{_deleted_staged_file_list}}, $file);
+                    my $file = $1;
 
-                $self->{_deleted_staged_file_ctr}++;                
+                    if (!-e $file){
+                        $self->{_logger}->logconfess("modified, not staged file '$file' does not exist");
+                    }
 
-            }
-            else {
-                $self->{_logger}->logconfess("Unexpected line '$line'");
-            }
+                    push(@{$self->{_modified_not_staged_file_list}}, $file);
 
-            next;
-        }
+                    $self->{_modified_not_staged_file_ctr}++;                
+                }
+                elsif ($line =~ m|^\s+deleted:\s+(\S+)\s*$|){
 
-        if ($found_changes_not_staged_section){
+                    my $file = $1;
 
-            if ($line =~ m|^\s+modified:\s+(\S+)\s*$|){
+                    push(@{$self->{_deleted_not_staged_file_list}}, $file);
 
-                my $file = $1;
+                    $self->{_deleted_not_staged_file_ctr}++;                
 
-                if (!-e $file){
-                    $self->{_logger}->logconfess("modified, not staged file '$file' does not exist");
+                }
+                else {
+                    $self->{_logger}->logconfess("Unexpected line '$line'");
                 }
 
-                push(@{$self->{_modified_not_staged_file_list}}, $file);
-
-                $self->{_modified_not_staged_file_ctr}++;                
+                next;
             }
-            elsif ($line =~ m|^\s+deleted:\s+(\S+)\s*$|){
+            elsif ($found_untracked_files_section){
 
-                my $file = $1;
+                if ($line =~ m|^\s+(\S+)\s*$|){
 
-                push(@{$self->{_deleted_not_staged_file_list}}, $file);
+                    my $untracked_file = $1;
 
-                $self->{_deleted_not_staged_file_ctr}++;                
+                    if (!-e $untracked_file){
+                        $self->{_logger}->logconfess("untracked file '$untracked_file' does not exist");
+                    }
 
-            }
-            else {
-                $self->{_logger}->logconfess("Unexpected line '$line'");
-            }
+                    push(@{$self->{_untracked_file_list}}, $untracked_file);
 
-            next;
-        }
-
-        if ($found_untracked_files_section){
-
-            if ($line =~ m|^\s+(\S+)\s*$|){
-
-                my $untracked_file = $1;
-
-                if (!-e $untracked_file){
-                    $self->{_logger}->logconfess("untracked file '$untracked_file' does not exist");
+                    $self->{_untracked_file_ctr}++;
                 }
-
-                push(@{$self->{_untracked_file_list}}, $untracked_file);
-
-                $self->{_untracked_file_ctr}++;
-            }
-            else {
-                $self->{_logger}->logconfess("Unexpected line '$line'");
+                else {
+                    $self->{_logger}->logconfess("Unexpected line '$line'");
+                }
             }
         }
     }
@@ -334,12 +347,139 @@ sub _parse_asset_list_file {
         ($self->{_deleted_staged_file_ctr} == 0)  && 
         ($self->{_deleted_not_staged_file_ctr} == 0)  && 
         ($self->{_untracked_file_ctr} == 0)){
-        $self->{_logger}->logconfess("Did not find any modified files nor any untracked files");
+        $self->{_logger}->logconfess("Did not find any modified, deleted- nor any untracked files");
     }
+    else {
 
-    $self->_prompt_user_about_files();
+        $self->_prompt_user_about_files();
 
-    $self->_stage_files();
+        ##---------------------------------------
+        ## modified files
+        ##---------------------------------------
+        if ((exists $self->{_modified_not_staged_file_ctr})  && 
+            ($self->{_modified_not_staged_file_ctr} > 0)){
+
+            if ((exists $self->{_final_modified_not_staged_file_ctr})  && 
+                ($self->{_final_modified_not_staged_file_ctr} > 0)){
+
+                $self->_stage_modified_not_staged_files();
+            }
+            else {
+                
+                printYellow("User does not want to stage '$self->{_modified_not_staged_file_ctr}' modified, but not staged files");
+                
+                $self->{_logger}->warn("User does not want to stage any of the '$self->{_modified_not_staged_file_ctr}' modified, not staged files");
+            }
+        }
+
+        ##---------------------------------------
+        ## deleted files
+        ##---------------------------------------
+        if ((exists $self->{_deleted_not_staged_file_ctr}) &&
+            ($self->{_deleted_not_staged_file_ctr} > 0)){
+
+            if ((exists $self->{_final_deleted_not_staged_file_ctr}) &&
+                ($self->{_final_deleted_not_staged_file_ctr} > 0)){
+
+                $self->_stage_deleted_not_staged_files();
+            }
+            else {
+                
+                printYellow("User does not want to stage '$self->{_deleted_not_staged_file_ctr}' deleted, not staged files");
+                
+                $self->{_logger}->warn("User does not want to stage any of the '$self->{_deleted_not_staged_file_ctr}' deleted, not staged files");
+            }
+        }
+
+        ##---------------------------------------
+        ## untracked files
+        ##---------------------------------------
+        if ((exists $self->{_untracked_file_ctr})  && 
+            ($self->{_untracked_file_ctr} > 0)){
+
+            if ((exists $self->{_final_untracked_file_ctr})  && 
+                ($self->{_final_untracked_file_ctr} > 0)){
+
+                $self->_stage_untracked_files();            
+            }
+            else {
+                printYellow("User does not want to stage any of the '$self->{_untracked_file_ctr}' untracked files");
+                    
+                $self->{_logger}->warn("User does not want to stage any of the '$self->{_untracked_file_ctr}' untracked files");
+            }
+        }
+            
+
+        if ((exists $self->{_modified_staged_file_ctr})  &&             
+            ($self->{_modified_staged_file_ctr} > 0)){
+
+            ## Have modified files that are already staged.
+            $self->_add_modified_files_to_confirmed_asset_list();
+        }
+        else {
+            $self->{_logger}->info("No modified files to be added to the confirmed assets list");
+        }
+
+        if ((exists $self->{_deleted_staged_file_ctr})  &&             
+            ($self->{_deleted_staged_file_ctr} > 0)){
+
+            ## Have deleted files that are already staged.
+            $self->_add_deleted_files_to_confirmed_asset_list();
+        }
+        else {
+            $self->{_logger}->info("No deleted files to be added to the confirmed assets list");
+        }
+    }
+}
+
+sub _add_modified_files_to_confirmed_asset_list {
+
+    my $self = shift;
+
+    if ((exists $self->{_modified_staged_file_list}) &&
+        (scalar(@{$self->{_modified_staged_file_list}}) > 0)){
+
+        my $file_ctr = 0;
+
+        foreach my $file (@{$self->{_modified_staged_file_list}}){
+        
+            $file_ctr++;
+
+            push(@{$self->{_confirmed_asset_file_list}}, $file);
+        
+            $self->{_confirmed_asset_file_ctr}++;
+        }
+
+        $self->{_logger}->info("Added '$file_ctr' modified (already staged) files to the confirmed assets list");
+    }
+    else {
+        $$self->{_logger}->logconfess("Why are we attempting to add modified (already staged) files to the confirmed assets list?");
+    }
+}
+
+sub _add_deleted_files_to_confirmed_asset_list {
+
+    my $self = shift;
+
+    if ((exists $self->{_deleted_staged_file_list}) &&
+        (scalar(@{$self->{_deleted_staged_file_list}}) > 0)){
+
+        my $file_ctr = 0;
+
+        foreach my $file (@{$self->{_deleted_staged_file_list}}){
+        
+            $file_ctr++;
+
+            push(@{$self->{_confirmed_asset_file_list}}, $file);
+        
+            $self->{_confirmed_asset_file_ctr}++;
+        }
+
+        $self->{_logger}->info("Added '$file_ctr' deleted (already staged) files to the confirmed assets list");
+    }
+    else {
+        $$self->{_logger}->logconfess("Why are we attempting to add deleted (already staged) files to the confirmed assets list?");
+    }
 }
 
 sub _prompt_user_about_files {
@@ -363,11 +503,11 @@ sub _prompt_user_about_modified_staged_files {
     
     if ($self->{_modified_staged_file_ctr} > 0){
         
-        print "\nFound the following '$self->{_modified_staged_file_ctr}' modified, staged files:\n";
+        printYellow("\nFound the following '$self->{_modified_staged_file_ctr}' modified, staged files:");
         
         print join("\n", @{$self->{_modified_staged_file_list}}) . "\n";
 
-        $self->_ask_user_about_modified_staged_files();
+        #$self->_ask_user_about_modified_staged_files();
     }
     else {
         $self->{_logger}->info("Did not find any modified, staged files");
@@ -380,7 +520,7 @@ sub _prompt_user_about_modified_not_staged_files {
 
     if ($self->{_modified_not_staged_file_ctr} > 0){
         
-        print "\nFound the following '$self->{_modified_not_staged_file_ctr}' modified, but not staged files:\n";
+        printYellow("\nFound the following '$self->{_modified_not_staged_file_ctr}' modified, but not staged files:");
         
         print join("\n", @{$self->{_modified_not_staged_file_list}}) . "\n";
 
@@ -397,11 +537,11 @@ sub _prompt_user_about_deleted_staged_files {
     
     if ($self->{_deleted_staged_file_ctr} > 0){
         
-        print "\nFound the following '$self->{_deleted_staged_file_ctr}' deleted, staged files:\n";
+        printYellow("\nFound the following '$self->{_deleted_staged_file_ctr}' deleted, staged files:");
         
         print join("\n", @{$self->{_deleted_staged_file_list}}) . "\n";
 
-        $self->_ask_user_about_deleted_staged_files();
+        # $self->_ask_user_about_deleted_staged_files();
     }
     else {
         $self->{_logger}->info("Did not find any deleted, staged files");
@@ -414,7 +554,7 @@ sub _prompt_user_about_deleted_not_staged_files {
 
     if ($self->{_deleted_not_staged_file_ctr} > 0){
         
-        print "\nFound the following '$self->{_deleted_not_staged_file_ctr}' deleted, but not staged files:\n";
+        printYellow("\nFound the following '$self->{_deleted_not_staged_file_ctr}' deleted, but not staged files:");
         
         print join("\n", @{$self->{_deleted_not_staged_file_list}}) . "\n";
 
@@ -431,7 +571,7 @@ sub _prompt_user_about_untracked_files {
     
     if ($self->{_untracked_file_ctr} > 0){
 
-        print "\nFound the following '$self->{_untracked_file_ctr}' untracked files:\n";
+        printYellow("\nFound the following '$self->{_untracked_file_ctr}' untracked files:");
         
         print join("\n", @{$self->{_untracked_file_list}}) . "\n";
 
@@ -443,82 +583,78 @@ sub _prompt_user_about_untracked_files {
 }
 
 
-sub _stage_files {
+# sub _stage_files {
 
-    my $self = shift;
+#     my $self = shift;
 
-    if ((! exists $self->{_modified_staged_file_ctr}) && 
-        (! exists $self->{_final_modified_not_staged_file_ctr}) && 
-        (! exists $self->{_final_deleted_not_staged_file_ctr}) && 
-        (! exists $self->{_deleted_staged_file_ctr}) && 
-        (! exists $self->{_final_untracked_file_ctr})){
+#     if ((! exists $self->{_final_modified_not_staged_file_ctr}) && 
+#         (! exists $self->{_final_deleted_not_staged_file_ctr}) && 
+#         (! exists $self->{_final_untracked_file_ctr})){
 
-        printBoldRed("User does not have any files to be staged.");
+#         printBoldRed("User does not have any files to be staged.");
         
-        exit(2);
-    }
+#         exit(2);
+#     }
 
-    if (($self->{_modified_staged_file_ctr} == 0) && 
-        ($self->{_final_modified_not_staged_file_ctr} == 0) && 
-        ($self->{_final_deleted_not_staged_file_ctr} == 0) && 
-        ($self->{_deleted_staged_file_ctr} == 0) && 
-        ($self->{_stage_untracked_file_ctr} == 0)){
+#     if (($self->{_final_modified_not_staged_file_ctr} == 0) && 
+#         ($self->{_final_deleted_not_staged_file_ctr} == 0) && 
+#         ($self->{_final_untracked_file_ctr} == 0)){
         
-        printBoldRed("User does not have any files to be staged.");
+#         printBoldRed("User does not have any files to be staged.");
         
-        exit(2);
-    }
+#         exit(2);
+#     }
 
-    if (exists $self->{_final_modified_not_staged_file_ctr}){
+#     if (exists $self->{_final_modified_not_staged_file_ctr}){
 
-        if ($self->{_final_modified_not_staged_file_ctr} > 0){
+#         if ($self->{_final_modified_not_staged_file_ctr} > 0){
 
-            $self->_do_stage_modified_not_staged_files();
-        }
-        else {
+#             $self->_stage_modified_not_staged_files();
+#         }
+#         else {
             
-            printYellow("User does not want to stage any of the '$self->{_modified_not_staged_file_ctr}' modified, not staged files");
+#             printYellow("User does not want to stage any of the '$self->{_modified_not_staged_file_ctr}' modified, not staged files");
             
-            $self->{_logger}->warn("User does not want to stage any of the '$self->{_modified_not_staged_file_ctr}' modified, not staged files");
-        }
-    }
-    else {
-        $self->{_logger}->info("There are no modified, not staged files to be staged");
-    }
+#             $self->{_logger}->warn("User does not want to stage any of the '$self->{_modified_not_staged_file_ctr}' modified, not staged files");
+#         }
+#     }
+#     else {
+#         $self->{_logger}->info("There are no modified, not staged files to be staged");
+#     }
 
-    if (exists $self->{_final_deleted_not_staged_file_ctr}){
+#     if (exists $self->{_final_deleted_not_staged_file_ctr}){
 
-        if ($self->{_final_deleted_not_staged_file_ctr} > 0){
+#         if ($self->{_final_deleted_not_staged_file_ctr} > 0){
 
-            $self->_do_stage_deleted_not_staged_files();
-        }
-        else {
+#             $self->_stage_deleted_not_staged_files();
+#         }
+#         else {
             
-            printYellow("User does not want to stage any of the '$self->{_deleted_not_staged_file_ctr}' deleted, not staged files");
+#             printYellow("User does not want to stage any of the '$self->{_deleted_not_staged_file_ctr}' deleted, not staged files");
             
-            $self->{_logger}->warn("User does not want to stage any of the '$self->{_deleted_not_staged_file_ctr}' deleted, not staged files");
-        }
-    }
-    else {
-        $self->{_logger}->info("There are no deleted, not staged files to be staged");
-    }
+#             $self->{_logger}->warn("User does not want to stage any of the '$self->{_deleted_not_staged_file_ctr}' deleted, not staged files");
+#         }
+#     }
+#     else {
+#         $self->{_logger}->info("There are no deleted, not staged files to be staged");
+#     }
 
-    if (exists $self->{_stage_untracked_file_ctr}){
+#     if (exists $self->{_final_untracked_file_ctr}){
 
-        if ($self->{_stage_untracked_file_ctr} > 0){
-            $self->_stage_untracked_files();
-        }
-        else {
+#         if ($self->{_final_untracked_file_ctr} > 0){
+#             $self->_stage_untracked_files();
+#         }
+#         else {
         
-            printYellow("User does not want to stage any of the '$self->{_untracked_file_ctr}' untracked files");
+#             printYellow("User does not want to stage any of the '$self->{_untracked_file_ctr}' untracked files");
                 
-            $self->{_logger}->warn("User does not want to stage any of the '$self->{_untracked_file_ctr}' untracked files");
-        }
-    }
-    else {
-        $self->{_logger}->info("There are no untracked files to be staged");
-    }
-}
+#             $self->{_logger}->warn("User does not want to stage any of the '$self->{_untracked_file_ctr}' untracked files");
+#         }
+#     }
+#     else {
+#         $self->{_logger}->info("There are no untracked files to be staged");
+#     }
+# }
 
 
 sub _ask_user_about_modified_not_staged_files {
@@ -527,9 +663,6 @@ sub _ask_user_about_modified_not_staged_files {
 
     print "\nLooks like there are '$self->{_modified_not_staged_file_ctr}' modified, not staged files to be committed to git.\n";
     printYellow("Please confirm which ones you'd like to stage.");
-
-    $self->{_final_modified_not_staged_file_list} = [];
-    $self->{_final_modified_not_staged_file_ctr} = 0;
 
     my $file_ctr = 0;
 
@@ -555,7 +688,9 @@ sub _ask_user_about_modified_not_staged_files {
 
                 push(@{$self->{_final_modified_not_staged_file_list}}, $file);
 
-                $self->{_final_modified_not_staged_ile_ctr}++;
+                $self->{_final_modified_not_staged_file_ctr}++;
+
+                $self->{_logger}->info("User wants to stage modified file '$file'");
 
                 goto NEXT_MODIFIED_FILE;
             }
@@ -586,9 +721,6 @@ sub _ask_user_about_deleted_not_staged_files {
     print "\nLooks like there are '$self->{_deleted_not_staged_file_ctr}' deleted, not staged files to be staged to be committed to git.\n";
     printYellow("Please confirm which ones you'd like to stage.");
 
-    $self->{_final_deleted_not_staged_file_list} = [];
-    $self->{_final_deleted_not_staged_file_ctr} = 0;
-
     my $file_ctr = 0;
 
     foreach my $file (sort @{$self->{_deleted_not_staged_file_list}}){
@@ -615,6 +747,8 @@ sub _ask_user_about_deleted_not_staged_files {
 
                 $self->{_final_deleted_not_staged_file_ctr}++;
 
+                $self->{_logger}->info("User wants to stage delete file '$file'");
+
                 goto NEXT_DELETED_FILE;
             }
             elsif ($answer eq 'N'){
@@ -637,36 +771,65 @@ sub _ask_user_about_deleted_not_staged_files {
     }
 }
 
-sub _stage_modified_files {
+sub _stage_modified_not_staged_files {
 
     my $self = shift;
 
-    if ($self->{_final_modified_not_staged_file})
-    foreach my $file (@{$self->{_final_modified_not_staged_file_list}}){
-    
-        push(@{$self->{_confirmed_asset_file_list}}, $file);
-    
-        $self->{_confirmed_asset_file_ctr}++;
-    }
+    if ((exists $self->{_final_modified_not_staged_file_list}) &&
+        (scalar(@{$self->{_final_modified_not_staged_file_list}}) > 0)){
 
-    foreach my $file (@{$self->{_modified_staged_file_list}}){
-    
-        push(@{$self->{_confirmed_asset_file_list}}, $file);
-    
-        $self->{_confirmed_asset_file_ctr}++;
-    }
-
-
-    my $cmd = "git add " . join(' ', @{$self->{_stage_modified_file_list}});
-    
-    if ($self->getTestMode()){
+        foreach my $file (@{$self->{_final_modified_not_staged_file_list}}){
         
-        printYellow("Running in test mode - would have executed: $cmd");
+            push(@{$self->{_confirmed_asset_file_list}}, $file);
         
-        $self->{_logger}->info("Running in test mode - would have executed: $cmd");
+            $self->{_confirmed_asset_file_ctr}++;
+        }
+
+        my $cmd = "git add " . join(' ', @{$self->{_final_modified_not_staged_file_list}});
+        
+        if ($self->getTestMode()){
+            
+            printYellow("Running in test mode - would have executed: $cmd");
+            
+            $self->{_logger}->info("Running in test mode - would have executed: $cmd");
+        }
+        else {
+            $self->_execute_cmd($cmd);
+        }
     }
     else {
-        $self->_execute_cmd($cmd);
+        $$self->{_logger}->logconfess("Why are we attempting to stage modified files?");
+    }
+}
+
+sub _stage_deleted_not_staged_files {
+
+    my $self = shift;
+
+    if ((exists $self->{_final_deleted_not_staged_file}) &&
+        (scalar(@{$self->{_final_deleted_not_staged_file}}) > 0)){
+
+        foreach my $file (@{$self->{_final_deleted_not_staged_file_list}}){
+        
+            push(@{$self->{_confirmed_asset_file_list}}, $file);
+        
+            $self->{_confirmed_asset_file_ctr}++;
+        }
+
+        my $cmd = "git add " . join(' ', @{$self->{_final_deleted_not_staged_file_list}});
+        
+        if ($self->getTestMode()){
+            
+            printYellow("Running in test mode - would have executed: $cmd");
+            
+            $self->{_logger}->info("Running in test mode - would have executed: $cmd");
+        }
+        else {
+            $self->_execute_cmd($cmd);
+        }
+    }
+    else {
+        $$self->{_logger}->logconfess("Why are we attempting to stage deleted files?");
     }
 }
 
@@ -675,10 +838,7 @@ sub _ask_user_about_untracked_files {
     my $self = shift;
 
     print "\nLooks like there are '$self->{_untracked_file_ctr}' untracked files to be staged to be committed to git.\n";
-    print "Please confirm which ones you'd like to stage.\n";
-
-    $self->{_stage_untracked_file_list} = [];
-    $self->{_stage_untracked_file_ctr} = 0;
+    printYellow("Please confirm which ones you'd like to stage.");
 
     my $file_ctr = 0;
 
@@ -702,9 +862,11 @@ sub _ask_user_about_untracked_files {
 
             if ($answer eq 'Y'){
 
-                push(@{$self->{_stage_untracked_file_list}}, $untracked_file);
+                push(@{$self->{_final_untracked_file_list}}, $untracked_file);
 
-                $self->{_stage_untracked_file_ctr}++;
+                $self->{_final_untracked_file_ctr}++;
+
+                $self->{_logger}->info("User wants to stage untracked file '$untracked_file'");
 
                 goto NEXT_UNTRACKED_FILE;
             }
@@ -732,23 +894,30 @@ sub _stage_untracked_files {
 
     my $self = shift;
 
-    foreach my $file (@{$self->{_stage_untracked_file_list}}){
-    
-        push(@{$self->{_confirmed_asset_file_list}}, $file);
-    
-        $self->{_confirmed_asset_file_ctr}++;
-    }
+    if ((exists $self->{_final_untracked_file_list}) &&
+        (scalar(@{$self->{_final_untracked_file_list}}) > 0)){
 
-    my $cmd = "git add " . join(' ', @{$self->{_stage_untracked_file_list}});
+        foreach my $file (@{$self->{_final_untracked_file_list}}){
+        
+            push(@{$self->{_confirmed_asset_file_list}}, $file);
+        
+            $self->{_confirmed_asset_file_ctr}++;
+        }
 
-    if ($self->getTestMode()){
-        
-        printYellow("Running in test mode - would have executed '$cmd'");
-        
-        $self->{_logger}->info("Running in test mode - would have executed '$cmd'");
+        my $cmd = "git add " . join(' ', @{$self->{_final_untracked_file_list}});
+
+        if ($self->getTestMode()){
+            
+            printYellow("Running in test mode - would have executed '$cmd'");
+            
+            $self->{_logger}->info("Running in test mode - would have executed '$cmd'");
+        }
+        else {
+            $self->_execute_cmd($cmd);
+        }
     }
     else {
-        $self->_execute_cmd($cmd);
+        $self->{_logger}->logconfess("Why are we attempting to stage untracked files?");
     }
 }
 
