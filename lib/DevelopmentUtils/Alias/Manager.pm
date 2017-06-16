@@ -118,6 +118,8 @@ sub BUILD {
 
     $self->_set_default_target_file(@_);
 
+    $self->{_installed_new_aliases_file} = FALSE;
+    
     $self->{_logger}->info("Instantiated ". __PACKAGE__);
 }
 
@@ -160,6 +162,36 @@ sub _set_default_target_file {
     }
 }
 
+sub _check_target_file {
+
+    my $self = shift;
+    my ($source_file, $target_file) = @_;
+
+    if (!-e $target_file){
+
+        my $username = $self->getUsername();
+
+        if (!defined($username)){
+            $self->{_logger}->logconfess("username was not defined");
+        }
+
+        $target_file = '/home/'. $username . '/aliases.txt';
+
+        if (!-e $target_file){
+
+            copy($source_file, $target_file) || $self->{_logger}->logconfess("Could not copy '$source_file' to '$target_file' : $!");
+            
+            $self->{_logger}->info("Copied '$source_file' to '$target_file'");
+            
+            print "Copied '$source_file' to '$target_file\n";
+            
+            printYellow("Make sure you add 'source $target_file' to ~/.bashrc");
+
+            $self->{_installed_new_aliases_file} = TRUE;            
+        }
+    }
+}
+
 sub checkAliases {
 
     my $self = shift;
@@ -167,6 +199,15 @@ sub checkAliases {
     my $target_file = $self->getTargetFile();
 
     my $source_file = $self->getSourceFile();
+
+    $self->_check_target_file($source_file, $target_file);
+
+    if ($self->{_installed_new_aliases_file}){
+     
+        $self->{_logger}->info("Just installed new aliases.txt file.  No further processing required.");
+     
+        return
+    }
 
     my $installed_aliases_lookup = $self->_load_alias_lookup($target_file);
 
