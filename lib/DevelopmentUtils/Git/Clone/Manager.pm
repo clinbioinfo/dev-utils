@@ -470,11 +470,14 @@ sub _display_branch_list {
     
     my $ctr = 0;
     
+
     foreach my $branch (@{$branch_list}){
     
         $ctr++;
     
         print $ctr .". " . $branch . "\n";
+
+        $self->{_branch_number_to_branch_name_lookup}->{$ctr} = $branch;
     }
 }
 
@@ -511,7 +514,7 @@ sub _prompt_user_for_branch {
 
     while (1) {
 
-        print "Please specify a branch: ";    
+        print "Please specify a branch (or pick a number): ";    
         
         $answer = <STDIN>;
         
@@ -521,6 +524,11 @@ sub _prompt_user_for_branch {
             next;
         }
         else {
+
+            if (exists $self->{_branch_number_to_branch_name_lookup}->{$answer}){
+                $answer = $self->{_branch_number_to_branch_name_lookup}->{$answer};                                
+            }
+
             last;
         }
     }
