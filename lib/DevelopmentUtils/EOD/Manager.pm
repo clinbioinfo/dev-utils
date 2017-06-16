@@ -293,7 +293,7 @@ sub _run_sublime_tasks {
     my $self = shift;
 
     $self->_run_sublime_analyzer();
-    # $self->_run_sublime_installer();
+    $self->_run_sublime_installer();
 }
 
 sub _run_sublime_analyzer {
@@ -325,7 +325,7 @@ sub _run_sublime_installer {
     $self->_print_banner("Will $task_name");
 
     try {
-        $self->{_sublime_snippets_manager}->checkSnippets();
+        $self->{_sublime_snippets_manager}->installSublimeSnippets();
     } catch {
 
         $self->{_logger}->error("Caught some exception while attempting to $task_name : $_");
