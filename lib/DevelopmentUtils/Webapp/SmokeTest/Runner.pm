@@ -231,7 +231,11 @@ sub run {
 
     my $search_attempt_ctr = 0;
 
-    $self->{_driver}->set_implicit_wait_timeout($wait);
+    my $milliseconds = $wait * 1000;
+
+    $self->{_logger}->info("Setting implicit wait timeout to '$milliseconds' milliseconds");
+
+    $self->{_driver}->set_implicit_wait_timeout($milliseconds);
 
 
     while (1){
