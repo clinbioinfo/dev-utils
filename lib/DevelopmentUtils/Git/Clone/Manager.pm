@@ -219,6 +219,9 @@ sub cloneProject {
             $self->{_logger}->logconfess("project was not defined");
         }
     }
+    else {
+        $self->setProject($project);
+    }
 
 
     $self->_clone_project($project);
@@ -235,12 +238,18 @@ sub checkoutBranch {
             $self->{_logger}->logconfess("project was not defined");
         }
     }
+    else {
+        $self->setProject($project);
+    }
 
     if (!defined($branch)){
         $branch = $self->getBranch();
         if (!defined($branch)){
             $self->{_logger}->logconfess("branch was not defined");
         }
+    }
+    else {
+        $self->setBranch($branch);
     }
 
     $self->_clone_project($project);
@@ -271,6 +280,9 @@ sub checkoutTag {
             $self->{_logger}->logconfess("project was not defined");
         }
     }
+    else {
+        $self->setProject($project);
+    }
 
     if (!defined($branch)){
         $branch = $self->getBranch();
@@ -278,12 +290,18 @@ sub checkoutTag {
             $self->{_logger}->logconfess("branch was not defined");
         }
     }
+    else {
+        $self->setBranch($branch);
+    }
 
     if (!defined($tag)){
         $tag = $self->getTag();
         if (!defined($tag)){
             $self->{_logger}->logconfess("tag was not defined");
         }
+    }
+    else {
+        $self->setTag($tag);
     }
 
     $self->_clone_project($project);
@@ -470,12 +488,24 @@ sub _display_branch_list {
     
     my $ctr = 0;
     
+    my $FORMAT = "%-3s %-10s %-400s\n";
 
     foreach my $branch (@{$branch_list}){
     
         $ctr++;
     
-        print $ctr .". " . $branch . "\n";
+        my $url = $self->_get_branch_url($branch);
+
+        if (defined($url)){
+           
+           printf($FORMAT, $ctr .'.', $branch, "($url)");
+        }
+        else {
+
+            $self->{_logger}->warn("url was not defined for branch '$branch'");
+
+            printf($FORMAT, $ctr .'.', $branch, "(N/A)");
+        }
 
         $self->{_branch_number_to_branch_name_lookup}->{$ctr} = $branch;
     }
@@ -567,6 +597,61 @@ sub _prompt_user_for_tag {
     return $answer;
 }
 
+sub _get_branch_url {
+
+    my $self = shift;
+    my ($branch) = @_;
+
+    my $base_url = $self->_get_browse_base_url();
+
+    if (defined($base_url)){
+
+        my $url = $base_url . 'browse?at=refs%2Fheads%2F' . $branch;
+
+        $self->{_logger}->info("branch '$branch' has url '$url'");
+
+        return $url;
+    }
+}
+
+sub _get_browse_base_url {
+
+    my $self = shift;
+
+    if (!exists $self->{_git_projects_lookup}){
+
+        my $file = $self->{_config_manager}->getGitProjectsLookupFile();
+        if (!defined($file)){
+            $self->{_logger}->logconfess("file was not defined");
+        }
+
+        if (!-e $file){
+            $self->{_logger}->logconfess("git project lookup file '$file' does not exist");
+        }
+
+        my $lookup = json_file_to_perl($file);
+        if (!defined($lookup)){
+            $self->{_logger}->logconfess("lookup was not defined for file '$file'");
+        }
+
+        $self->{_git_projects_lookup} = $lookup;
+    }
+
+    my $project = $self->getProject();
+
+    if (exists $self->{_git_projects_lookup}->{$project}->{browse_url}){
+        return $self->{_git_projects_lookup}->{$project}->{browse_url};
+    }
+    else {        
+
+        my $file = $self->{_config_manager}->getGitProjectsLookupFile();
+        if (!defined($file)){
+            $self->{_logger}->logconfess("file was not defined");
+        }
+
+        printBoldRed("project '$project' does not have a record in '$file'");
+    }
+}
 sub _execute_cmd {
 
     my $self = shift;
