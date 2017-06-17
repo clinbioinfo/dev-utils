@@ -195,9 +195,9 @@ sub _is_selenium_remote_webdriver_running {
 
 sub printBrightBlue {
 
-    my () = @_;
+    my ($msg) = @_;
     print color 'bright_blue';
-    print  . "\n";
+    print  $msg . "\n";
     print color 'reset';
 }
 
