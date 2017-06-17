@@ -17,6 +17,8 @@ use constant FALSE => 0;
 
 use constant DEFAULT_TEST_MODE => TRUE;
 
+use constant DEFAULT_VERBOSE => TRUE;
+
 my $login =  getlogin || getpwuid($<) || "sundaramj";
 
 use constant DEFAULT_OUTDIR => '/tmp/' . $login . '/' . File::Basename::basename($0) . '/' . time();
@@ -25,6 +27,15 @@ use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
 
 ## Singleton support
 my $instance;
+
+has 'verbose' => (
+    is       => 'rw',
+    isa      => 'Bool',
+    writer   => 'setVerbose',
+    reader   => 'getVerbose',
+    required => FALSE,
+    default  => DEFAULT_VERBOSE
+    );
 
 has 'test_mode' => (
     is       => 'rw',
@@ -210,7 +221,9 @@ sub _parse_asset_list_file {
         }
         elsif ($line =~ m|^Changes to be committed:|){
 
-            print "Found changes (staged) to be committed\n";
+            if ($self->getVerbose()){
+                print "Found changes (staged) to be committed\n";
+            }
         
             $found_modified_staged_section = TRUE;
             
@@ -222,7 +235,9 @@ sub _parse_asset_list_file {
         }
         elsif ($line =~ m|^Changes not staged for commit:|){
 
-            print "Found changes not staged for commit\n";
+            if ($self->getVerbose()){
+                print "Found changes not staged for commit\n";
+            }
         
             $found_modified_not_staged_section = TRUE;
 
@@ -234,7 +249,9 @@ sub _parse_asset_list_file {
         }
         elsif ($line =~ m|^Untracked files:|){
         
-            print "Found untracked files section\n";
+            if ($self->getVerbose()){
+                print "Found untracked files section\n";
+            }
 
             $found_untracked_files_section = TRUE;
             
@@ -246,7 +263,9 @@ sub _parse_asset_list_file {
         }
         elsif ($line =~ m|no changes added to commit|){
 
-            print "Found end section\n";
+            if ($self->getVerbose()){
+                print "Found end section\n";
+            }
 
             $found_the_end = TRUE;
 
