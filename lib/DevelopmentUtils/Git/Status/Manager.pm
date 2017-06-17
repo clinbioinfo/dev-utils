@@ -157,6 +157,50 @@ sub checkForUncommittedAssets {
     return $self->_get_asset_list_content(@_);
 }
 
+sub getUncommittedAssetsList {
+
+    my $self = shift;
+
+    if (! exists $self->{_uncommitted_assets_list}){
+
+        my $list = [];
+
+        if (scalar(@{$self->{_modified_staged_file_list}}) > 0){
+            foreach my $file (@{$self->{_modified_staged_file_list}}){
+                push(@{$list}, $file);
+            }
+        }
+
+        if (scalar(@{$self->{_deleted_staged_file_list}}) > 0){
+            foreach my $file (@{$self->{_deleted_staged_file_list}}){
+                push(@{$list}, $file);
+            }
+        }
+
+        if (scalar(@{$self->{_modified_not_staged_file_list}}) > 0){
+            foreach my $file (@{$self->{_modified_not_staged_file_list}}){
+                push(@{$list}, $file);
+            }
+        }
+
+        if (scalar(@{$self->{_deleted_not_staged_file_list}}) > 0){
+            foreach my $file (@{$self->{_deleted_not_staged_file_list}}){
+                push(@{$list}, $file);
+            }
+        }
+
+        if (scalar(@{$self->{_untracked_file_list}}) > 0){
+            foreach my $file (@{$self->{_untracked_file_list}}){
+                push(@{$list}, $file);
+            }
+        }
+
+        $self->{_uncommitted_assets_list} = $list;
+    }
+        
+    return $self->{_uncommitted_assets_list};
+}
+
 sub _get_asset_list_content {
 
     my $self = shift;

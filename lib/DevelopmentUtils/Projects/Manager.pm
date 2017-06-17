@@ -490,7 +490,14 @@ sub _prompt_user_regarding_project_version_dir {
 sub _display_list_uncommitted_assets {
 
     my $self = shift;
-    printYellow("Would have listed uncommitted assets\n");
+
+    my $list = $self->{_current_status_manager}->getUncommittedAssetsList();
+    if (!defined($list)){
+        $self->{_logger}->logconfess("list was not defined");
+    }
+
+    printYellow("\nHere are the uncommitted assets:");
+    print join("\n", @{$list}) . "\n";
 }
 
 sub _archive_project_version_directory {
