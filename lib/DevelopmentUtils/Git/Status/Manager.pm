@@ -279,7 +279,7 @@ sub _parse_asset_list_file {
 
             if ($found_modified_staged_section){
 
-                if ($line =~ m|^\s+modified:\s+(\S+)\s*$|){
+                if ($line =~ m|^\s+modified:\s+(.+)\s*$|){
 
                     my $file = $1;
 
@@ -291,7 +291,7 @@ sub _parse_asset_list_file {
 
                     $self->{_modified_staged_file_ctr}++;                
                 }
-                elsif ($line =~ m|^\s+deleted:\s+(\S+)\s*$|){
+                elsif ($line =~ m|^\s+deleted:\s+(.+)\s*$|){
 
                     my $file = $1;
 
@@ -308,7 +308,7 @@ sub _parse_asset_list_file {
             }
             elsif ($found_modified_not_staged_section){
 
-                if ($line =~ m|^\s+modified:\s+(\S+)\s*$|){
+                if ($line =~ m|^\s+modified:\s+(.+)\s*$|){
 
                     my $file = $1;
 
@@ -320,7 +320,7 @@ sub _parse_asset_list_file {
 
                     $self->{_modified_not_staged_file_ctr}++;                
                 }
-                elsif ($line =~ m|^\s+deleted:\s+(\S+)\s*$|){
+                elsif ($line =~ m|^\s+deleted:\s+(.+)\s*$|){
 
                     my $file = $1;
 

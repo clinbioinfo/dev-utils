@@ -125,6 +125,13 @@ sub getGitProjectsLookupFile {
     return $self->_getValue('Git', 'projects_lookup_file');
 }
 
+sub getQualifiedProjectDirectoriesFile {
+
+    my $self = shift;
+
+    return $self->_getValue('Projects', 'qualified_project_directories_file');
+}
+
 sub _getValue {
 
     my $self = shift;

@@ -23,6 +23,8 @@ use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
 
 use constant DEFAULT_VERBOSE   => FALSE;
 
+use constant DEFAULT_REPORT_UNCOMMITTED_ASSETS_ONLY => FALSE;
+
 use constant DEFAULT_LOG_LEVEL => 4;
 
 use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
@@ -43,6 +45,7 @@ my (
     $logfile, 
     $man, 
     $verbose,
+    $report_uncommitted_assets_only
     );
 
 my $results = GetOptions (
@@ -53,6 +56,7 @@ my $results = GetOptions (
     'man|m'                          => \$man,
     'indir=s'                        => \$indir,
     'outdir=s'                       => \$outdir,
+    'report-uncommitted-assets-only=s'    => \$report_uncommitted_assets_only,
     );
 
 &checkCommandLineArguments();
@@ -73,7 +77,8 @@ if (!defined($config_manager)){
 
 my $manager = DevelopmentUtils::Projects::Manager::getInstance(
     indir  => $indir,
-    outdir => $outdir
+    outdir => $outdir,
+    report_uncommitted_assets_only => $report_uncommitted_assets_only
     );
 
 if (!defined($manager)){
@@ -103,6 +108,13 @@ sub checkCommandLineArguments {
     
     if ($help){
     	&pod2usage({-exitval => 1, -verbose => 1, -output => \*STDOUT});
+    }
+
+    if (!defined($report_uncommitted_assets_only)){
+
+        $report_uncommitted_assets_only = DEFAULT_REPORT_UNCOMMITTED_ASSETS_ONLY;
+            
+        printYellow("--report-uncommitted-assets-only was not specified and therefore was set to default '$report_uncommitted_assets_only'");
     }
 
     if (!defined($config_file)){
