@@ -2,9 +2,9 @@
 	<content><![CDATA[
 sub printBrightBlue {
 
-    my ($msg) = @_;
+    my (\$msg) = @_;
     print color 'bright_blue';
-    print $msg . "\n";
+    print \$msg . "\n";
     print color 'reset';
 }
 ]]></content>
