@@ -36,6 +36,14 @@ use constant DEFAULT_REPORT_UNCOMMITTED_ASSETS_ONLY => FALSE;
 ## Singleton support
 my $instance;
 
+has 'pattern' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setPattern',
+    reader   => 'getPattern',
+    required => FALSE,    
+    );
+
 has 'report_uncommitted_assets_only' => (
     is       => 'rw',
     isa      => 'Bool',
@@ -395,6 +403,21 @@ sub _analyze_project_version_dir {
 
     my $self = shift;
     my ($project_version_dir) = @_;
+
+    my $pattern = $self->getPattern();
+
+    if (defined($pattern)){
+
+        if ($project_version_dir !~ m|$pattern|){
+
+            $self->{_logger}->info("project version directory '$project_version_dir' does NOT match pattern '$pattern' and so shall be skipped.");
+
+            return;
+        }
+        else {
+            $self->{_logger}->info("project version directory '$project_version_dir' DOES match pattern '$pattern' and so shall be analyzed.");            
+        }
+    }
 
     ## 1. Determine if is a git local checkout
     ## 2. Determine if there are any uncommitted assets

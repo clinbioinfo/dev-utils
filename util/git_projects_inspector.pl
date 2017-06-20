@@ -48,7 +48,8 @@ my (
     $man, 
     $verbose,
     $test_mode,
-    $report_uncommitted_assets_only
+    $report_uncommitted_assets_only,
+    $pattern
     );
 
 my $results = GetOptions (
@@ -60,6 +61,7 @@ my $results = GetOptions (
     'indir=s'                        => \$indir,
     'outdir=s'                       => \$outdir,
     'test_mode=s'                    => \$test_mode,
+    'pattern=s'                      => \$pattern,
     'report-uncommitted-assets-only=s'    => \$report_uncommitted_assets_only,
     );
 
@@ -88,6 +90,10 @@ my $manager = DevelopmentUtils::Projects::Manager::getInstance(
 
 if (!defined($manager)){
     $logger->logdie("Could not instantiate DevelopmentUtils::Projects::Manager");
+}
+
+if (defined($pattern)){
+  $manager->setPattern($pattern);
 }
 
 $manager->run();
