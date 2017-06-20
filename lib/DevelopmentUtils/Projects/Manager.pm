@@ -431,6 +431,12 @@ sub _analyze_project_version_dir {
             printBoldRed("Found uncommitted assets");
         }
     }
+    else {
+
+        push(@{$self->{_project_version_dir_to_committed_assets_list}}, $project_version_dir);
+        
+        $self->{_committed_assets_ctr}++;
+    }
 
     if (!$self->getReportUncommittedAssetsOnly()){
 
@@ -519,9 +525,16 @@ sub _display_findings {
     print "Completed analysis of projects directory '$self->{_projects_dir}'\n";
     # print "Found the following '$self->{_project_dir_count}' project directories under '$self->{_projects_dir}'\n";
 
+    if ($self->{_committed_assets_ctr} > 0){
+        
+        printGreen("The following '$self->{_committed_assets_ctr}' project version directories have no uncommitted assets");
+        
+        print join("\n", @{$self->{_project_version_dir_to_committed_assets_list}}) . "\n";
+    }
+
     if ($self->{_uncommitted_assets_ctr} > 0){
         
-        printBoldRed("The following '$self->{_uncommitted_assets_ctr}' project version directories have committed assets");
+        printBoldRed("The following '$self->{_uncommitted_assets_ctr}' project version directories have uncommitted assets");
         
         print join("\n", @{$self->{_project_version_dir_to_uncommitted_assets_list}}) . "\n";
     }
