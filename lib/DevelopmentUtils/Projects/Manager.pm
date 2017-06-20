@@ -433,9 +433,9 @@ sub _analyze_project_version_dir {
     }
     else {
 
-        push(@{$self->{_project_version_dir_to_committed_assets_list}}, $project_version_dir);
+        push(@{$self->{_project_version_dir_to_no_uncommitted_assets_list}}, $project_version_dir);
         
-        $self->{_committed_assets_ctr}++;
+        $self->{_no_uncommitted_assets_ctr}++;
     }
 
     if (!$self->getReportUncommittedAssetsOnly()){
@@ -525,24 +525,29 @@ sub _display_findings {
     print "Completed analysis of projects directory '$self->{_projects_dir}'\n";
     # print "Found the following '$self->{_project_dir_count}' project directories under '$self->{_projects_dir}'\n";
 
-    if ($self->{_committed_assets_ctr} > 0){
+    if ($self->{_no_uncommitted_assets_ctr} > 0){
         
-        printGreen("The following '$self->{_committed_assets_ctr}' project version directories have no uncommitted assets");
+        printGreenBanner("The following '$self->{_no_uncommitted_assets_ctr}' project version directories have no uncommitted assets");
         
-        print join("\n", @{$self->{_project_version_dir_to_committed_assets_list}}) . "\n";
-    }
+        print join("\n", @{$self->{_project_version_dir_to_no_uncommitted_assets_list}}) . "\n";
 
-    if ($self->{_uncommitted_assets_ctr} > 0){
-        
-        printBoldRed("The following '$self->{_uncommitted_assets_ctr}' project version directories have uncommitted assets");
-        
-        print join("\n", @{$self->{_project_version_dir_to_uncommitted_assets_list}}) . "\n";
-    }
 
+        print "Shall I remove them? [y/N] ";
+        
+        my $answer = <STDIN>;
+        
+        chomp $answer;
+        
+        $answer = uc($answer);
+        
+        if ($answer eq 'Y'){
+            $self->_remove_project_version_directories_with_no_uncommitted_assets();
+        }        
+    }
 
     if ($self->{_empty_directory_ctr} > 0){
 
-        printBoldRed("The following '$self->{_empty_directory_ctr}' directories are empty");
+        printBoldRedBanner("The following '$self->{_empty_directory_ctr}' directories are empty");
         
         print join("\n", @{$self->{_empty_directory_list}}) . "\n";
 
@@ -557,6 +562,92 @@ sub _display_findings {
         if ($answer eq 'Y'){
             $self->_remove_empty_directories();
         }        
+    }
+
+
+    if ($self->{_uncommitted_assets_ctr} > 0){
+        
+        printBoldRedBanner("The following '$self->{_uncommitted_assets_ctr}' project version directories have uncommitted assets");
+        
+        print join("\n", @{$self->{_project_version_dir_to_uncommitted_assets_list}}) . "\n";
+
+        print "\nPlease inspect them and decide how to proceed.  Thanks.\n";
+    }
+
+}
+
+sub  _remove_project_version_directories_with_no_uncommitted_assets {
+ 
+    my $self = shift;
+
+    print "Remove all or proceed interactively? [a/I/q] ";
+        
+    my $answer = <STDIN>;
+    
+    chomp $answer;
+    
+    $answer = uc($answer);
+    
+    if ((!defined($answer)) || ($answer eq '')){
+        $answer = 'I';
+    }
+
+    if ($answer eq 'A'){
+
+        foreach my $dir (@{$self->{_project_version_dir_to_no_uncommitted_assets_list}}){
+
+            my $cmd = "rm -rf $dir";
+            
+            if ($self->getTestMode()){
+            
+                printYellow("Running in test mode - would have executed: '$cmd'");
+            }
+            else {
+                $self->_execute_cmd($cmd);
+            }
+        }
+    }
+    elsif ($answer eq 'I'){
+
+        foreach my $dir (@{$self->{_project_version_dir_to_no_uncommitted_assets_list}}){
+
+            print "Remove directory '$dir' [y/N/q] ";
+
+            my $answer2 = <STDIN>;
+
+            chomp $answer2;
+
+            $answer2 = uc($answer2);
+
+            if ((!defined($answer2)) || ($answer2 eq '')){
+                $answer2 = 'N';
+            }
+
+            if ($answer2 eq 'Y'){
+
+                my $cmd = "rm -rf $dir";
+                
+                if ($self->getTestMode()){
+                
+                    printYellow("Running in test mode - would have executed: '$cmd'");
+                }
+                else {
+                    $self->_execute_cmd($cmd);
+                }
+            }
+            elsif ($answer2 eq 'Q'){
+
+                printBoldRed("See you later.");
+
+                exit(0);
+            }
+        }
+    }
+    elsif ($answer eq 'Q'){
+
+        printBoldRed("Bye.");
+
+        exit(0);
     }
 }
 
@@ -610,6 +701,17 @@ sub printBoldRed {
     print color 'reset';
 }
 
+sub printBoldRedBanner {
+
+    my ($msg) = @_;
+
+    printBoldRed("\n****************************************************************************");
+    printBoldRed("*");
+    printBoldRed("* $msg");
+    printBoldRed("*");
+    printBoldRed("****************************************************************************");
+}
+
 sub printYellow {
 
     my ($msg) = @_;
@@ -624,6 +726,17 @@ sub printGreen {
     print color 'green';
     print $msg . "\n";
     print color 'reset';
+}
+
+sub printGreenBanner {
+
+    my ($msg) = @_;
+
+    printGreen("\n****************************************************************************");
+    printGreen("*");
+    printGreen("* $msg");
+    printGreen("*");
+    printGreen("****************************************************************************");
 }
 
 sub printBrightBlue {
