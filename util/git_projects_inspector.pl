@@ -21,7 +21,9 @@ use constant FALSE => 0;
 
 use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
 
-use constant DEFAULT_VERBOSE   => FALSE;
+use constant DEFAULT_VERBOSE => FALSE;
+
+use constant DEFAULT_TEST_MODE => TRUE;
 
 use constant DEFAULT_REPORT_UNCOMMITTED_ASSETS_ONLY => FALSE;
 
@@ -45,6 +47,7 @@ my (
     $logfile, 
     $man, 
     $verbose,
+    $test_mode,
     $report_uncommitted_assets_only
     );
 
@@ -56,6 +59,7 @@ my $results = GetOptions (
     'man|m'                          => \$man,
     'indir=s'                        => \$indir,
     'outdir=s'                       => \$outdir,
+    'test_mode=s'                    => \$test_mode,
     'report-uncommitted-assets-only=s'    => \$report_uncommitted_assets_only,
     );
 
@@ -78,6 +82,7 @@ if (!defined($config_manager)){
 my $manager = DevelopmentUtils::Projects::Manager::getInstance(
     indir  => $indir,
     outdir => $outdir,
+    test_mode => $test_mode,
     report_uncommitted_assets_only => $report_uncommitted_assets_only
     );
 
@@ -131,6 +136,13 @@ sub checkCommandLineArguments {
         $verbose = DEFAULT_VERBOSE;
 
         printYellow("--verbose was not specified and therefore was set to default '$verbose'");
+    }
+
+    if (!defined($test_mode)){
+
+        $test_mode = DEFAULT_TEST_MODE;
+
+        printYellow("--test_mode was not specified and therefore was set to default '$test_mode'");
     }
 
     if (!defined($log_level)){

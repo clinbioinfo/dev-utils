@@ -552,7 +552,15 @@ sub _remove_empty_directories {
     my $self = shift;
 
     foreach my $dir (@{$self->{_empty_directory_list}}){
-        printYellow("Would have removed $dir");
+
+        my $cmd = "rmdir $dir";
+
+        if ($self->getTestMode()){
+            printYellow("Running in test mode - would have executed: '$cmd'");
+        }
+        else {
+            $self->_execute_cmd($cmd);
+        }
     }
 }
 
