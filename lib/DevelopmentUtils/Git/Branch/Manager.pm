@@ -226,8 +226,6 @@ sub recommendNextDevBranch {
 
     my $self = shift;
 
-    $self->{_logger}->info("NOT YET IMPLEMENTED");
-
     $self->_print_banner("Going to determine next development branches");
 
     foreach my $project_name (sort keys %{$self->{_project_lookup}}){

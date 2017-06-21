@@ -32,6 +32,14 @@ use constant DEFAULT_PROJECTS_CONF_FILE => "$FindBin::Bin/../conf/projects_conf.
 ## Singleton support
 my $instance;
 
+has 'report_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setReportFile',
+    reader   => 'getReportFile',
+    required => FALSE
+    );
+
 has 'test_mode' => (
     is       => 'rw',
     isa      => 'Bool',

@@ -316,7 +316,16 @@ sub recommendNextBuildTags {
         my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
 
         if ($self->getVerbose()){
+
             print "For project '$project_name'\n";
+
+            if (!defined($current_build_tag)){
+
+                $current_build_tag = 'N/A';
+                
+                $self->{_logger}->info("current_build_tag was not defined and therefore will be reported as '$current_build_tag'");
+            }
+
             print "Current build tag '$current_build_tag'\n";
             print "Recommended next build tag '$next_build_tag'\n";
             print "The repository URL is '$repo_url\n\n";
@@ -392,25 +401,39 @@ sub _get_all_build_tags {
         }
     }
     else {
-        $self->{_logger}->logconfess("Did not find any tags for '$project_name' with repository URL '$repo_url'");
+        $self->{_logger}->warn("Did not find any tags for '$project_name' with repository URL '$repo_url'");
     }
 
-    if ($self->getVerbose()){
+    if ($candidate_ctr > 0){
 
-        print "Found the following '$candidate_ctr' tags:\n";
-        
-        print join("\n", @{$candidate_list}) . "\n";
+        if ($self->getVerbose()){
+
+            print "Found the following '$candidate_ctr' tags:\n";
+            
+            print join("\n", @{$candidate_list}) . "\n";
+        }
+
+        $self->{_project_lookup}->{$project_name}->{'tag-list'} = $candidate_list;
+
+        $self->{_project_lookup}->{$project_name}->{'tag-count'} = $candidate_ctr;
     }
-
-    $self->{_project_lookup}->{$project_name}->{'tag-list'} = $candidate_list;
-
-    $self->{_project_lookup}->{$project_name}->{'tag-count'} = $candidate_ctr;
 }
 
 sub _determine_current_and_next_build_tags {
 
     my $self = shift;
     my ($project_name) = @_;
+
+    if (! exists $self->{_project_lookup}->{$project_name}->{'tag-list'}){
+
+        print color 'red';
+        print "It appears there are no tags for project '$project_name'\n";
+        print color 'reset';
+
+        $self->_recommend_tag_based_on_latest_branch($project_name);
+
+        return;
+    }
 
     my $tag_list = $self->{_project_lookup}->{$project_name}->{'tag-list'};
 
@@ -477,6 +500,33 @@ sub _determine_current_and_next_build_tags {
         print color 'bold red';
         print "There are no tags for project '$project_name'\n";
         print color 'reset';
+    }
+}
+
+sub _recommend_tag_based_on_latest_branch {
+
+    my $self = shift;
+    my ($project_name) = @_;
+
+    my $current_dev_branch = $self->_get_current_dev_branch($project_name);
+
+    if ($current_dev_branch =~ m|v(\d+)\.(\d+)|){
+
+        my $max_version = $1;
+        my $max_revision = $2;
+
+        my $next_build_tag = 'v' . $max_version . '.' . $max_revision . '.1';
+
+        $self->{_project_lookup}->{$project_name}->{next_build_tag} = $next_build_tag;
+    }
+    else {
+
+        if ($current_dev_branch eq 'master'){
+            printYellow("Please create the development branch v1.1 for project '$project_name' and then manually create the next build tag v1.1.1");
+        }
+        else {
+            $self->{_logger}->logconfess("Encountered some unexpected situation - project '$project_name' current dev branch '$current_dev_branch'");
+        }
     }
 }
 
@@ -812,6 +862,14 @@ sub getTagListByProject {
     }
 
     return $self->{_project_to_tag_list_lookup}->{$project};
+}
+
+sub printYellow {
+
+    my ($msg) = @_;
+    print color 'yellow';
+    print $msg . "\n";
+    print color 'reset';
 }
 
 no Moose;
