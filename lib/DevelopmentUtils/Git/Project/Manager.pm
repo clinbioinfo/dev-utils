@@ -132,10 +132,13 @@ sub archiveProject {
 
 
     my $self = shift;
+    my ($indir) = @_;
 
-    my $indir = $self->getIndir();
     if (!defined($indir)){
-        $self->{_logger}->logconfess("indir was not defined");
+        $indir = $self->getIndir();
+        if (!defined($indir)){
+            $self->{_logger}->logconfess("indir was not defined");
+        }
     }
 
     $self->_check_indir_status($indir);
@@ -183,13 +186,23 @@ sub archiveProject {
 
         my $target = $basename . '.' . $date . '.tgz';
 
-        chdir($parent_dir) || $self->{_logger}->logconfess("Could not change into directory '$parent_dir' : $!");
-
         my $cmd = "tar -zcf $target $basename --remove-files";
-        
-        $self->_execute_cmd($cmd);
 
-        $self->{_logger}->info("Project directory '$indir' has been archived to '$target'");
+        if ($self->getTestMode()){
+            printYellow("Running in test mode - would have executed: '$cmd'");
+        }
+        else {
+
+            my $current_dir = File::Spec->rel2abs(cwd());
+
+            chdir($parent_dir) || $self->{_logger}->logconfess("Could not change into directory '$parent_dir' : $!");
+            
+            $self->_execute_cmd($cmd);
+
+            $self->{_logger}->info("Project directory '$indir' has been archived to '$target'");
+
+            print "Okay - archived as '$target'\n";
+        }
     }
     else {
 

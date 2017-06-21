@@ -13,6 +13,7 @@ use JSON::Parse 'json_file_to_perl';
 use DevelopmentUtils::Logger;
 use DevelopmentUtils::Config::Manager;
 use DevelopmentUtils::Git::Status::Manager;
+use DevelopmentUtils::Git::Project::Manager;
 
 use constant TRUE  => 1;
 use constant FALSE => 0;
@@ -146,6 +147,8 @@ sub BUILD {
 
     $self->_initConfigManager(@_);
 
+    $self->_initProjectManager(@_);
+
     $self->{_projects_dir} = $self->getProjectsDir();
 
     $self->{_current_dir} = File::Spec->rel2abs(cwd());
@@ -193,6 +196,19 @@ sub _initGitManager {
 
     $self->{_git_manager} = $manager;
 }
+
+sub _initProjectManager {
+
+    my $self = shift;
+
+    my $manager = DevelopmentUtils::Git::Project::Manager::getInstance(@_);
+    if (!defined($manager)){
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Project::Manager");
+    }
+
+    $self->{_git_project_manager} = $manager;
+}
+
 
 sub _load_qualified_project_dir_lookup {
 
@@ -532,13 +548,15 @@ sub _display_list_uncommitted_assets {
 sub _archive_project_version_directory {
 
     my $self = shift;
-    printYellow("Would have archived project version directory\n");
+    
+    $self->{_git_project_manager}->archiveProject($self->{_current_project_version_dir});
 }
 
 sub _remove_project_version_directory {
 
     my $self = shift;
-    printYellow("Would have removed project version directory\n");
+    
+    $self->{_git_project_manager}->removeProject($self->{_current_project_version_dir});
 }
 
 sub _display_findings {
