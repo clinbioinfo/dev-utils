@@ -3,84 +3,86 @@ use strict;
 use Term::ANSIColor;
 use FindBin;
 use File::Copy;
+use File::Path;
 use File::Compare;
 use Getopt::Long qw(:config no_ignore_case no_auto_abbrev);
+
+use lib "$FindBin::Bin/../lib";
+
+use DevelopmentUtils::Logger;
+use DevelopmentUtils::Sublime::Snippets::Manager;
+
+use constant TRUE => 1;
+use constant FALSE => 0;
+
+use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
+
+use constant DEFAULT_VERBOSE => FALSE;
+
+use constant DEFAULT_LOG_LEVEL => 4;
+
+my $username = $ENV{USER};
+
+use constant DEFAULT_OUTDIR => '/tmp/' . $username . '/' . File::Basename::basename($0) . '/' . time();
 
 use constant DEFAULT_INSTALL_DIR => '~/.config/sublime-text-3/Packages/User/';
 use constant DEFAULT_SOURCE_DIR => "$FindBin::Bin/../sublime-snippets/snippets/";
 
 my $install_dir;
 my $source_dir;
+my $log_level;
+my $log_file;
+my $outdir;
+my $config_file;
+my $verbose;
 
 my $results = GetOptions (
     'install-dir=s'  => \$install_dir, 
-    'source-dir=s'     => \$source_dir
+    'source-dir=s'   => \$source_dir,
+    'outdir=s'       => \$outdir,
+    'log_file=s'     => \$log_file,
+    'log_level=s'    => \$log_level,
+    'config_file=s'  => \$config_file,
+    'verbose=s'      => \$verbose
     );
 
 &checkCommandLineArguments();
 
+
+my $logger = DevelopmentUtils::Logger::getInstance(
+	log_level => $log_level,
+	log_file  => $log_file
+	);
+
+if (!defined($logger)){
+	confess ("Could not instantiate DevelopmentUtils::Logger");
+}
+
 if (!-e $source_dir){
-	die "source directory '$source_dir' does not exist";
+	$logger->logdie("source directory '$source_dir' does not exist");
 }
 
 
 if (!-e $install_dir){
-	die "install directory '$install_dir' does not exist";
+	$logger->logdie("install directory '$install_dir' does not exist");
 }
 
-my $file_list = get_file_list();
 
-my $file_ctr = 0;
-my $copy_ctr = 0;
-my $already_exists_ctr = 0;
-my $already_exists_list = [];
+my $manager = DevelopmentUtils::Sublime::Snippets::Manager::getInstance(
+	install_dir => $install_dir,
+	repo_dir    => $source_dir,
+	config_file => $config_file,
+	verbose     => $verbose
+	);
 
-foreach my $file (@{$file_list}){
-
-	$file_ctr++;
-	
-	my $target_file = $install_dir . '/' . File::Basename::basename($file);
-
-	if (!-e $target_file){
-
-		copy($file, $target_file) || die "Encountered some error while attempting to copy file '$file' to '$target_file' : $!";
-		
-		$copy_ctr++;
-	}
-	else {
-
-		if (compare($file, $target_file) == 0){
-
-			$already_exists_ctr++;
-
-			push(@{$already_exists_list}, $file);
-
-		}
-		else {
-
-			print "target file '$target_file' already exists\n";
-
-			printYellow("The contents are different");
-
-			print "You might want to compare the contents of both files and make a decision how you want to proceed\n";
-
-			print "diff $file $target_file | less\n\n";
-		}
-	}
+if (!defined($manager)){
+	$logger->logconfess("Could not instantiate DevelopmentUtils::Sublime::Snippets::Manager");
 }
 
-print "Processed '$file_ctr' Sublime snippet files\n";
-
-print "Copied '$copy_ctr' files from '$source_dir' to '$install_dir'\n";
-
-if ($already_exists_ctr > 0){
-
-	printYellow("The following '$already_exists_ctr' Sublime snippet files existed in the target install directory and have the same content:");
-
-	print join("\n",  @{$already_exists_list}) . "\n";
-}
+$manager->installSublimeSnippets();
 
 print "$0 execution completed\n";
+print "The log file is '$log_file'\n";
 exit(0);
 
 ##--------------------------------------------------------
@@ -92,6 +94,14 @@ exit(0);
 sub checkCommandLineArguments {
    
    	my $fatalCtr = 0;
+
+
+    if (!defined($verbose)){
+
+    	$verbose = DEFAULT_VERBOSE;
+
+        printYellow("--verbose was not specified and therefore was set to default '$verbose'");        
+    }
 
     if (!defined($install_dir)){
 
@@ -105,6 +115,42 @@ sub checkCommandLineArguments {
     	$source_dir = DEFAULT_SOURCE_DIR;
 
         printYellow("--source-dir was not specified and therefore was set to default '$source_dir'");
+    }
+
+
+    if (!defined($config_file)){
+        
+        $config_file = DEFAULT_CONFIG_FILE;
+        
+        printYellow("--config_file was not specified and therefore was set to default '$config_file'");        
+    }
+
+    if (!defined($log_level)){
+        
+        $log_level = DEFAULT_LOG_LEVEL;
+        
+        printYellow("--log_level was not specified and therefore was set to default '$log_level'");        
+    }
+
+    if (!defined($outdir)){
+        
+        $outdir = DEFAULT_OUTDIR;
+        
+        printYellow("--outdir was not specified and therefore was set to default '$outdir'");        
+    }
+
+    if (!-e $outdir){
+
+        mkpath($outdir) || die "Could not create output directory '$outdir' : $!";
+
+        print "Created output directory '$outdir'\n";
+    }
+
+    if (!defined($log_file)){
+
+        $log_file = $outdir . '/' . File::Basename::basename($0) . '.log';
+        
+        printYellow("--log_file was not specified and therefore was set to default '$log_file'");        
     }
 
     if ($fatalCtr > 0){
@@ -135,25 +181,4 @@ sub printYellow {
     print color 'yellow';
     print $msg . "\n";
     print color 'reset';
-}
-
-sub get_file_list {
-
-	my $cmd = "find $source_dir -name '*.sublime-snippet'";
-
-	my @file_list;
-
-	print "About to execute '$cmd'\n";
-
-	eval {
-		@file_list = qx($cmd);
-	};
-
-	if($?){
-		die "Encountered some error while attempting to execute '$cmd' : $! $@";
-	}
-
-	chomp @file_list;
-
-	return \@file_list;
 }

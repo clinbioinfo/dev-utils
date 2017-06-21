@@ -7,6 +7,7 @@ use File::Path;
 use FindBin;
 use File::Slurp;
 use Term::ANSIColor;
+use Proc::ProcessTable;
 use JSON::Parse 'json_file_to_perl';
 
 use DevelopmentUtils::Logger;
@@ -23,6 +24,8 @@ my $login =  getlogin || getpwuid($<) || "sundaramj";
 use constant DEFAULT_OUTDIR => '/tmp/' . $login . '/' . File::Basename::basename($0) . '/' . time();
 
 use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
+
+use constant DEFAULT_SELENIUM_REMOTE_WEBDRIVER_PROCESS_NAME => 'selenium-server-standalone';
 
 ## Singleton support
 my $instance;
@@ -68,6 +71,15 @@ has 'indir' => (
     reader   => 'getIndir',
     required => FALSE,
     default  => DEFAULT_INDIR
+    );
+
+has 'selenium_remote_webdriver_process_name' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setSeleniumRemoteWebdriverProcessName',
+    reader   => 'getSeleniumRemoteWebdriverProcessName',
+    required => FALSE,
+    default  => DEFAULT_SELENIUM_REMOTE_WEBDRIVER_PROCESS_NAME
     );
 
 sub getInstance {
@@ -138,10 +150,67 @@ sub runSmokeTests {
 
     my $self = shift;
 
-    $self->{_webapp_install_checker}->runSmokeTests(@_);
+    if ($self->_is_selenium_remote_webdriver_running()){
+
+        $self->{_webapp_install_checker}->runSmokeTests(@_);
+    }
+    else {
+        printBoldRed("Selenium Remote Webdriver is NOT running.");
+        exit(1);
+    }
 }
 
+sub _is_selenium_remote_webdriver_running {
+
+    my $self = shift;
+
+    my $selenium_process_name = $self->getSeleniumRemoteWebdriverProcessName();
+
+    my $process_table = new Proc::ProcessTable;
+    if (!defined($process_table)){
+        $self->{_logger}->logconfess("Could not instantiate Proc::ProcessTable");
+    }
+
+    foreach my $process (@{$process_table->table}){
+
+        my $cmdline = $process->cmndline;
+        if (!defined($cmdline)){
+            $self->{_logger}->logconfess("cmdline was not defined for Process: ". Dumper $process);
+        }
+
+        if ($cmdline =~ m|$selenium_process_name|){
+
+            $self->{_logger}->info("Looks like the Selenium Remote Webdriver process is running");
+
+            printBrightBlue("Looks like the Selenium Remote Webdriver process is running");
+
+            return TRUE;
+        }
+    }
+
+    $self->{_logger}->error("Looks like Selenium Remote Webdriver process is not running");
+
+    return FALSE;
+}
+
+sub printBrightBlue {
+
+    my ($msg) = @_;
+    print color 'bright_blue';
+    print  $msg . "\n";
+    print color 'reset';
+}
+
+sub printBoldRed {
+
+    my ($msg) = @_;
+    print color 'bold red';
+    print $msg . "\n";
+    print color 'reset';
+}
 no Moose;
+
+
 __PACKAGE__->meta->make_immutable;
 
 __END__

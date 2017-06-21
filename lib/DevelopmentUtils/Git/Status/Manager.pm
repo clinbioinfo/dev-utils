@@ -17,6 +17,8 @@ use constant FALSE => 0;
 
 use constant DEFAULT_TEST_MODE => TRUE;
 
+use constant DEFAULT_VERBOSE => TRUE;
+
 my $login =  getlogin || getpwuid($<) || "sundaramj";
 
 use constant DEFAULT_OUTDIR => '/tmp/' . $login . '/' . File::Basename::basename($0) . '/' . time();
@@ -25,6 +27,15 @@ use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
 
 ## Singleton support
 my $instance;
+
+has 'verbose' => (
+    is       => 'rw',
+    isa      => 'Bool',
+    writer   => 'setVerbose',
+    reader   => 'getVerbose',
+    required => FALSE,
+    default  => DEFAULT_VERBOSE
+    );
 
 has 'test_mode' => (
     is       => 'rw',
@@ -146,6 +157,50 @@ sub checkForUncommittedAssets {
     return $self->_get_asset_list_content(@_);
 }
 
+sub getUncommittedAssetsList {
+
+    my $self = shift;
+
+    if (! exists $self->{_uncommitted_assets_list}){
+
+        my $list = [];
+
+        if (scalar(@{$self->{_modified_staged_file_list}}) > 0){
+            foreach my $file (@{$self->{_modified_staged_file_list}}){
+                push(@{$list}, $file);
+            }
+        }
+
+        if (scalar(@{$self->{_deleted_staged_file_list}}) > 0){
+            foreach my $file (@{$self->{_deleted_staged_file_list}}){
+                push(@{$list}, $file);
+            }
+        }
+
+        if (scalar(@{$self->{_modified_not_staged_file_list}}) > 0){
+            foreach my $file (@{$self->{_modified_not_staged_file_list}}){
+                push(@{$list}, $file);
+            }
+        }
+
+        if (scalar(@{$self->{_deleted_not_staged_file_list}}) > 0){
+            foreach my $file (@{$self->{_deleted_not_staged_file_list}}){
+                push(@{$list}, $file);
+            }
+        }
+
+        if (scalar(@{$self->{_untracked_file_list}}) > 0){
+            foreach my $file (@{$self->{_untracked_file_list}}){
+                push(@{$list}, $file);
+            }
+        }
+
+        $self->{_uncommitted_assets_list} = $list;
+    }
+        
+    return $self->{_uncommitted_assets_list};
+}
+
 sub _get_asset_list_content {
 
     my $self = shift;
@@ -210,7 +265,9 @@ sub _parse_asset_list_file {
         }
         elsif ($line =~ m|^Changes to be committed:|){
 
-            print "Found changes (staged) to be committed\n";
+            if ($self->getVerbose()){
+                print "Found changes (staged) to be committed\n";
+            }
         
             $found_modified_staged_section = TRUE;
             
@@ -222,7 +279,9 @@ sub _parse_asset_list_file {
         }
         elsif ($line =~ m|^Changes not staged for commit:|){
 
-            print "Found changes not staged for commit\n";
+            if ($self->getVerbose()){
+                print "Found changes not staged for commit\n";
+            }
         
             $found_modified_not_staged_section = TRUE;
 
@@ -234,7 +293,9 @@ sub _parse_asset_list_file {
         }
         elsif ($line =~ m|^Untracked files:|){
         
-            print "Found untracked files section\n";
+            if ($self->getVerbose()){
+                print "Found untracked files section\n";
+            }
 
             $found_untracked_files_section = TRUE;
             
@@ -246,7 +307,9 @@ sub _parse_asset_list_file {
         }
         elsif ($line =~ m|no changes added to commit|){
 
-            print "Found end section\n";
+            if ($self->getVerbose()){
+                print "Found end section\n";
+            }
 
             $found_the_end = TRUE;
 
@@ -260,7 +323,7 @@ sub _parse_asset_list_file {
 
             if ($found_modified_staged_section){
 
-                if ($line =~ m|^\s+modified:\s+(\S+)\s*$|){
+                if ($line =~ m|^\s+modified:\s+(.+)\s*$|){
 
                     my $file = $1;
 
@@ -272,7 +335,7 @@ sub _parse_asset_list_file {
 
                     $self->{_modified_staged_file_ctr}++;                
                 }
-                elsif ($line =~ m|^\s+deleted:\s+(\S+)\s*$|){
+                elsif ($line =~ m|^\s+deleted:\s+(.+)\s*$|){
 
                     my $file = $1;
 
@@ -289,7 +352,7 @@ sub _parse_asset_list_file {
             }
             elsif ($found_modified_not_staged_section){
 
-                if ($line =~ m|^\s+modified:\s+(\S+)\s*$|){
+                if ($line =~ m|^\s+modified:\s+(.+)\s*$|){
 
                     my $file = $1;
 
@@ -301,7 +364,7 @@ sub _parse_asset_list_file {
 
                     $self->{_modified_not_staged_file_ctr}++;                
                 }
-                elsif ($line =~ m|^\s+deleted:\s+(\S+)\s*$|){
+                elsif ($line =~ m|^\s+deleted:\s+(.+)\s*$|){
 
                     my $file = $1;
 

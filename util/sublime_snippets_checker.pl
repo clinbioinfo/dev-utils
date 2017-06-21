@@ -36,7 +36,6 @@ my $results = GetOptions (
     'outdir=s'       => \$outdir,
     'log_file=s'     => \$log_file,
     'log_level=s'    => \$log_level,
-    'outdir=s'       => \$outdir,
     'config_file=s'  => \$config_file
     );
 

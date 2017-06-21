@@ -16,6 +16,8 @@ use DevelopmentUtils::Config::Manager;
 use constant TRUE  => 1;
 use constant FALSE => 0;
 
+use constant DEFAULT_VERBOSE => FALSE;
+
 use constant DEFAULT_TEST_MODE => TRUE;
 
 my $login =  getlogin || getpwuid($<) || "sundaramj";
@@ -23,6 +25,10 @@ my $login =  getlogin || getpwuid($<) || "sundaramj";
 use constant DEFAULT_OUTDIR => '/tmp/' . $login . '/' . File::Basename::basename($0) . '/' . time();
 
 use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
+
+use constant DEFAULT_INSTALL_DIR => '~/.config/sublime-text-3/Packages/User/';
+
+use constant DEFAULT_REPO_DIR => "$FindBin::Bin/../sublime-snippets/snippets/";
 
 ## Singleton support
 my $instance;
@@ -34,6 +40,15 @@ has 'test_mode' => (
     reader   => 'getTestMode',
     required => FALSE,
     default  => DEFAULT_TEST_MODE
+    );
+
+has 'verbose' => (
+    is       => 'rw',
+    isa      => 'Bool',
+    writer   => 'setVerbose',
+    reader   => 'getVerbose',
+    required => FALSE,
+    default  => DEFAULT_VERBOSE
     );
 
 has 'config_file' => (
@@ -67,7 +82,8 @@ has 'install_dir' => (
     isa      => 'Str',
     writer   => 'setInstallDir',
     reader   => 'getInstallDir',
-    required => FALSE
+    required => FALSE,
+    default  => DEFAULT_INSTALL_DIR
     );
 
 has 'repo_dir' => (
@@ -75,7 +91,8 @@ has 'repo_dir' => (
     isa      => 'Str',
     writer   => 'setRepoDir',
     reader   => 'getRepoDir',
-    required => FALSE
+    required => FALSE,
+    default  => DEFAULT_REPO_DIR
     );
 
 sub getInstance {
@@ -180,17 +197,29 @@ sub checkSnippets {
     print "Processed '$file_ctr' Sublime snippet files\n";
 
     if ($copy_ctr > 0){
+        
         print "Copied '$copy_ctr' files from '$install_dir' to '$repo_dir'\n";
+        
         print "You should commit those to the Git repository\n";
+
+        $self->{_logger}->info("Copied '$copy_ctr' files from '$install_dir' to '$repo_dir'. You should commit those to the Git repository");
+
     }
 
     if ($already_exists_ctr > 0){
 
-        printYellow("The following '$already_exists_ctr' Sublime snippet files exist in the repository directory and have the same content:");
+        if ($self->getVerbose()){
 
-        print join("\n",  @{$already_exists_list}) . "\n";
+            printYellow("The following '$already_exists_ctr' Sublime snippet files exist in the repository directory and have the same content:");
+
+            print join("\n",  @{$already_exists_list}) . "\n";
+        }
+
+
+        $self->{_logger}->info("The following '$already_exists_ctr' Sublime snippet files exist in the repository directory and have the same content:");
+
+        $self->{_logger}->info(join("\n",  @{$already_exists_list}));
     }
-
 }
 
 
@@ -219,6 +248,99 @@ sub _get_file_list {
     chomp @file_list;
 
     return \@file_list;
+}
+
+sub installSublimeSnippets {
+
+    my $self = shift;
+    my ($install_dir, $source_dir) = @_;
+
+    if (!defined($install_dir)){
+
+        $install_dir = $self->getInstallDir();
+
+        if (!defined($install_dir)){
+
+            $self->{_logger}->logconfess("install_dir was not defined");
+        }
+    }
+
+    if (!defined($source_dir)){
+
+        $source_dir = $self->getRepoDir();
+
+        if (!defined($source_dir)){
+
+            $self->{_logger}->logconfess("source_dir was not defined");
+        }
+    }
+
+    my $file_list = $self->_get_file_list($source_dir);
+
+    my $file_ctr = 0;
+    my $copy_ctr = 0;
+    my $already_exists_ctr = 0;
+    my $already_exists_list = [];
+
+    foreach my $file (@{$file_list}){
+
+        $file_ctr++;
+        
+        my $target_file = $install_dir . '/' . File::Basename::basename($file);
+
+        $target_file =~ s|/+|/|g;  ## remove multiple forward slashes
+
+        if (!-e $target_file){
+
+            copy($file, $target_file) || $self->{_logger}->logconfess("Encountered some error while attempting to copy file '$file' to '$target_file' : $!");
+            
+            $copy_ctr++;
+        }
+        else {
+
+            if (compare($file, $target_file) == 0){
+
+                $already_exists_ctr++;
+
+                push(@{$already_exists_list}, $file);
+
+            }
+            else {
+
+                print "target file '$target_file' already exists\n";
+
+                $self->{_logger}->info("target file '$target_file' already exists");
+
+                printYellow("The contents are different");
+
+                print "You might want to compare the contents of both files and make a decision how you want to proceed\n";
+
+                print "diff $file $target_file | less\n\n";
+            }
+        }
+    }
+
+    print "Processed '$file_ctr' Sublime snippet files\n";
+
+    $self->{_logger}->info("Processed '$file_ctr' Sublime snippet files");
+
+    print "Copied '$copy_ctr' files from '$source_dir' to '$install_dir'\n";
+
+    $self->{_logger}->info("Copied '$copy_ctr' files from '$source_dir' to '$install_dir'");
+
+    if ($already_exists_ctr > 0){
+
+        if ($self->getVerbose()){
+
+            printYellow("The following '$already_exists_ctr' Sublime snippet files existed in the target install directory and have the same content:");
+
+            print join("\n",  @{$already_exists_list}) . "\n";
+        }
+
+        $self->{_logger}->info("The following '$already_exists_ctr' Sublime snippet files existed in the target install directory and have the same content:");
+
+        $self->{_logger}->info(join("\n",  @{$already_exists_list}));
+    }
 }
 
 sub printBoldRed {

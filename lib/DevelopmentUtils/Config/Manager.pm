@@ -144,6 +144,13 @@ sub getGitProjectsLookupFile {
     return $self->{_parser}->getGitProjectsLookupFile(@_);
 }
 
+sub getQualifiedProjectDirectoriesFile {
+
+    my $self = shift;
+
+    return $self->{_parser}->getQualifiedProjectDirectoriesFile(@_);
+}
+
 1==1; ## End of module
 
 __END__

@@ -1,0 +1,9 @@
+<snippet>
+	<content><![CDATA[
+use constant DEFAULT_CONFIG_FILE => "\$FindBin::Bin/../conf/$1_conf.ini";
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>default-config-file</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>

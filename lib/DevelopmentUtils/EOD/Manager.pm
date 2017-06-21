@@ -20,7 +20,7 @@ use constant FALSE => 0;
 
 use constant DEFAULT_TEST_MODE => TRUE;
 
-my $login =  getlogin || getpwuid($<) || "sundaramj";
+my $login =  getlogin || getpwuid($<) || $ENV{USER} || "sundaramj";
 
 use constant DEFAULT_OUTDIR => '/tmp/' . $login . '/' . File::Basename::basename($0) . '/' . time();
 
@@ -32,7 +32,7 @@ use constant DEFAULT_SUBLIME_REPOSITORY_DIR => "$FindBin::Bin/../sublime-snippet
 
 use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
 
-use constant DEFAULT_BASHRC_FILE=> '~/.bashrc';
+use constant DEFAULT_BASHRC_FILE=> '~/aliases.txt';
 
 use constant DEFAULT_BASHRC_CONFIG_FILE=> "$FindBin::Bin/../doc/aliases.txt";
 
@@ -223,7 +223,8 @@ sub _initAliasManager {
         bashrc_file        => $bashrc_file,
         bashrc_config_file => $bashrc_config_file,
         outdir             => $outdir,
-        config_file        => $config_file
+        config_file        => $config_file,
+        username           => $login
         );
 
     if (!defined($manager)){
@@ -240,11 +241,11 @@ sub run {
 
     $self->_prompt_about_reminder_email();
     
-    $self->_check_sublime_snippets();
+    $self->_run_sublime_tasks();
     
-    $self->_recommend_new_aliases();
+    $self->_run_alias_tasks();
     
-    $self->_check_git_status();
+    $self->_run_git_tasks();
     
     $self->_check_status_of_services();
 }
@@ -287,43 +288,74 @@ sub _send_reminder {
     $self->{_mailer}->sendNotification();
 }
 
-sub _check_sublime_snippets {
+sub _run_sublime_tasks {
 
     my $self = shift;
 
+    $self->_run_sublime_analyzer();
+    $self->_run_sublime_installer();
+}
+
+sub _run_sublime_analyzer {
+
+    my $self = shift;
+
+    my $task_name = 'run Sublime snippets analyzer';
+
     ## Detect new Sublime snippets and prompt me to commit those to dev-utils repository.
-    $self->_print_banner("Will check Sublime snippets");
+    $self->_print_banner("Will $task_name");
 
     try {
         $self->{_sublime_snippets_manager}->checkSnippets();
     } catch {
 
-        $self->{_logger}->error("Caught some exception while attempting to check Sublime snippets : $_");
+        $self->{_logger}->error("Caught some exception while attempting to $task_name : $_");
 
-        printBoldRed("Caught some exception while attempting to check Sublime snippets : $_");
+        printBoldRed("Caught some exception while attempting to $task_name : $_");
     }
 }
 
-sub _recommend_new_aliases {
+sub _run_sublime_installer {
+
+    my $self = shift;
+    
+    my $task_name = 'run Sublime snippets installer';
+
+    ## Detect new Sublime snippets and prompt me to commit those to dev-utils repository.
+    $self->_print_banner("Will $task_name");
+
+    try {
+        $self->{_sublime_snippets_manager}->installSublimeSnippets();
+    } catch {
+
+        $self->{_logger}->error("Caught some exception while attempting to $task_name : $_");
+
+        printBoldRed("Caught some exception while attempting to $task_name : $_");
+    }
+}
+
+sub _run_alias_tasks {
 
     my $self = shift;
 
+    my $task_name = 'run aliases task';
+
     ## Scan my history and recommend aliases to be added to .bashrc.    
-    $self->_print_banner("Will recommend aliases");
+    $self->_print_banner("Will $task_name");
 
     try {
 
-        $self->{_alias_manager}->recommendAliases();
+        $self->{_alias_manager}->checkAliases();
 
     } catch {
 
-        $self->{_logger}->error("Caught some exception while attempting to recommend aliases : $_");
+        $self->{_logger}->error("Caught some exception while attempting to $task_name : $_");
 
-        printBoldRed("Caught some exception while attempting to recommend aliases : $_");
+        printBoldRed("Caught some exception while attempting to $task_name : $_");
     };
 }
 
-sub _check_git_status {
+sub _run_git_tasks {
 
     my $self = shift;
     
@@ -402,7 +434,7 @@ sub _print_banner {
     my $self = shift;
     my ($msg) = @_;
 
-    print color 'yellow';
+    print color 'bright_blue';
     print "************************************************************\n";
     print "*\n";
     print "* $msg\n";

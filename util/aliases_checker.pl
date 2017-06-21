@@ -77,24 +77,6 @@ if (!-e $source_file){
     $logger->logdie("source file '$source_file' does not exist");
 }
 
-
-if (!-e $target_file){
-
-    $target_file = '/home/'. $username . '/aliases.txt';
-
-    if (!-e $target_file){
-
-        copy($source_file, $target_file) || $logger->logdie("Could not copy '$source_file' to '$target_file' : $!");
-        
-        $logger->info("Copied '$source_file' to '$target_file'");
-        
-        print "Copied '$source_file' to '$target_file\n";
-        
-        print "Make sure you add 'source $target_file' to ~/.bashrc\n";
-        exit(0); 
-    }
-}
-
 my $manager = DevelopmentUtils::Alias::Manager::getInstance(
     test_mode            => $test_mode,
     verbose              => $verbose,

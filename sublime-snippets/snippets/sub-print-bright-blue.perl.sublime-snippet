@@ -1,0 +1,15 @@
+<snippet>
+	<content><![CDATA[
+sub printBrightBlue {
+
+    my (\$msg) = @_;
+    print color 'bright_blue';
+    print \$msg . "\n";
+    print color 'reset';
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sub-print-bright-blue</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>

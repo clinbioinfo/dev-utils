@@ -13,7 +13,7 @@ use lib "$FindBin::Bin/../lib";
 
 use DevelopmentUtils::Logger;
 use DevelopmentUtils::Config::Manager;
-use DevelopmentUtils::Projects::Manager;
+use DevelopmentUtils::Perlbrew::Helper;
 
 use constant TRUE => 1;
 
@@ -21,11 +21,7 @@ use constant FALSE => 0;
 
 use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
 
-use constant DEFAULT_VERBOSE => FALSE;
-
-use constant DEFAULT_TEST_MODE => TRUE;
-
-use constant DEFAULT_REPORT_UNCOMMITTED_ASSETS_ONLY => FALSE;
+use constant DEFAULT_VERBOSE   => FALSE;
 
 use constant DEFAULT_LOG_LEVEL => 4;
 
@@ -47,9 +43,6 @@ my (
     $logfile, 
     $man, 
     $verbose,
-    $test_mode,
-    $report_uncommitted_assets_only,
-    $pattern
     );
 
 my $results = GetOptions (
@@ -60,9 +53,6 @@ my $results = GetOptions (
     'man|m'                          => \$man,
     'indir=s'                        => \$indir,
     'outdir=s'                       => \$outdir,
-    'test_mode=s'                    => \$test_mode,
-    'pattern=s'                      => \$pattern,
-    'report-uncommitted-assets-only=s'    => \$report_uncommitted_assets_only,
     );
 
 &checkCommandLineArguments();
@@ -81,22 +71,16 @@ if (!defined($config_manager)){
     $logger->logdie("Could not instantiate DevelopmentUtils::Config::Manager");
 }
 
-my $manager = DevelopmentUtils::Projects::Manager::getInstance(
+my $helper = DevelopmentUtils::Perlbrew::Helper::getInstance(
     indir  => $indir,
-    outdir => $outdir,
-    test_mode => $test_mode,
-    report_uncommitted_assets_only => $report_uncommitted_assets_only
+    outdir => $outdir
     );
 
-if (!defined($manager)){
-    $logger->logdie("Could not instantiate DevelopmentUtils::Projects::Manager");
+if (!defined($helper)){
+    $logger->logdie("Could not instantiate DevelopmentUtils::Perlbrew::Helper");
 }
 
-if (defined($pattern)){
-  $manager->setPattern($pattern);
-}
-
-$manager->run();
+$helper->run();
 
 
 printGreen(File::Spec->rel2abs($0) . " execution completed\n");
@@ -121,13 +105,6 @@ sub checkCommandLineArguments {
     	&pod2usage({-exitval => 1, -verbose => 1, -output => \*STDOUT});
     }
 
-    if (!defined($report_uncommitted_assets_only)){
-
-        $report_uncommitted_assets_only = DEFAULT_REPORT_UNCOMMITTED_ASSETS_ONLY;
-            
-        printYellow("--report-uncommitted-assets-only was not specified and therefore was set to default '$report_uncommitted_assets_only'");
-    }
-
     if (!defined($config_file)){
 
         $config_file = DEFAULT_CONFIG_FILE;
@@ -142,13 +119,6 @@ sub checkCommandLineArguments {
         $verbose = DEFAULT_VERBOSE;
 
         printYellow("--verbose was not specified and therefore was set to default '$verbose'");
-    }
-
-    if (!defined($test_mode)){
-
-        $test_mode = DEFAULT_TEST_MODE;
-
-        printYellow("--test_mode was not specified and therefore was set to default '$test_mode'");
     }
 
     if (!defined($log_level)){
@@ -299,12 +269,12 @@ __END__
 
 =head1 NAME
 
- commit_code.pl - Perl script for committing code to Git and then add comment to relevant Jira ticket
+ perlbrew_helper.pl - Perl script to help with executing perlbrew commands
 
 
 =head1 SYNOPSIS
 
- perl util/commit_code.pl --jira_ticket BDMTNG-552
+ perl util/perlbrew_helper.pl
 
 =head1 OPTIONS
 
@@ -312,98 +282,15 @@ __END__
 
 =item B<--indir>
 
-  The input directory where all of the source files will be read from.
-  Default is two directories above the standard location of this installer
-  i.e.: ../util/webInstaller.pl
 
 =item B<--outdir>
 
-  The directory where all output artifacts will be written e.g.: the log file
-  if the --logfile option is not specified.
-  A default value is assigned /tmp/[username]/webInstaller.pl/[timestamp]/
-
-=item B<--install-dir>
-
-  The directory where the web-based components will be installed.
-  Default value assigned is [web-server-dir]/[application-main-dir]
-
-=item B<--web-server-dir>
-
-  The base directory of the Apache2 HTTP Server.
-  Default is set to /var/www/
-
-=item B<--application-main-dir>
-
-  The subdirectory that will be created in the [web-server-dir] that will be the target of the install process.
-  Default is set to 'bdmdev'
-
-=item B<--css-file-permissions>
-
-  Permission mask for all .css files to be installed.
-  Default is set to 644
-
-=item B<--conf-file-permissions>
-
-  Permission mask for all .ini files to be installed.
-  Default is set to 644
-
-=item B<--javascript-file-permissions>
-
-  Permission mask for all .js files to be installed.
-  Default is set to 644
-
-=item B<--cgi-bin-file-permissions>
-
-  Permission mask for all .cgi files to be installed.
-  Default is set to 755
-
-=item B<--lib-file-permissions>
-
-  Permission mask for all .pm files to be installed.
-  Default is set to 644
-
-=item B<--default-database-environment>
-
-  This is the value that will be substituted for all instannces of the placeholder variable __DEFAULT_DATABASE_ENVIRONMENT__.
-  Default is set to 'Development'
-
-=item B<--apache-web-server-configuration-file>
-
-  This is the Apache2 configuration file that will contain directives pertaining to this installed instance.
-  Default is set to /etc/apache2/conf.d/[application-main-dir].conf
-
-=item B<--software-version>
-
-  This is the version of software being installed.
-  Default is set to Subversion repository revision number assigned to this script.
-
-=item B<--debug_level>
-
-  The debug level for Log4perl logging.  
-  Default is set to 3.
-
-=item B<--logfile>
-
-  The Log4perl log file.
-  Default is set to [outdir]/webInstaller.pl.log
-
-=item B<--help|-h>
-
-  Print a brief help message and exits.
-
-=item B<--man|-m>
-
-  Prints the manual page and exits.
-
-=item B<--master-registration-file>
-
-  If specified, and does exist- the installed instance of the web application software will be registered in the browsable, master registration file.
 
 =back
 
 =head1 DESCRIPTION
 
- A script for helping me to inspect and navigate my projects directories.
+ A script for helping with executing perlbrew commands.
 
 =head1 CONTACT
 
