@@ -23,6 +23,8 @@ use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
 
 use constant DEFAULT_VERBOSE   => FALSE;
 
+use constant DEFAULT_TEST_MODE  => TRUE;
+
 use constant DEFAULT_LOG_LEVEL => 4;
 
 use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
@@ -43,7 +45,9 @@ my (
     $logfile, 
     $man, 
     $verbose,
+    $test_mode
     );
+
 
 my $results = GetOptions (
     'log-level|d=s'                  => \$log_level, 
@@ -53,6 +57,7 @@ my $results = GetOptions (
     'man|m'                          => \$man,
     'indir=s'                        => \$indir,
     'outdir=s'                       => \$outdir,
+    'test_mode=s'                    => \$test_mode,
     );
 
 &checkCommandLineArguments();
@@ -73,7 +78,8 @@ if (!defined($config_manager)){
 
 my $git_project_manager = DevelopmentUtils::Git::Project::Manager::getInstance(
     indir  => $indir,
-    outdir => $outdir
+    outdir => $outdir,
+    test_mode => $test_mode
     );
 
 if (!defined($git_project_manager)){
