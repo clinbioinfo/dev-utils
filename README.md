@@ -88,19 +88,19 @@ The scripts and programs are aimed at reducing repetition and increasing automat
 
 #### util/perl_module_syntax_checker.pl
 
-*
+* Program that checks the syntax (i.e.: perl -wc) of Perl modules in a specified directory
 
 #### util/perl_module_users.pl
 
-*
+* Script that parses Perl modules and generates a report outline which modules use a specified Perl module
 
 #### util/project_archive_stasher.pl
 
-*
+* Planned: program to stash/archive active projects in Git 
 
 #### util/scp_assets_by_list_file.pl
 
-*
+* Interactive program for secure copying of files as specified in a list file (new-line separated) to remote machine
 
 #### util/scp_assets.pl
 
@@ -125,12 +125,12 @@ The scripts and programs are aimed at reducing repetition and increasing automat
 
 #### util/webapp_install_checker.pl
 
-*
+* Program for executing smoke tests against installed instances of web applications
 
 #### util/webapp_last_session_instance_analyzer.pl
 
 
-*
+* Script for identifying the latest instance of an installed web application based on a pattern
 
 # License
 
