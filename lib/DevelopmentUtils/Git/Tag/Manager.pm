@@ -316,7 +316,16 @@ sub recommendNextBuildTags {
         my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
 
         if ($self->getVerbose()){
+
             print "For project '$project_name'\n";
+
+            if (!defined($current_build_tag)){
+
+                $current_build_tag = 'N/A';
+                
+                $self->{_logger}->info("current_build_tag was not defined and therefore will be reported as '$current_build_tag'");
+            }
+
             print "Current build tag '$current_build_tag'\n";
             print "Recommended next build tag '$next_build_tag'\n";
             print "The repository URL is '$repo_url\n\n";
