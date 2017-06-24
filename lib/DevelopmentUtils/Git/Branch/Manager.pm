@@ -483,7 +483,7 @@ sub _generate_report {
         
         my $next_branch = $self->{_project_lookup}->{$project_name}->{'next_dev_branch'};
         
-        my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
+        my $browse_url = $self->{_project_lookup}->{$project_name}->{'browse_url'};
 
         print OUTFILE "\n$project_name:\n\n";
         
@@ -491,7 +491,7 @@ sub _generate_report {
         
         print OUTFILE "\tRecommended next branch: '$next_branch'\n";
         
-        print OUTFILE "\tRepository URL: '$repo_url'\n";
+        print OUTFILE "\tRepository URL: '$browse_url'\n";
     }
 
 
@@ -579,7 +579,7 @@ sub _generate_current_branch_report {
 
         my $branch_list = $self->{_project_lookup}->{$project_name}->{'branch-list'};
                 
-        my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
+        my $browse_url = $self->{_project_lookup}->{$project_name}->{'browse_url'};
 
         print OUTFILE "\n$project_name:\n\n";
         
@@ -589,7 +589,7 @@ sub _generate_current_branch_report {
             print OUTFILE "\t$branch\n";
         }
         
-        print OUTFILE "\n\tRepository URL: '$repo_url'\n";
+        print OUTFILE "\n\tRepository URL: '$browse_url'\n";
     }
 
 
