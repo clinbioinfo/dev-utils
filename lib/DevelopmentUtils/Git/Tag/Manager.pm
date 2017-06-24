@@ -256,7 +256,7 @@ sub _generate_current_tag_report {
 
         my $tag_list = $self->{_project_lookup}->{$project_name}->{'tag-list'};
                 
-        my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
+        my $browse_url = $self->{_project_lookup}->{$project_name}->{'browse_url'};
 
         print OUTFILE "\n$project_name:\n\n";
         
@@ -266,7 +266,7 @@ sub _generate_current_tag_report {
             print OUTFILE "\t$tag\n";
         }
         
-        print OUTFILE "\n\tRepository URL: '$repo_url'\n";
+        print OUTFILE "\n\tRepository URL: '$browse_url'\n";
     }
 
     close OUTFILE;
@@ -313,7 +313,7 @@ sub recommendNextBuildTags {
         
         my $next_build_tag = $self->_get_next_build_tag($project_name);
 
-        my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
+        my $browse_url = $self->{_project_lookup}->{$project_name}->{'browse_url'};
 
         if ($self->getVerbose()){
 
@@ -328,7 +328,7 @@ sub recommendNextBuildTags {
 
             print "Current build tag '$current_build_tag'\n";
             print "Recommended next build tag '$next_build_tag'\n";
-            print "The repository URL is '$repo_url\n\n";
+            print "The repository URL is '$browse_url\n\n";
         }
     }
 
@@ -573,7 +573,7 @@ sub _generate_report {
         
         my $next_branch = $self->{_project_lookup}->{$project_name}->{'next_build_tag'};
         
-        my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
+        my $browse_url = $self->{_project_lookup}->{$project_name}->{'browse_url'};
 
         print OUTFILE "\n$project_name:\n\n";
         
@@ -581,7 +581,7 @@ sub _generate_report {
         
         print OUTFILE "\tRecommended next branch: '$next_branch'\n";
         
-        print OUTFILE "\tRepository URL: '$repo_url'\n";
+        print OUTFILE "\tRepository URL: '$browse_url'\n";
 
         print OUTFILE "\tHere are the existing tags:\n";
 

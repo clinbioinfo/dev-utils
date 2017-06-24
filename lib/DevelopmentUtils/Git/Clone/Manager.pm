@@ -630,7 +630,10 @@ sub _get_browse_base_url {
 
         my $file = $self->{_config_manager}->getGitProjectsLookupFile();
         if (!defined($file)){
-            $self->{_logger}->logconfess("file was not defined");
+
+            my $config_file = $self->{_config_manager}->getConfigfile();
+            
+            $self->{_logger}->logconfess("file was not defined [Git/projects_lookup_file] was not defined in the configuration file '$config_file'");
         }
 
         if (!-e $file){
