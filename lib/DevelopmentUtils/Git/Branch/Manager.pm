@@ -239,13 +239,13 @@ sub recommendNextDevBranch {
         
         my $next_dev_branch = $self->_get_next_dev_branch($project_name);
 
-        my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
+        my $browse_url = $self->{_project_lookup}->{$project_name}->{'browse_url'};
 
         if ($self->getVerbose()){
             print "For project '$project_name'\n";
             print "Current dev branch '$current_dev_branch'\n";
             print "Recommended next dev branch '$next_dev_branch'\n";
-            print "The repository URL is '$repo_url\n\n";
+            print "The repository URL is '$browse_url\n\n";
         }
     }
 

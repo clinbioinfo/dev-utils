@@ -313,7 +313,7 @@ sub recommendNextBuildTags {
         
         my $next_build_tag = $self->_get_next_build_tag($project_name);
 
-        my $repo_url = $self->{_project_lookup}->{$project_name}->{'repo-url'};
+        my $browse_url = $self->{_project_lookup}->{$project_name}->{'browse_url'};
 
         if ($self->getVerbose()){
 
@@ -328,7 +328,7 @@ sub recommendNextBuildTags {
 
             print "Current build tag '$current_build_tag'\n";
             print "Recommended next build tag '$next_build_tag'\n";
-            print "The repository URL is '$repo_url\n\n";
+            print "The repository URL is '$browse_url\n\n";
         }
     }
 
