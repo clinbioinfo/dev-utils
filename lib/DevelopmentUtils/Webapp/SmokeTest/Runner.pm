@@ -12,9 +12,9 @@ use DevelopmentUtils::Config::Manager;
 use constant TRUE  => 1;
 use constant FALSE => 0;
 
-use constant DEFAULT_WAIT => 10;
+use constant DEFAULT_WAIT => 5; ## seconds
 
-use constant DEFAULT_MAX_SEARCH_ATTEMPTS_COUNT => 3;
+use constant DEFAULT_MAX_SEARCH_ATTEMPTS_COUNT => 1;
 
 use constant DEFAULT_BROWSER_NAME => 'chrome';
 
