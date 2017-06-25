@@ -1,6 +1,7 @@
 package DevelopmentUtils::UmletClassDiagramToPerlModule::Converter;
 
 use Moose;
+use Cwd;
 use Term::ANSIColor;
 
 
@@ -12,6 +13,8 @@ use DevelopmentUtils::Perl::Module::File::Writer;
 use constant TRUE  => 1;
 
 use constant FALSE => 0;
+
+use constant DEFAULT_VERBOSE => TRUE;
 
 use constant DEFAULT_TEST_MODE => TRUE;
 
@@ -59,6 +62,65 @@ has 'indir' => (
     required => FALSE,
     default  => DEFAULT_INDIR
     );
+
+
+has 'skip_green_modules' => (
+    is       => 'rw',
+    isa      => 'Bool',
+    writer   => 'setSkipGreenModules',
+    reader   => 'getSkipGreenModules',
+    required => FALSE
+    );
+
+has 'suppress_checkpoints' => (
+    is       => 'rw',
+    isa      => 'Bool',
+    writer   => 'setSuppressCheckpoints',
+    reader   => 'getSuppressCheckpoints',
+    required => FALSE
+    );
+
+has 'software_version' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setSoftwareVersion',
+    reader   => 'getSoftwareVersion',
+    required => FALSE
+    );
+
+has 'software_author' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setSoftwareAuthor',
+    reader   => 'getSoftwareAuthor',
+    required => FALSE
+    );
+
+has 'author_email_address' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setAuthorEmailAddress',
+    reader   => 'getAuthorEmailAddress',
+    required => FALSE
+    );
+
+has 'infile' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setInfile',
+    reader   => 'getInfile',
+    required => FALSE
+    );
+
+has 'verbose' => (
+    is       => 'rw',
+    isa      => 'Bool',
+    writer   => 'setVerbose',
+    reader   => 'getVerbose',
+    required => FALSE,
+    default  => DEFAULT_VERBOSE
+    );
+
 
 
 sub getInstance {
@@ -164,27 +226,45 @@ sub printGreen {
 }
 
 
+sub run {
+
+    my $self = shift;
+
+    $self->runConversion(@_);
+}
 
 sub runConversion {
 
     my $self = shift;
     
-    my $record_list = $self->{_parser}->getClassList();
-    if (!defined($record_list)){
-        $self->{_logger}->logconfess("record_list was not defined");
+    my $module_count = $self->{_parser}->getModuleCount();
+    if (!defined($module_count)){
+        $self->{_logger}->logconfess("module_count was not defined");
     }
 
-    # &parseUxfFile($infile);
+    if ($module_count > 0){
 
-    $self->{_writer}->createAPI($record_list);
+        my $module_lookup = $self->{_parser}->getModuleLookup();
+        if (!defined($module_lookup)){
+            $self->{_logger}->logconfess("module_lookup was not defined");
+        }
 
-    # &createAPI();
+        # &parseUxfFile($infile);
 
-    if ($self->getVerbose()){
+        $self->{_writer}->createAPI($module_lookup);
 
-        print "Conversion completed.\n";
+        # &createAPI();
 
-        print "See output files in directory '$self->getOutdir()'\n";
+        if ($self->getVerbose()){
+
+            print "Conversion completed.\n";
+
+            print "See output files in directory '$self->getOutdir()'\n";
+        }
+    }
+    else {
+        printBoldRed("There were no modules to process");
+        exit(1);
     }
 }
 
@@ -209,8 +289,8 @@ __END__
 =head1 SYNOPSIS
 
  use DevelopmentUtils::UmletClassDiagramToPerlModule::Converter;
- my $manager = DevelopmentUtils::UmletClassDiagramToPerlModule::Converter::getInstance();
- $manager->commitCodeAndPush($comment);
+ my $converter = DevelopmentUtils::UmletClassDiagramToPerlModule::Converter::getInstance();
+ $converter->runConversion();
 
 =head1 AUTHOR
 

@@ -10,6 +10,8 @@ use constant TRUE  => 1;
 
 use constant FALSE => 0;
 
+use constant DEFAULT_VERBOSE => TRUE;
+
 use constant DEFAULT_TEST_MODE => TRUE;
 
 use constant HEADER_SECTION => 0;
@@ -53,6 +55,24 @@ has 'infile' => (
     required => FALSE
     );
 
+has 'skip_green_modules' => (
+    is       => 'rw',
+    isa      => 'Bool',
+    writer   => 'setSkipGreenModules',
+    reader   => 'getSkipGreenModules',
+    required => FALSE
+    );
+
+
+has 'verbose' => (
+    is       => 'rw',
+    isa      => 'Bool',
+    writer   => 'setVerbose',
+    reader   => 'getVerbose',
+    required => FALSE,
+    default  => DEFAULT_VERBOSE
+    );
+
 
 sub getInstance {
 
@@ -83,13 +103,13 @@ sub _initLogger {
 
     my $self = shift;
 
-    my $self->{_logger} = Log::Log4perl->get_logger(__PACKAGE__);
+    my $logger = Log::Log4perl->get_logger(__PACKAGE__);
 
-    if (!defined($self->{_logger})){
+    if (!defined($logger)){
         confess "logger was not defined";
     }
 
-    $self->{_logger} = $self->{_logger};
+    $self->{_logger} = $logger;
 }
 
 sub _initConfigManager {
@@ -115,6 +135,29 @@ sub getClassList {
     return $self->{_class_record_list};
 }
 
+sub getModuleLookup {
+
+    my $self = shift;
+
+    if (! exists $self->{_module_lookup}){
+        $self->_parse_file(@_);
+    }
+
+    return $self->{_module_lookup};    
+}
+
+sub getModuleCount {
+
+    my $self = shift;
+
+    if (! exists $self->{_module_ctr}){
+        $self->_parse_file(@_);
+    }
+
+    return $self->{_module_ctr};    
+}
+
+
 sub _parse_file {
 
     my $self = shift;
@@ -131,7 +174,10 @@ sub _parse_file {
 
     $this = $self;
 
-    my $twig = new XML::Twig(
+    $self->{_module_lookup} = {};
+    $self->{_module_ctr} = 0;
+
+        my $twig = new XML::Twig(
         twig_handlers =>  { 
             panel_attributes => \&panelAttributesHandler 
         }
@@ -141,7 +187,7 @@ sub _parse_file {
         $self->{_logger}->logconfess("Could not instantiate XML::Twig");
     }
 
-    if ($verbose){
+    if ($self->getVerbose()){
         print "About to parse input file '$infile'\n";
     }
 
@@ -149,11 +195,29 @@ sub _parse_file {
 
     $twig->parsefile($infile);
 
-    if ($verbose){
+    if ($self->getVerbose()){
         print "Finished parsing Umlet uxf file '$infile'\n";
     }
 
     $self->{_logger}->info("Finished parsing Umlet uxf file '$infile'");
+
+
+    $self->{_logger}->info("Found the following '$self->{_module_ctr}' modules:");
+    
+    if ($self->getVerbose()){
+        print "Found the folloiwng '$self->{_module_ctr}' modules\n";
+
+    }
+
+    foreach my $name (sort keys %{$self->{_module_lookup}}){
+
+        if ($self->getVerbose()){
+
+            print $name . "\n";
+        }
+
+        $self->{_logger}->info($name);
+    }
 }
 
 sub panelAttributesHandler {
@@ -199,17 +263,17 @@ sub panelAttributesHandler {
 
             $currentModule = $line;
 
-            if (! exists $moduleLookup->{$currentModule}){
+            if (! exists $self->{_module_lookup}->{$currentModule}){
 
                 if ($currentModule =~ /Factory/){
                     $processingFactoryModule = TRUE;
                 }
 
-                $moduleLookup->{$currentModule} = {};
-                $moduleCtr++;
+                $self->{_module_lookup}->{$currentModule} = {};
+                $self->{_module_ctr}++;
             }
             else {
-                die "Already processed a module called '$currentModule'\n";
+                $self->{_logger}->logconfess("Already processed a module called '$currentModule'");
             }
         }
         else {
@@ -217,7 +281,7 @@ sub panelAttributesHandler {
             ## Not processing the first line
 
             if (!defined($currentModule)){
-                die "module name was not determined when processing data line '$lineCtr' with data content:\n$data\n";
+                $self->{_logger}->logconfess("module name was not determined when processing data line '$lineCtr' with data content:\n$data");
             }
 
             if ($sectionCtr == HEADER_SECTION){
@@ -225,7 +289,7 @@ sub panelAttributesHandler {
                 if ($line =~ /^bg\=(\S+)/){
 
                     if ($1 eq 'green'){
-                        $moduleLookup->{$currentModule}->{already_implemented} = TRUE;
+                        $self->{_module_lookup}->{$currentModule}->{already_implemented} = TRUE;
                     }
                     ## encountered the background color directive
                     next;
@@ -235,32 +299,32 @@ sub panelAttributesHandler {
                     ## In the top section where the module is named and all dependencies and constants are cited
 
                     if ($line =~ m|^//skip|){
-                        $moduleLookup->{$currentModule}->{already_implemented} = TRUE;
+                        $self->{_module_lookup}->{$currentModule}->{already_implemented} = TRUE;
                     }
                     elsif ($line =~ m|^//singleton|){
-                        if ($verbose){
+                        if ($self->getVerbose()){
                             print "currentModule '$currentModule' is a singleton\n";
                         }
 
-                        $moduleLookup->{$currentModule}->{singleton}++;
+                        $self->{_module_lookup}->{$currentModule}->{singleton}++;
                     }
                     elsif (($line =~ m|^//extends (\S+)|) || ($line =~ m|^//inherits (\S+)|)){
-                        if ($verbose){
+                        if ($self->getVerbose()){
                             print "module '$currentModule' extends '$1'\n";
                         }
 
-                        push(@{$moduleLookup->{$currentModule}->{extends_list}}, $1);
+                        push(@{$self->{_module_lookup}->{$currentModule}->{extends_list}}, $1);
                     }
                     elsif ( (($line =~ m|^//depends on (\S+) type\=(\S+)|) || ($line =~ m|^//depends (\S+) type\=(\S+)|)) && ($processingFactoryModule)){
 
-                        push(@{$moduleLookup->{$currentModule}->{depends_on_list}}, $1);
-                        $moduleLookup->{$currentModule}->{factory_types_lookup}->{$1} = $2;
+                        push(@{$self->{_module_lookup}->{$currentModule}->{depends_on_list}}, $1);
+                        $self->{_module_lookup}->{$currentModule}->{factory_types_lookup}->{$1} = $2;
                     }
                     elsif (($line =~ m|^//depends on (\S+)|) || ($line =~ m|^//depends (\S+)|)){
-                        push(@{$moduleLookup->{$currentModule}->{depends_on_list}}, $1);
+                        push(@{$self->{_module_lookup}->{$currentModule}->{depends_on_list}}, $1);
                     }
                     elsif ($line =~ m|^//constant (\S+) (\S+)|){
-                        push(@{$moduleLookup->{$currentModule}->{constant_list}}, [$1, $2]);
+                        push(@{$self->{_module_lookup}->{$currentModule}->{constant_list}}, [$1, $2]);
                         ## $1 is the name of the constant
                         ## $2 is the value assigned to the constant
                     }
@@ -272,77 +336,77 @@ sub panelAttributesHandler {
                     }
                 }
                 else {
-                    die "Don't know what to do with line '$line' in header section of module '$currentModule'\n";
+                    $self->{_logger}->logconfess("Don't know what to do with line '$line' in header section of module '$currentModule'");
                 }
             }
             elsif ($sectionCtr == PRIVATE_MEMBERS_SECTION){
              
                 if ($line =~ m|^\-(\S+):\s*(\S+)\s*$|){
-                    push(@{$moduleLookup->{$currentModule}->{private_data_members_list}}, [$1, $2]);
+                    push(@{$self->{_module_lookup}->{$currentModule}->{private_data_members_list}}, [$1, $2]);
                     ## $1 is the name of the variable
                     ## $2 is the data type
                 }
                 elsif ($line =~ m|^[\-\_]{0,1}(\S+)\(\)\s*:\s*(\S+)\s*$|){
-                    push(@{$moduleLookup->{$currentModule}->{private_methods_list}}, [$1, undef, $2]);
+                    push(@{$self->{_module_lookup}->{$currentModule}->{private_methods_list}}, [$1, undef, $2]);
                     ## $1 is the name of the private method
                     ## undef indicates that there are no arguments passed to the method
                     ## $2 is the returned data type
                 }
                 elsif ($line =~ m|^[\-\_]{0,1}(\S+)\(([\S\s\,]+)\)\s*:\s*(\S+)\s*$|){
-                    push(@{$moduleLookup->{$currentModule}->{private_methods_list}}, [$1, $2, $3]);
+                    push(@{$self->{_module_lookup}->{$currentModule}->{private_methods_list}}, [$1, $2, $3]);
                     ## $1 is the name of the private method
                     ## $2 the argument list passed to the method (need to refine this so that can handle more than one argument i.e.: comma-separated list
                     ## $3 is the returned data type
                 }
                 elsif ($line =~ m|^[\-\_]{0,1}(\S+)\(([\S\s\,]+)\)\s*$|){
-                    push(@{$moduleLookup->{$currentModule}->{private_methods_list}}, [$1, $2, undef]);
+                    push(@{$self->{_module_lookup}->{$currentModule}->{private_methods_list}}, [$1, $2, undef]);
                     ## $1 is the name of the private method
                     ## $2 the argument list passed to the method (need to refine this so that can handle more than one argument i.e.: comma-separated list
                     ## undef indicates the method does not return anything
                 }
                 elsif ($line =~ m|^[\-\_]{0,1}(\S+)\(\)\s*$|){
-                    push(@{$moduleLookup->{$currentModule}->{private_methods_list}}, [$1, undef, undef]);
+                    push(@{$self->{_module_lookup}->{$currentModule}->{private_methods_list}}, [$1, undef, undef]);
                     ## $1 is the name of the private method
                     ## first undef indicates that there is not argument
                     ## second undef indicates the method does not return anything
                 }
 
                 else {
-                    die "Don't know how to process this line '$line' in private members section of module '$currentModule'";
+                    $self->{_logger}->logconfess("Don't know how to process this line '$line' in private members section of module '$currentModule'");
                 }
             }
             elsif ($sectionCtr == PUBLIC_MEMBERS_SECTION){
              
                 if ($line =~ m|^(\S+)\(\)\s*:\s*(\S+)\s*$|){
-                    push(@{$moduleLookup->{$currentModule}->{public_methods_list}}, [$1, undef, $2]);
+                    push(@{$self->{_module_lookup}->{$currentModule}->{public_methods_list}}, [$1, undef, $2]);
                     ## $1 is the name of the public method
                     ## undef indicates that there are no arguments passed to the method
                     ## $2 is the returned data type
                 }
                 elsif ($line =~ m|^(\S+)\((\S+[\S\s\,]*)\)\s*:\s*(\S+)\s*$|){
-                    push(@{$moduleLookup->{$currentModule}->{public_methods_list}}, [$1, $2, $3]);
+                    push(@{$self->{_module_lookup}->{$currentModule}->{public_methods_list}}, [$1, $2, $3]);
                     ## $1 is the name of the public method
                     ## $2 the argument list passed to the method (need to refine this so that can handle more than one argument i.e.: comma-separated list
                     ## $3 is the returned data type
                 }
                 elsif ($line =~ m|^(\S+)\((\S+[\S\s\,]*)\)\s*$|){
-                    push(@{$moduleLookup->{$currentModule}->{public_methods_list}}, [$1, $2, undef]);
+                    push(@{$self->{_module_lookup}->{$currentModule}->{public_methods_list}}, [$1, $2, undef]);
                     ## $1 is the name of the public method
                     ## $2 the argument list passed to the method (need to refine this so that can handle more than one argument i.e.: comma-separated list
                     ## undef indicates the method does not return anything
                 }
                 elsif ($line =~ m|^(\S+)\(\)\s*$|){
-                    push(@{$moduleLookup->{$currentModule}->{public_methods_list}}, [$1, undef, undef]);
+                    push(@{$self->{_module_lookup}->{$currentModule}->{public_methods_list}}, [$1, undef, undef]);
                     ## $1 is the name of the public method
                     ## first undef indicates that there is not argument
                     ## second undef indicates the method does not return anything
                 }
                 else {
-                    die "Don't know how to parse '$line' in public members section of module '$currentModule'";
+                    $self->{_logger}->logconfess("Don't know how to parse '$line' in public members section of module '$currentModule'");
                 }
             }
             else {
-                die "Did not expect section '$sectionCtr'";
+                $self->{_logger}->logconfess("Did not expect section '$sectionCtr'");
             }
         }
     }

@@ -12,6 +12,7 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 
 use DevelopmentUtils::Logger;
+use DevelopmentUtils::UmletClassDiagramToPerlModule::Converter;
 
 use constant TRUE => 1;
 
@@ -35,6 +36,7 @@ use constant DEFAULT_POD_AUTHOR_EMAIL_ADDRESS => 'sundaramj.medimmune@gmail.com'
 
 use constant DEFAULT_SKIP_GREEN_MODULES => TRUE;
 
+use constant DEFAULT_CONFIG_FILE => "$Find::Bin/../conf/umlet_converter.ini";
 
 $|=1; ## do not buffer output stream
 
@@ -46,6 +48,7 @@ my ($infile,
     $logfile, 
     $man,
     $verbose, 
+    $config_file,
     $suppressCheckpoints,
     $softwareVersion, 
     $softwareAuthor, 
@@ -57,6 +60,7 @@ my $results = GetOptions (
       'help|h'                  => \$help,
       'man|m'                   => \$man,
       'infile=s'                => \$infile,
+      'config_file=s'           => \$config_file,
       'outdir=s'                => \$outdir,
       'logfile=s'               => \$logfile,
       'verbose=s'               => \$verbose,
@@ -79,6 +83,7 @@ if (!defined($logger)){
 }
 
 my $converter = DevelopmentUtils::UmletClassDiagramToPerlModule::Converter::getInstance(
+    config_file          => $config_file,
     infile               => $infile,
     outdir               => $outdir,
     verbose              => $verbose,
@@ -168,6 +173,14 @@ sub checkCommandLineArguments {
         $verbose = DEFAULT_VERBOSE;
 
         printYellow("--verbose was not specified and therefore was set to default '$verbose'");
+        
+    }
+
+    if (!defined($config_file)){
+
+        $config_file = DEFAULT_CONFIG_FILE;
+
+        printYellow("--config_file was not specified and therefore was set to default '$config_file'");
         
     }
 
