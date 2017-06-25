@@ -28,22 +28,26 @@ use constant LINE_NUMBER_IDX => 11;
 use constant STATEMENT_IDX => 12;
 
 use constant DEFAULT_VERBOSE => TRUE;
+
 use constant DEFAULT_COMMENT => 'N/A';
 
-use constant DEFAULT_TEMPLATE_FILE => "$FindBin::Bin/../template/log4perl_to_html_tmpl.tt";
+use constant DEFAULT_TEMPLATE_FILE => "$FindBin::Bin/../log4perl-to-html/template/log4perl_to_html_tmpl.tt";
 
-use constant DEFAULT_OUTDIR => '/tmp/' . getlogin . '/' . File::Basename::basename($0) . '/'. time();
+use constant DEFAULT_USERNAME => getlogin || $ENV{USER};
+
+use constant DEFAULT_OUTDIR => '/tmp/' . DEFAULT_USERNAME . '/' . File::Basename::basename($0) . '/'. time();
 
 use constant DEFAULT_ADMIN_EMAIL => 'sundaram.medimmune@gmail.com';
 
-use constant DEFAULT_WEB_SERVER_DIR => '/var/www';
+use constant DEFAULT_WEB_SERVER_DIR => '/var/www/html';
 
-use constant DEFAULT_USERNAME => getlogin;
+use constant DEFAULT_SERVER_OWNER => 'www-data';
+
 
 $|=1; ## do not buffer output stream
 
 ## Parse command line options
-my ($man, $help, $infile, $outfile, $template_file, $outdir, $web_server_dir, $username, $comment);
+my ($man, $help, $infile, $outfile, $template_file, $outdir, $web_server_dir, $username, $comment, $install_dir, $server_owner);
 
 my $results = GetOptions (
     'help|h'           => \$help,
@@ -55,6 +59,8 @@ my $results = GetOptions (
     'web_server_dir=s' => \$web_server_dir,
     'username=s'       => \$username,
     'comment=s'        => \$comment,
+    'install_dir=s'    => \$install_dir,
+    'server_owner=s'   => \$server_owner,
     );
 
 my $hostname = hostname();
@@ -93,6 +99,11 @@ my $records = [];
 &convert();
 
 print "The output file is '$outfile'\n";
+
+&set_up_install();
+
+&install_html_file();
+
 exit(0);
 
 ##-----------------------------------------------------------
@@ -244,6 +255,30 @@ sub loadTemplateLookup {
     };    
 }
 
+sub printGreen {
+
+    my ($msg) = @_;
+    print color 'green';
+    print $msg . "\n";
+    print color 'reset';
+}
+
+sub printYellow {
+
+    my ($msg) = @_;
+    print color 'yellow';
+    print $msg . "\n";
+    print color 'reset';
+}
+
+sub printBoldRed {
+
+    my ($msg) = @_;
+    print color 'bold red';
+    print $msg . "\n";
+    print color 'reset';
+}
+
 sub checkCommandLineArguments {
    
     if ($man){
@@ -254,67 +289,68 @@ sub checkCommandLineArguments {
     	&pod2usage({-exitval => 1, -verbose => 1, -output => \*STDOUT});
     }
 
+    if (!defined($server_owner)){
+
+        $server_owner = DEFAULT_SERVER_OWNER;
+
+        printYellow("--server_owner was not specified and therefore was set to default '$server_owner'");        
+    }
+
     if (!defined($web_server_dir)){
 
         $web_server_dir = DEFAULT_WEB_SERVER_DIR;
 
-        print color 'yellow';
-        print "--web_server_dir was not specified and therefore was set to default '$web_server_dir'\n";
-        print color 'reset';
+        printYellow("--web_server_dir was not specified and therefore was set to default '$web_server_dir'");        
+    }
+
+    if (!defined($install_dir)){
+
+        $install_dir = $web_server_dir . '/log4perl-to-html';
+
+        printYellow("--install_dir was not specified and therefore was set to default '$install_dir'");        
     }
 
     if (!defined($outdir)){
 
         $outdir = DEFAULT_OUTDIR;
 
-        print color 'yellow';
-        print "--outdir was not specified and therefore was set to default '$outdir'\n";
-        print color 'reset';
+        printYellow("--outdir was not specified and therefore was set to default '$outdir'");
     }
 
     if (!defined($username)){
 
         $username = DEFAULT_USERNAME;
 
-        print color 'yellow';
-        print "--username was not specified and therefore was set to default '$username'\n";
-        print color 'reset';
+        printYellow("--username was not specified and therefore was set to default '$username'");
     }
 
     if (!-e $outdir){
 
         mkpath ($outdir) || die "Could not create output directory '$outdir' : $!";
 
-        print color 'yellow';
-        print "Created output directory '$outdir'\n";
-        print color 'reset';
+        printYellow("Created output directory '$outdir'");
     }
 
     if (!defined($template_file)){
         
         $template_file = DEFAULT_TEMPLATE_FILE;
 
-        print color 'yellow';
-        print "--template_file was not specified and therefore was set to default '$template_file'\n";
-        print color 'reset';
+        printYellow("--template_file was not specified and therefore was set to default '$template_file'");
     }
 
     if (!defined($comment)){
         
         $comment = DEFAULT_COMMENT;
 
-        print color 'yellow';
-        print "--comment was not specified and therefore was set to default '$comment'\n";
-        print color 'reset';
+        printYellow("--comment was not specified and therefore was set to default '$comment'");
     }
 
     my $fatalCtr=0;
 
     if (!defined($infile)){
         
-        print color 'bold red';
-        print "--infile was not specified\n";
-        print color 'reset';
+        printBoldRed("--infile was not specified");
+
         $fatalCtr++;       
     }
     else {
@@ -325,7 +361,10 @@ sub checkCommandLineArguments {
     $infile = File::Spec->rel2abs($infile);
 
     if ($fatalCtr > 0 ){
-    	die "Required command-line arguments were not specified\n";
+
+    	printBoldRed("Required command-line arguments were not specified");
+
+        exit(1);
     }
 }
 
@@ -340,38 +379,38 @@ sub checkInfileStatus {
     my $errorCtr = 0 ;
 
     if (!-e $infile){
-        print color 'bold red';
-        print ("input file '$infile' does not exist\n");
-        print color 'reset';
+        
+        printBoldRed("input file '$infile' does not exist");
+        
         $errorCtr++;
     }
     else {
         if (!-f $infile){
-            print color 'bold red';
-            print ("'$infile' is not a regular file\n");
-            print color 'reset';        
+            
+            printBoldRed("'$infile' is not a regular file");
+            
             $errorCtr++;
         }
 
         if (!-r $infile){
-            print color 'bold red';
-            print ("input file '$infile' does not have read permissions\n");
-            print color 'reset';
+            
+            printBoldRed("input file '$infile' does not have read permissions");
+            
             $errorCtr++;
         }
 
         if (!-s $infile){
-            print color 'bold red';
-            print ("input file '$infile' does not have any content\n");
-            print color 'reset';
+            
+            printBoldRed("input file '$infile' does not have any content");
+            
             $errorCtr++;
         }
     }
 
     if ($errorCtr > 0){
-        print color 'bold red';
-        print ("Encountered issues with input file '$infile'\n");
-        print color 'reset';
+        
+        printBoldRed("Encountered issues with input file '$infile'");
+        
         confess;
     }
 }
@@ -384,15 +423,89 @@ sub checkOutdirStatus {
         
         mkpath($outdir) || die "Could not create output directory '$outdir' : $!";
         
-        print color 'yellow';
-        print "Created output directory '$outdir'\n";
-        print color 'reset';
+        printYellow("Created output directory '$outdir'");        
     }
     
     if (!-d $outdir){
-        print color 'bold red';
-        print "'$outdir' is not a regular directory\n";
-        print color 'reset';
+        
+        printBoldRed("'$outdir' is not a regular directory");        
+    }
+}
+
+sub set_up_install {
+
+    if (!-e $web_server_dir){
+
+        printBoldRed("Looks like you dont' have a web server directory at '$web_server_dir'");
+
+        exit(1);
+    }
+
+    if (!-e $install_dir){
+
+        printYellow("Looks like the install directory '$install_dir' does not exist");
+
+        my $cmd = "sudo mkdir -p $install_dir";
+
+        execute_cmd($cmd);
+
+        my $cmd2 = "sudo mkdir -p $install_dir/css";
+
+        execute_cmd($cmd2);
+
+        my $cmd3 = "sudo mkdir -p $install_dir/javascript/lib";
+
+        execute_cmd($cmd3);
+
+        my $cmd4 = "sudo mkdir -p $install_dir/javascript/app";
+
+        execute_cmd($cmd4);
+
+        my $cmd5 = "sudo cp $FindBin::Bin/../log4perl-to-html/javascript/lib/jquery-1.10.2.min.js $install_dir/javascript/lib/.";
+
+        execute_cmd($cmd5);        
+
+        my $cmd6 = "sudo cp $FindBin::Bin/../log4perl-to-html/javascript/app/log4perl_to_html.js $install_dir/javascript/app/.";
+
+        execute_cmd($cmd6);        
+
+        my $cmd7 = "sudo cp $FindBin::Bin/../log4perl-to-html/css/*.css $install_dir/css/.";
+
+        execute_cmd($cmd7);        
+
+        my $cmd8 = "sudo chown -R $server_owner:$server_owner $install_dir";
+
+        execute_cmd($cmd8);        
+    }
+}
+
+sub install_html_file {
+
+    my $cmd1 = "sudo cp $outfile $install_dir/.";
+
+    execute_cmd($cmd1);        
+
+    print "\nView it here:\n";
+    print "http://localhost/log4perl-to-html/" . File::Basename::basename($outfile) . "\n";
+
+}
+
+
+
+sub execute_cmd {
+
+    my ($ex) = @_;
+
+    print ("About to execute '$ex'\n");
+
+    print "About to execute '$ex'\n";
+    
+    eval {
+        qx($ex);
+    };
+
+    if ($?){
+        confess("Encountered some error while attempting to execute '$ex' : $! $@");
     }
 }
 
