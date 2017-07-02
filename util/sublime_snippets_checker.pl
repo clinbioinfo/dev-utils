@@ -15,9 +15,9 @@ use constant DEFAULT_CONFIG_FILE => "$FindBin::Bin/../conf/commit_code.ini";
 
 use constant DEFAULT_LOG_LEVEL => 4;
 
-my $username = $ENV{USER};
+use constant DEFAULT_USERNAME => getlogin || getpwuid($<) || $ENV{USER} || "sundaramj";
 
-use constant DEFAULT_OUTDIR => '/tmp/' . $username . '/' . File::Basename::basename($0) . '/' . time();
+use constant DEFAULT_OUTDIR => '/tmp/' . DEFAULT_USERNAME . '/' . File::Basename::basename($0) . '/' . time();
 
 use constant DEFAULT_INSTALL_DIR => '~/.config/sublime-text-3/Packages/User/';
 

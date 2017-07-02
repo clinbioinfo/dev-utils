@@ -20,9 +20,9 @@ use constant DEFAULT_VERBOSE => FALSE;
 
 use constant DEFAULT_TEST_MODE => TRUE;
 
-my $login =  getlogin || getpwuid($<) || "sundaramj";
+use constant DEFAULT_USERNAME => getlogin || getpwuid($<) || $ENV{USER} || "sundaramj";
 
-use constant DEFAULT_OUTDIR => '/tmp/' . $login . '/' . File::Basename::basename($0) . '/' . time();
+use constant DEFAULT_OUTDIR => '/tmp/' . DEFAULT_USERNAME . '/' . File::Basename::basename($0) . '/' . time();
 
 use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
 
