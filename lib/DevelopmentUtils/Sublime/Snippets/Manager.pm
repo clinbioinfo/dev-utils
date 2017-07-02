@@ -26,7 +26,7 @@ use constant DEFAULT_OUTDIR => '/tmp/' . DEFAULT_USERNAME . '/' . File::Basename
 
 use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
 
-use constant DEFAULT_INSTALL_DIR => '~/.config/sublime-text-3/Packages/User/';
+use constant DEFAULT_INSTALL_DIR => $ENV{HOME} . '/.config/sublime-text-3/Packages/User/';
 
 use constant DEFAULT_REPO_DIR => "$FindBin::Bin/../sublime-snippets/snippets/";
 

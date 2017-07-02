@@ -25,7 +25,8 @@ my $username = $ENV{USER};
 
 use constant DEFAULT_OUTDIR => '/tmp/' . $username . '/' . File::Basename::basename($0) . '/' . time();
 
-use constant DEFAULT_INSTALL_DIR => '~/.config/sublime-text-3/Packages/User/';
+use constant DEFAULT_INSTALL_DIR => $ENV{HOME} . '/.config/sublime-text-3/Packages/User/';
+
 use constant DEFAULT_SOURCE_DIR => "$FindBin::Bin/../sublime-snippets/snippets/";
 
 my $install_dir;
@@ -110,6 +111,8 @@ sub checkCommandLineArguments {
         printYellow("--install-dir was not specified and therefore was set to default '$install_dir'");        
     }
 
+    $install_dir = File::Spec->rel2abs($install_dir);
+
     if (!defined($source_dir)){
 	
     	$source_dir = DEFAULT_SOURCE_DIR;
@@ -118,12 +121,16 @@ sub checkCommandLineArguments {
     }
 
 
+    $source_dir = File::Spec->rel2abs($source_dir);
+
     if (!defined($config_file)){
         
         $config_file = DEFAULT_CONFIG_FILE;
         
         printYellow("--config_file was not specified and therefore was set to default '$config_file'");        
     }
+
+    $config_file = File::Spec->rel2abs($config_file);
 
     if (!defined($log_level)){
         
