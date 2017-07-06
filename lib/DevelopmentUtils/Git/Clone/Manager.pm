@@ -109,6 +109,14 @@ has 'tag' => (
     required => FALSE
     );
 
+has 'checkout_dir' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setCheckoutDirectory',
+    reader   => 'getCheckoutDirectory',
+    required => FALSE
+    );
+
 sub getInstance {
 
     if (!defined($instance)){
@@ -364,6 +372,8 @@ sub _clone_project {
         $self->_execute_cmd($cmd);
 
         my $target_path = File::Spec->rel2abs($target_dir);
+
+        $self->setCheckoutDirectory($target_path);
 
         print "The project has been clone to '$target_path'\n";
 

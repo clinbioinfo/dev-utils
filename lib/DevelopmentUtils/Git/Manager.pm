@@ -16,6 +16,8 @@ use DevelopmentUtils::Git::Branch::Manager;
 use DevelopmentUtils::Git::Tag::Manager;
 use DevelopmentUtils::Git::Clone::Manager;
 use DevelopmentUtils::Git::Stage::Manager;
+use DevelopmentUtils::Git::Assets::Manager;
+
 
 use constant TRUE  => 1;
 use constant FALSE => 0;
@@ -149,6 +151,15 @@ has 'repo_name' => (
     required => FALSE
     );
 
+
+has 'project' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setProject',
+    reader   => 'getProject',
+    required => FALSE
+    );
+
 sub getInstance {
 
     if (!defined($instance)){
@@ -178,6 +189,8 @@ sub BUILD {
     $self->_initGitCloneManager(@_);
 
     $self->_initGitStageManager(@_);
+
+    $self->_initGitAssetsManager(@_);
 
     $self->_conditional_init_jira_manager(@_);
 
@@ -332,6 +345,17 @@ sub _initGitStageManager {
     $self->{_stage_manager} = $manager;
 }
 
+sub _initGitAssetsManager {
+
+    my $self = shift;
+    
+    my $manager = DevelopmentUtils::Git::Assets::Manager::getInstance(@_);
+    if (!defined($manager)){
+        $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Git::Assets::Manager");
+    }
+
+    $self->{_asset_manager} = $manager;
+}
 
 sub commitCodeAndPush {
 
@@ -830,6 +854,27 @@ sub getCommitHashURL {
     chdir($indir) || $self->{_logger}->logconfess("Could not change into directory '$indir' : $!");
 
     return $self->_get_commit_url();
+}
+
+sub manageAssets {
+
+    my $self = shift;
+
+    my $project = $self->getProject();
+    if (!defined($project)){
+        $self->{_logger}->logconfess("project was not defined");
+    }
+
+    $self->{_clone_manager}->cloneProject($project);
+    
+    my $checkout_directory = $self->{_clone_manager}->getCheckoutDirectory();
+    if (!defined($checkout_directory)){
+        $self->{_logger}->logconfess("checkout_directory was not defined");
+    }
+
+    $self->{_asset_manager}->setCheckoutDirectory($checkout_directory);
+    
+    $self->{_asset_manager}->manageAssets();
 }
 
 
