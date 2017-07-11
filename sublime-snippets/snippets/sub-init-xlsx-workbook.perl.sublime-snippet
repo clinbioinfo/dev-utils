@@ -1,0 +1,56 @@
+<snippet>
+	<content><![CDATA[
+use Excel::Writer::XLSX;
+
+sub _init_workbook {
+
+    my \$self = shift;
+    my (\$outfile) = @_;
+
+    ## Create the workbook
+    my \$workbook = Excel::Writer::XLSX->new(\$outfile);
+    if (!defined(\$workbook)){
+        \$self->{_logger}->logconfess("Could not instantiate Excel::Writer::XLSX");
+    }
+
+    \$self->{_workbook} = \$workbook;
+
+    my \$worksheet = \$workbook->add_worksheet();
+    if (!defined(\$worksheet)){
+        \$self->{_logger}->logconfess("worksheet was not defined");
+    }
+
+    \$self->{_worksheet} = \$worksheet;
+}
+
+sub _writeHeader {
+
+    my \$self = shift;
+    my (\$column_name_list) = @_;
+
+    if (!defined(\$column_name_list)){
+
+	    \$column_name_list = \$self->getColumnNameList();
+	    if (!defined(\$column_name_list)){
+	        \$self->{_logger}->logconfess("column_name_list was not defined");
+	    }
+    }
+
+    my \$column_count = scalar(@{\$column_name_list});
+
+    for (my \$col = 0; \$col < \$column_count ; \$col++){
+
+        my \$column_name = \$column_name_list->[\$col];
+
+        \$self->{_worksheet}->write(0, \$col, \$column_name);
+    }
+
+    \$self->{_logger}->info("Wrote column names to the worksheet");
+}
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sub-init-xlsx-workbook</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>
