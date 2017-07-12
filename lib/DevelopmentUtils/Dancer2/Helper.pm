@@ -156,7 +156,11 @@ sub initialize_new_app {
 
     $subdir =~ s|::|-|g;
 
-    printBrightBlue("The app has been initialized here:\n$tmpdir/$subdir");
+    my $current_instance_dir = $tmpdir . '/' . $subdir;
+
+    $self->{_current_instance_dir} = $current_instance_dir;
+
+    printBrightBlue("The app has been initialized here:\n$current_instance_dir");
 }
 
 sub check_for_running_app_services {
@@ -195,7 +199,9 @@ sub check_for_running_app_services {
             printBrightBlue("Looks like there are the following '$count' instances of Dancer2 apps running on this machine:");
         }
 
-        print join("\n", @{$list}) . "\n";
+        foreach my $set (@{$list}){
+            print "state '$set->[0]' command '$set->[1]'\n";
+        }    
     }
     else {
 
@@ -207,7 +213,49 @@ sub start_service {
 
     my $self = shift;
 
-    $self->{_logger}->logconfess("NOT YET IMPLEMENTED");
+    my $answer;
+
+    while (1){
+
+        print "Please provide the port number (default is 5000) : ";
+
+        $answer = <STDIN>;
+
+        chomp $answer;
+
+        if ($answer eq ''){
+            $answer = 5000;
+            last;
+        }
+        elsif ($answer !~ m|^\d+$|){
+
+            printBoldRed("'$answer' is not a valid port number");
+        }
+        else {
+            last;
+        }
+    }
+
+    my $stdout = $self->getOutdir() . '/app.psgi.stdout';
+    my $stderr = $self->getOutdir() . '/app.psgi.stderr';
+   
+    my $cmd = "plackup -r bin/app.psgi -p $answer 1>$stdout 2>$stderr";
+
+    if (exists $self->{_current_instance_dir}){
+
+        if (-e $self->{_current_instance_dir}){
+        
+            chdir($self->{_current_instance_dir}) || $self->{_logger}->logconfess("Could not change into Dancer2 app instance directory '$self->{_current_instance_dir}' : $!");
+
+            printBrightBlue("Change into your Dancer2 app instance directory '$self->{_current_instance_dir}' and then execute:\n$cmd\n");
+        }
+        else {
+            $self->{_logger}->logconfess("Dancer2 app instance directory '$self->{_current_instance_dir}' does not exist");
+        }
+    }
+    else {
+        printBrightBlue("Change into your Dancer2 app instance directory and then execute:\n$cmd\n");
+    }
 }
 
 sub stop_service {
