@@ -6,6 +6,7 @@ use Data::Dumper;
 use File::Path;
 use FindBin;
 use Term::ANSIColor;
+use Proc::ProcessTable;
 
 use DevelopmentUtils::Logger;
 use DevelopmentUtils::Config::Manager;
@@ -152,7 +153,7 @@ sub initialize_new_app {
     $self->_execute_cmd($cmd);
 
     my $subdir = $answer;
-    
+
     $subdir =~ s|::|-|g;
 
     printBrightBlue("The app has been initialized here:\n$tmpdir/$subdir");
@@ -161,14 +162,32 @@ sub initialize_new_app {
 sub check_for_running_app_services {
 
     my $self = shift;
- 
-    my $cmd = "ps -wef | grep plackup | grep -v grep";
-    
-    my $results = $self->_execute_cmd($cmd);
 
-    my $count = scalar(@{$results});
+    my $table = new Proc::ProcessTable();
+    if (!defined($table)){
+        $self->{_logger}->logconfess("Could not instantiate Proc::ProcessTable");
+    }
+
+    my $count = 0;
+    
+    my $list = [];
+
+    foreach my $process (@{$table->table}){
+
+        my $state = $process->state;
+        
+        my $cmd = $process->cmndline;
+
+        if ($cmd =~ m|plackup|){
+        
+            push(@{$list}, [$state, $cmd]);
+        
+            $count++;
+        }
+    }
 
     if ($count > 0){
+
         if ($count == 1){
             printBrightBlue("Looks like there is one instance of a Dancer2 app running on this machine:");
         }
@@ -176,15 +195,12 @@ sub check_for_running_app_services {
             printBrightBlue("Looks like there are the following '$count' instances of Dancer2 apps running on this machine:");
         }
 
-        print join("\n", @{$results}) . "\n";
+        print join("\n", @{$list}) . "\n";
     }
     else {
 
-        printYellow("Looks like there are no instances of Dancer2 apps running on this machine.");
-        
-        print "Checked by executing the following command '$cmd'.\n";
+        printYellow("Looks like there are no instances of Dancer2 apps running on this machine.");        
     }
-    $self->{_logger}->logconfess("NOT YET IMPLEMENTED");
 }
 
 sub start_service {
