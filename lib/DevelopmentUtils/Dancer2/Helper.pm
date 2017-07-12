@@ -25,6 +25,32 @@ use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
 ## Singleton support
 my $instance;
 
+has 'config_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setConfigfile',
+    reader   => 'getConfigfile',
+    required => FALSE,
+    );
+
+has 'outdir' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setOutdir',
+    reader   => 'getOutdir',
+    required => FALSE,
+    default  => DEFAULT_OUTDIR
+    );
+
+has 'test_mode' => (
+    is       => 'rw',
+    isa      => 'Bool',
+    writer   => 'setTestMode',
+    reader   => 'getTestMode',
+    required => FALSE,
+    default  => DEFAULT_TEST_MODE
+    );
+
 sub getInstance {
 
     if (!defined($instance)){
@@ -79,20 +105,85 @@ sub install_dancer2 {
 
     my $self = shift;
 
-    $self->{_logger}->logconfess("NOT YET IMPLEMENTED");
+    my $cmd = "cpanm Dancer2";
+
+    my $results = $self->_execute_cmd($cmd);
+
+    print join("\n", @{$results}) . "\n";
+
 }
 
 sub initialize_new_app {
 
     my $self = shift;
     
-    $self->{_logger}->logconfess("NOT YET IMPLEMENTED");
+    my $answer;
+
+    while (1){
+
+        print "Please provide the namespace for your new app : ";
+
+        $answer = <STDIN>;
+
+        chomp $answer;
+
+        if (($answer =~ m|^\d|) || ($answer =~ m|^_|) || ($answer =~ m|^\:|)){
+
+            printBoldRed("'$answer' is an invalid namespace");
+        }
+        else {
+            last;
+        }
+    }
+
+    my $tmpdir = $self->getOutdir();
+
+    if (!-e $tmpdir){
+    
+        mkpath($tmpdir) || $self->{_logger}->logconfess("Could not create temporary directory '$tmpdir' : $!");
+    
+        $self->{_logger}->info("Created temporary directory '$tmpdir'");
+    }
+
+    chdir($tmpdir) || $self->{_logger}->logconfess("Could not change into temporary directory '$tmpdir' : $!");
+
+    my $cmd = "dancer2 -a $answer";
+
+    $self->_execute_cmd($cmd);
+
+    my $subdir = $answer;
+    
+    $subdir =~ s|::|-|g;
+
+    printBrightBlue("The app has been initialized here:\n$tmpdir/$subdir");
 }
 
 sub check_for_running_app_services {
 
     my $self = shift;
  
+    my $cmd = "ps -wef | grep plackup | grep -v grep";
+    
+    my $results = $self->_execute_cmd($cmd);
+
+    my $count = scalar(@{$results});
+
+    if ($count > 0){
+        if ($count == 1){
+            printBrightBlue("Looks like there is one instance of a Dancer2 app running on this machine:");
+        }
+        else {
+            printBrightBlue("Looks like there are the following '$count' instances of Dancer2 apps running on this machine:");
+        }
+
+        print join("\n", @{$results}) . "\n";
+    }
+    else {
+
+        printYellow("Looks like there are no instances of Dancer2 apps running on this machine.");
+        
+        print "Checked by executing the following command '$cmd'.\n";
+    }
     $self->{_logger}->logconfess("NOT YET IMPLEMENTED");
 }
 
