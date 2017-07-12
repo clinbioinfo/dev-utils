@@ -178,13 +178,15 @@ sub check_for_running_app_services {
 
     foreach my $process (@{$table->table}){
 
+        my $pid = $process->pid;
+
         my $state = $process->state;
         
         my $cmd = $process->cmndline;
 
         if ($cmd =~ m|plackup|){
         
-            push(@{$list}, [$state, $cmd]);
+            push(@{$list}, [$pid, $state, $cmd]);
         
             $count++;
         }
@@ -200,8 +202,10 @@ sub check_for_running_app_services {
         }
 
         foreach my $set (@{$list}){
-            print "state '$set->[0]' command '$set->[1]'\n";
+            print "PID '$set->[0]' state '$set->[1]' command '$set->[2]'\n";
         }    
+
+        $self->{_plackup_count} = $count;
     }
     else {
 
@@ -262,7 +266,14 @@ sub stop_service {
 
     my $self = shift;
 
-    $self->{_logger}->logconfess("NOT YET IMPLEMENTED");
+    $self->check_for_running_app_services();
+
+    if ($self->{_plackup_count} > 0){
+        printBrightBlue("Recommend that you just kill the process manually");
+    }
+    else {
+        print "Looks like there are no instances to be stopped on this local machine\n";
+    }
 }
 
 sub _execute_cmd {
