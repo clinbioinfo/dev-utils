@@ -1,0 +1,33 @@
+<snippet>
+	<content><![CDATA[
+use File::Slurp;
+
+my @contents = read_file(\$${1:infile});
+
+my \$line_ctr = 0;
+
+#my \$lookup = {};
+
+foreach my \$line (@contents){
+
+    chomp \$line;
+
+    if (\$line =~ m|^\#|){
+        next;  ## skip commented lines
+    }
+
+    if (\$line =~ m|^\s*\$|){
+        next;  ## skip blank lines
+    }
+
+    \$line_ctr++;
+}
+
+\$self->{_logger}->info("Processed '\$line_ctr' lines in file \$${1:infile}");
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>file-slurp</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>
