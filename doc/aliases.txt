@@ -3,6 +3,7 @@ alias lll='ls -ltr '
 alias lk='less '
 alias eb='e ~/.bashrc & '
 alias sb='source ~/.bashrc '
+alias catb='cat ~/.bashrc '
 
 ##-------------------------------------------
 ##
