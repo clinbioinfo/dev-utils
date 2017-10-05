@@ -1,0 +1,31 @@
+<snippet>
+	<content><![CDATA[
+import logging
+
+class ${1}():
+	'''A class for ${2}.'''
+
+	_instance = None
+
+
+	@classmethod
+	def getInstance(cls):
+
+		if cls._instance == None:
+			cls._instance = ${1}()	
+
+		return cls._instance
+
+
+	def __init__(self):
+		
+		self._logger = logging.getLogger(__name__)
+
+		self._logger.info("Instantiated ${3}.${1}")
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>singleton-class-declaration</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.python</scope>
+</snippet>

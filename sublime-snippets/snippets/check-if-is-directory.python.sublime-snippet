@@ -1,0 +1,12 @@
+<snippet>
+	<content><![CDATA[
+if not os.path.isdir(${1:indir}):
+	self._logger.critical("%s is not a directory" % ${1:indir})
+	print("%s is not a directory" % ${1:indir})
+	exit(1)
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>check-if-is-directory</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.python</scope>
+</snippet>

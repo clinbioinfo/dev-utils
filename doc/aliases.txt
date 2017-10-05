@@ -3,6 +3,7 @@ alias lll='ls -ltr '
 alias lk='less '
 alias eb='e ~/.bashrc & '
 alias sb='source ~/.bashrc '
+alias catb='cat ~/.bashrc '
 
 ##-------------------------------------------
 ##
@@ -24,3 +25,21 @@ alias ggs="git status "
 alias fl='find . -name "*.pl"'
 alias fm='find . -name "*.pm"'
 alias pb='perlbrew '
+
+
+##-------------------------------------------
+##
+## Git Clone
+##
+##-------------------------------------------
+alias clone-vwb='git clone https://github.com/clinbioinfo/vwb.git'
+alias clone-vwb-dashboard='git clone https://github.com/clinbioinfo/vwb-dashboard.git'
+alias clone-umlet-utils='git clone https://github.com/clinbioinfo/umlet-utils.git'
+alias clone-log4perl-to-html='git clone https://github.com/clinbioinfo/log4perl-to-html.git'
+alias clone-queries-benchmarker-utils='git clone https://github.com/clinbioinfo/queries-benchmarker-utils.git'
+alias clone-sharepoint-utils='git clone https://github.com/clinbioinfo/sharepoint-utils.git'
+alias clone-installer-config-utils='git clone https://github.com/clinbioinfo/installer-config-utils.git'
+alias clone-flowjo-utils='git clone https://github.com/clinbioinfo/flowjo-utils.git'
+alias clone-perlbrew-utils='git clone https://github.com/clinbioinfo/perlbrew-utils.git'
+alias clone-rest-web-service-bootstrap-utils='git clone https://github.com/clinbioinfo/rest-web-service-bootstrap-utils.git'
+

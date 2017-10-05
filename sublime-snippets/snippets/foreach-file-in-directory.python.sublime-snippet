@@ -1,0 +1,19 @@
+<snippet>
+	<content><![CDATA[
+file_ctr = 0
+
+for path, subdirs, files in os.walk(${1:indir}):
+
+	for name in files:
+
+		file_ctr += 1
+
+		file_path = os.path.join(path, name)
+
+print("Processed %d files in directory %s" % (file_ctr, ${1:indir}))
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>foreach-file-in-directory</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.python</scope>
+</snippet>

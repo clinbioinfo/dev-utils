@@ -77,6 +77,8 @@ if (!-e $source_file){
     $logger->logdie("source file '$source_file' does not exist");
 }
 
+$source_file = File::Spec->rel2abs($source_file);
+
 my $manager = DevelopmentUtils::Alias::Manager::getInstance(
     test_mode            => $test_mode,
     verbose              => $verbose,
