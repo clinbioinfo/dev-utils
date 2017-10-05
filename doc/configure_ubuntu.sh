@@ -7,7 +7,7 @@ sudo apt install git -y
 echo "About install dev-utils"
 cd ~
 git clone https://github.com/clinbioinfo/dev-utils.git
-cp ~/dev-utils/docs/aliases.txt ~/.
+cp ~/dev-utils/doc/aliases.txt ~/.
 echo "source ~/aliases.txt" >> ~/.bashrc
 
 echo "About to install chromium-browser"
