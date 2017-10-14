@@ -1,0 +1,9 @@
+## Reference:
+## https://www.linuxhint.com/install-sqlite-browser-ubuntu/
+sudo add-apt-repository ppa:linuxgndu/sqlitebrowser-testing
+sudo apt-get update
+sudo apt-get install sqlitebrowser
+
+## To remove:
+sudo apt-get remove sqlitebrowser
+
