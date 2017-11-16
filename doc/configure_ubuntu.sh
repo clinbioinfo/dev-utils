@@ -30,6 +30,7 @@ perlbrew init
 
 echo "About to install perl-5.27.4"
 perlbrew install perl-5.27.4
+perlbrew install-cpanm
 
 echo "About to create lib perl-5.27.4@devutils"
 perlbrew lib create perl-5.27.4@devutils
