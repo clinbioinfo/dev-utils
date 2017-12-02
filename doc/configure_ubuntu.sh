@@ -10,3 +10,5 @@ echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sou
 sudo apt-get install sublime-text
 echo "About to install git"
 sudo apt install git
+echo "About to install python3-pip"
+sudo apt install python3-pip
