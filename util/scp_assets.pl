@@ -5,6 +5,7 @@ use File::Basename;
 use Term::ANSIColor;
 use Try::Tiny;
 use File::Slurp;
+use Sys::Hostname;
 
 use constant TRUE => 1;
 use constant FALSE => 0;
@@ -67,6 +68,8 @@ sub scp_assets {
 	execute_transfer();
 
 	write_scp_conf_file();
+
+	transfer_file($scp_conf_file);
 }
 
 sub are_all_defaults_correct {
@@ -127,43 +130,54 @@ sub execute_transfer {
 		
 		chomp $file;
 		
-		my $ex;
-		
-		if (-f $file){
-		    $ex = "scp $file $username\@$target_machine:$target_base_dir/$project_dir/$file";
-		}
-		elsif (-d $file){
-		    $ex = "scp -r $file $username\@$target_machine:$target_base_dir/$project_dir/$file";
-		}
-		else{
-		    print color 'bold red';
-		    print "Don't know how to handle '$file'\n";
-			print color 'reset';
-		    next;
-		}
-
-		$ex =~ s|/+|/|g; ## replace multiple forward slashes with a single one
-
-		print "About to execute '$ex'\n";
-		
-		try {
-		    
-		    qx($ex);
-		    
-		} catch {
-		    
-		    print color 'bold red';
-		    print "Encountered the following error: $_\n";
-		    print color 'reset';
-		    exit(1);
-		};
+		transfer_file($file);
 
 		$transfer_ctr++;
-
     }
 
     print "Processed '$ctr' assets\n";
     print "Transfered '$transfer_ctr' assets\n";
+}
+
+sub transfer_file {
+
+	my ($file) = @_;
+
+	my $ex;
+	
+	if (-f $file){
+		
+		if (File::Basename::basename($file) eq 'scp_conf.txt'){
+			$file = File::Basename::basename($file);
+		}
+
+	    $ex = "scp $file $username\@$target_machine:$target_base_dir/$project_dir/$file";
+	}
+	elsif (-d $file){
+	    $ex = "scp -r $file $username\@$target_machine:$target_base_dir/$project_dir/$file";
+	}
+	else{
+	    print color 'bold red';
+	    print "Don't know how to handle '$file'\n";
+		print color 'reset';
+	    next;
+	}
+
+	$ex =~ s|/+|/|g; ## replace multiple forward slashes with a single one
+
+	print "About to execute '$ex'\n";
+	
+	try {
+	    
+	    qx($ex);
+	    
+	} catch {
+	    
+	    print color 'bold red';
+	    print "Encountered the following error: $_\n";
+	    print color 'reset';
+	    exit(1);
+	};
 }
 
 sub read_scp_conf_file {
@@ -200,6 +214,12 @@ sub write_scp_conf_file {
 	print OUTFILE "target_base_dir=$target_base_dir\n";
 
 	print OUTFILE "project_dir=$project_dir\n";
+
+	print OUTFILE "## source-machine: " . hostname() . "\n";
+
+	print OUTFILE "## date-created: " . localtime() . "\n";
+
+	print OUTFILE "## created-by: " . $username . "\n";
 
 	close OUTFILE;
 	
