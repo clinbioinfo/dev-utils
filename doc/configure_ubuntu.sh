@@ -19,8 +19,14 @@ sudo apt-get install emacs24 -y
 echo "About to install Sublime Text"
 wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add
 echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
+
+
+echo "About to install sublime text"
 sudo apt-get update
 sudo apt-get install sublime-text -y
+
+echo "About to install python3-pip"
+sudo apt install python3-pip
 
 echo "About to install Perlbrew"
 sudo apt-get install perlbrew -y
@@ -43,6 +49,3 @@ cpanm Config::IniFiles
 cpanm Moose
 cpanm File::Slurp
 cpanm JSON::Parse
-
-echo "About to install Meteor JS"
-curl https://install.meteor.com/ | sh
