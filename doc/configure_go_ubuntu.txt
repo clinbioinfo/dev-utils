@@ -1,0 +1,26 @@
+echo "Reference: https://tecadmin.net/install-go-on-ubuntu/"
+
+echo "Will update Ubuntu packages"
+sudo apt-get update
+
+echo "Will upgrade Ubuntu packages"
+sudo apt-get -y upgrade
+
+echo "Changing to /tmp directory"
+cd /tmp/
+
+echo "Will retrieve go 1.9.2"
+wget https://storage.googleapis.com/golang/go1.9.2.linux-amd64.tar.gz
+
+echo "Will unpackage the tar ball"
+sudo tar -xvf go1.9.2.linux-amd64.tar.gz
+
+echo "Will move go to /usr/local"
+sudo mv go /usr/local
+
+echo "Will set GOROOT and GOPATH environment variables"
+export GOROOT=/usr/local/go
+export GOPATH=$HOME/projects
+
+echo "Will update PATH"
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
