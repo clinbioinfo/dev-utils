@@ -1,0 +1,6 @@
+cpanm Log::Log4perl
+cpanm Log::Log4perl
+cpanm Moose
+cpanm File::Slurp
+cpanm Config::IniFiles
+
