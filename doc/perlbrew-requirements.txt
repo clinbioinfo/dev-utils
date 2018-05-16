@@ -1,0 +1,5 @@
+Log::Log4perl
+Config::IniFiles
+Moose
+File::Slurp
+JSON::Parse

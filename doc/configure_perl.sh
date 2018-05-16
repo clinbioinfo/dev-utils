@@ -13,11 +13,8 @@ perlbrew install-cpanm
 echo "About to create lib perl-5.27.4@devutils"
 perlbrew lib create perl-5.27.4@devutils
 
-echo "About to install modules for dev-utils"
+echo "About to use perl-5.27.4@devutils"
 perlbrew use perl-5.27.4@devutils
-cpanm Try::Tiny
-cpanm Log::Log4perl
-cpanm Config::IniFiles
-cpanm Moose
-cpanm File::Slurp
-cpanm JSON::Parse
+
+echo "About to install modules for dev-utils"
+echo "cat perlbrew-requirements.txt | perlbrew exec cpanm"
