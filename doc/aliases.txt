@@ -43,3 +43,7 @@ alias clone-flowjo-utils='git clone https://github.com/clinbioinfo/flowjo-utils.
 alias clone-perlbrew-utils='git clone https://github.com/clinbioinfo/perlbrew-utils.git'
 alias clone-rest-web-service-bootstrap-utils='git clone https://github.com/clinbioinfo/rest-web-service-bootstrap-utils.git'
 
+##
+## misc.
+##
+alias create-python-venv="perl ~/dev-utils/util/create_python_venv.pl "
