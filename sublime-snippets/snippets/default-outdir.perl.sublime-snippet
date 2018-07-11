@@ -1,0 +1,15 @@
+<snippet>
+	<content><![CDATA[
+use File::Path;
+use File::Basename;
+use constant DEFAULT_OUTDIR => '/tmp/' . File::Basename::basename(\$0) . '/' . time();
+my \$outdir = DEFAULT_OUTDIR;
+if (!-e \$outdir){
+	 mkpath(\$outdir) || die "Could not create output directory '\$outdir' : \$!";
+	 print "Created directory '\$outdir'\n";
+}]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>default-outdir</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>
