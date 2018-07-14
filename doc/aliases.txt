@@ -28,6 +28,7 @@ alias ggh="cat ~/aliases.txt | grep alias | grep git | grep -v clone-"
 alias fl='find . -name "*.pl"'
 alias fm='find . -name "*.pm"'
 alias pb='perlbrew '
+alias pbh='pb help | less'
 
 
 ##-------------------------------------------
