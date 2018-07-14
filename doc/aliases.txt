@@ -17,7 +17,7 @@ alias ggp="git push "
 alias ggs="git status "
 alias ggl="git clone "
 alias ggba="git branch -a "
-alias ggh="cat ~/aliases.txt | grep alias | grep git "
+alias ggh="cat ~/aliases.txt | grep alias | grep git | grep -v clone-"
 
 
 ##-------------------------------------------
