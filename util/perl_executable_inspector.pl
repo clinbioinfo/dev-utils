@@ -76,14 +76,13 @@ foreach my $line (@lines){
 		next;
 	}
 
-	print '>> ' . $line . "\n";
 
 	if ($line =~ m|^sub\s+(\S+)\s*\{{0,1}\s*$|){
 
 		$sub_lookup->{$1}++;
 
 		$sub_ctr++;
-		
+
 		next;
 	}
 
@@ -129,15 +128,17 @@ if ($sub_ctr > 0){
 		}
 	}
 
+	if ($used_sub_ctr > 0){
+		printGreen("\nFound the following '$used_sub_ctr' used subroutines:");
+		print join("\n", @{$used_sub_list}) . "\n";
+	}
+
 	if ($unused_sub_ctr > 0){
-		print "Found the following '$unused_sub_ctr' unused subroutines:\n";
+
+		printBoldRed("\nFound the following '$unused_sub_ctr' unused subroutines:");
 		print join("\n", @{$unused_sub_list}) . "\n";
 	}
 
-	if ($used_sub_ctr > 0){
-		print "Found the following '$used_sub_ctr' used subroutines:\n";
-		print join("\n", @{$used_sub_list}) . "\n";
-	}
 }
 else {
 	print "No subroutines found in '$infile'\n";
