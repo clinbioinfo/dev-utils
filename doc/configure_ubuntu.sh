@@ -15,12 +15,21 @@ sudo apt-get install chromium-browser -y
 
 echo "About to install emacs25"
 sudo apt-get install emacs25 -y
+echo ";;disable splash screen and startup message" >> ~/.emacs
+echo "(setq inhibit-startup-message t)" >> ~/.emacs
+echo "(setq initial-scratch-message nil)" >> ~/.emacs
 
 echo "About to install terminator"
 sudo apt-get install terminator -y
 
 echo "About to install tree"
 sudo apt-get install -y tree
+
+echo "About to install umlet"
+sudo apt-get install -y umlet
+
+echo "About to install screen"
+sudo apt-get install -y screen
 
 echo "About to install Sublime Text"
 wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add

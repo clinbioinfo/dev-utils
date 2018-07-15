@@ -3,4 +3,6 @@ cpanm Log::Log4perl
 cpanm Moose
 cpanm File::Slurp
 cpanm Config::IniFiles
+cpanm JSON
+cpanm JSON::Parse
 
