@@ -1,0 +1,29 @@
+Room actions
+
+/join <room name> – Join an existing room.
+
+/part– Leave the room you’re currently in.
+
+/topic <msg> – Set the topic for the current room.
+
+
+
+Setting your status
+
+/available | /back | /here <msg> – Shortcut for setting your status to available (green dot). The <msg> part is optional.
+
+/away <msg> – Set your status to away (yellow dot). In appearance, this is the same as going idle, except it doesn’t automatically return your status to ‘available’ when you come back.
+
+/dnd – Set status to do not disturb (red dot).
+
+
+Formatting
+
+/code <msg> – Displays the message with code syntax highlighting (language is autodetected).
+
+/quote <msg> – Displays the message formatted with a monospace font, regardless of length or number of newlines in the message.
+
+/me | /em <msg> – The “emote” command. This will let you display a line of grey text with your name at the beginning, similar to the style room join and leave messages. For example, if I typed “/me is happy.” it would show “Jeff Park is happy.” in the chat.
+
+/clear – Temporarily clear the chat history in the current room or 1-1 chat. (The history comes back when you reopen the room or chat.)
+

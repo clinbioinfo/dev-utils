@@ -51,3 +51,4 @@ alias clone-rest-web-service-bootstrap-utils='git clone https://github.com/clinb
 ## misc.
 ##
 alias create-python-venv="perl ~/dev-utils/util/create_python_venv.pl "
+alias hipchat-tips="cat ~/dev-utils/docs/hipchat_slash_commands.txt"

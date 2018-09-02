@@ -64,84 +64,29 @@ my $sub_lookup = {};
 
 my $sub_ctr = 0;
 
+my $var_lookup = {};
+
+my $var_ctr = 0;
+
 my $line_of_code_list = [];
 
-foreach my $line (@lines){
-
-	if ($line =~ m|^\s*$|){
-		next;
-	}
-
-	if ($line =~ m|^\#|){
-		next;
-	}
-
-
-	if ($line =~ m|^sub\s+(\S+)\s*\{{0,1}\s*$|){
-
-		$sub_lookup->{$1}++;
-
-		$sub_ctr++;
-
-		next;
-	}
-
-	push(@{$line_of_code_list}, $line);
-}
+&parse_lines();
 
 
 if ($sub_ctr > 0){
 
-	
-	my $used_sub_lookup = {};
-	
-	my $used_sub_ctr = 0;
-	my $used_sub_list = [];
-
-	my $unused_sub_ctr = 0;
-	my $unused_sub_list = [];
-	
-
-	foreach my $subname (sort keys %{$sub_lookup}){
-
-		my $found_use_of_sub = FALSE;
-
-		foreach my $line_of_code (@{$line_of_code_list}){
-			
-			if ($line_of_code =~ m/$subname/){
-				
-				$found_use_of_sub = TRUE;
-
-				push(@{$used_sub_list}, $subname);
-
-				$used_sub_ctr++;
-
-				last; 
-				## Done checking for use of this subroutine.
-				## Start checking for the use of the next one.
-			}
-		}
-
-		if (! $found_use_of_sub){
-			$unused_sub_ctr++;
-			push(@{$unused_sub_list}, $subname);
-		}
-	}
-
-	if ($used_sub_ctr > 0){
-		printGreen("\nFound the following '$used_sub_ctr' used subroutines:");
-		print join("\n", @{$used_sub_list}) . "\n";
-	}
-
-	if ($unused_sub_ctr > 0){
-
-		printBoldRed("\nFound the following '$unused_sub_ctr' unused subroutines:");
-		print join("\n", @{$unused_sub_list}) . "\n";
-	}
-
+   &analyze_subroutines();
 }
 else {
 	print "No subroutines found in '$infile'\n";
+}
+
+if ($var_ctr > 0){
+
+   &analyze_variables();
+}
+else {
+    printBoldRed("No variables found in '$infile'");
 }
 
 printGreen(File::Spec->rel2abs($0) . " execution completed\n");
@@ -244,4 +189,160 @@ sub printBoldRed {
     print color 'bold red';
     print $msg . "\n";
     print color 'reset';
+}
+
+sub parse_lines {
+
+    foreach my $line (@lines){
+
+        if ($line =~ m|^\s*$|){
+            next;
+        }
+
+        if ($line =~ m|^\#|){
+            next;
+        }
+
+
+        if ($line =~ m|^sub\s+(\S+)\s*\{{0,1}\s*$|){
+
+            $sub_lookup->{$1}++;
+
+            $sub_ctr++;
+
+            next;
+        }
+        else {
+
+            my @variables_list = $line =~ m/\$(\w+)/;
+
+            foreach my $variable (@variables_list){
+
+                if (! exists $var_lookup->{$variable}){
+                    ## We're only interested in counting unique variables.
+                    $var_ctr++;
+                    $var_lookup->{$variable} = $line_ctr;
+                }
+            }        
+        }
+
+        push(@{$line_of_code_list}, [$line, $line_ctr]);        
+    }
+}
+
+sub analyze_subroutines {
+    
+    my $used_sub_lookup = {};
+    
+    my $used_sub_ctr = 0;
+    my $used_sub_list = [];
+
+    my $unused_sub_ctr = 0;
+    my $unused_sub_list = [];
+    
+
+    foreach my $subname (sort keys %{$sub_lookup}){
+
+        my $found_use_of_sub = FALSE;
+
+        foreach my $line_of_code_ref (@{$line_of_code_list}){
+            
+            my $line_of_code = $line_of_code_ref->[0];
+            my $line_number = $line_of_code_ref->[1];
+
+            if ($line_of_code =~ m/$subname/){
+                
+                $found_use_of_sub = TRUE;
+
+                push(@{$used_sub_list}, $subname);
+
+                $used_sub_ctr++;
+
+                last; 
+                ## Done checking for use of this subroutine.
+                ## Start checking for the use of the next one.
+            }
+        }
+
+        if (! $found_use_of_sub){
+            $unused_sub_ctr++;
+            push(@{$unused_sub_list}, $subname);
+        }
+    }
+
+    if ($used_sub_ctr > 0){
+        printGreen("\nFound the following '$used_sub_ctr' used subroutines:");
+        print join("\n", @{$used_sub_list}) . "\n";
+    }
+
+    if ($unused_sub_ctr > 0){
+
+        printBoldRed("\nFound the following '$unused_sub_ctr' unused subroutines:");
+        print join("\n", @{$unused_sub_list}) . "\n";
+    }
+}
+
+sub analyze_variables {
+    
+    my $used_var_lookup = {};
+    
+    my $used_var_ctr = 0;
+    my $used_var_list = [];
+
+    my $unused_var_ctr = 0;
+    my $unused_var_list = [];
+    
+    foreach my $varname (sort keys %{$var_lookup}){
+
+        my $found_use_of_var = FALSE;
+
+        foreach my $line_of_code_ref (@{$line_of_code_list}){
+
+            my $line_of_code = $line_of_code_ref->[0];
+            my $line_number = $line_of_code_ref->[1];
+                        
+            if ($line_of_code =~ m/\$$varname/){
+            
+                my $var_declaration_line_number = $var_lookup->{$varname};
+
+                if ($var_declaration_line_number == $line_number){
+                    ## The only use of this variable might be on the very line it was declared.
+                }
+                else {
+                    $found_use_of_var = TRUE;
+
+                    push(@{$used_var_list}, $varname);
+
+                    $used_var_ctr++;
+
+                    last; 
+                    ## Done checking for use of this varroutine.
+                    ## Start checking for the use of the next one.
+                }
+            }
+        }
+
+        if (! $found_use_of_var){
+            $unused_var_ctr++;
+            push(@{$unused_var_list}, $varname);
+        }
+    }
+
+    if ($used_var_ctr > 0){
+        printGreen("\nFound the following '$used_var_ctr' used variables:");
+        foreach my $var (@{$used_var_list}){
+            print '$' . $var . "\n";
+        }
+        # print join("\n" .'$', @{$used_var_list}) . "\n";
+    }
+
+    if ($unused_var_ctr > 0){
+
+        printBoldRed("\nFound the following '$unused_var_ctr' unused variables:");
+        foreach my $var (@{$unused_var_list}){
+            print '$' . $var . "\n";
+        }
+
+        # print join("\n" . '$', @{$unused_var_list}) . "\n";
+    }
 }
