@@ -328,8 +328,11 @@ sub create_test_file($$){
         }
     }
 
+
+    my $test_count = scalar(@{$lookup->{data_member_list}}) + 3;
+
     print OUTFILE 'use FindBin;' . "\n\n";
-    print OUTFILE 'use Test::More tests => 3;' . "\n";
+    print OUTFILE 'use Test::More tests => ' . $test_count . ';' . "\n";
 
     print OUTFILE 'use lib "$FindBin::Bin/../lib/";' . "\n\n";
     print OUTFILE '' . "\n";
@@ -444,6 +447,33 @@ sub create_test_file($$){
 
     print OUTFILE 'ok( defined($instance) && ref $instance eq \'' . $package . '\',     \'instantiantion works\' );' . "\n";
 
+
+    ## Write the data member value checks here
+    for my $data_member (@{$lookup->{data_member_list}}){
+
+        my $name = $data_member->{name};
+
+        my $type = $data_member->{type};
+
+        my $getter = $data_member->{getter};
+
+        if (!exists $data_member->{default}){
+            if (exists $declared_variables_lookup->{$name}){
+                my $value = $declared_variables_lookup->{$name};
+                print OUTFILE 'is($instance->' . $getter . "(), '" . $value . "' , 'testing " . $getter . "()');" . "\n";
+            }
+            else {
+                $logger->logconfess("name '$name' does not exist in the declared_variables_lookup");
+            }
+        }
+        else {
+            my $value = $data_member->{default};
+            print OUTFILE 'is($instance->' . $getter . "(), '" . $value . "' , 'testing " . $getter . "()');" . "\n";
+        }
+    }
+
+    print OUTFILE "\n\n";
+
     close OUTFILE;
 
     $logger->info("Wrote '$test_file' for package '$package'");
@@ -513,7 +543,7 @@ sub parse_module($) {
                 next;
             }
         }
-        if ($line =~ m/^\s+isa\s+\=\>\s+'(\S+)',\s*$/){
+        if ($line =~ m/^\s+isa\s+\=\>\s+'(\S+)',{0,1}\s*$/){
 
             if ($found_data_member){
                 $current_lookup->{type} = $1;
@@ -524,7 +554,7 @@ sub parse_module($) {
             next;
         }
 
-        if ($line =~ m/^\s+writer\s+\=\>\s+'(\S+)',\s*$/){
+        if ($line =~ m/^\s+writer\s+\=\>\s+'(\S+)',{0,1}\s*$/){
 
             if ($found_data_member){
                 $current_lookup->{setter} = $1;
@@ -537,7 +567,7 @@ sub parse_module($) {
             next;
         }
 
-        if ($line =~ m/^\s+reader\s+\=\>\s+'(\S+)',\s*$/){
+        if ($line =~ m/^\s+reader\s+\=\>\s+'(\S+)',{0,1}\s*$/){
 
             if ($found_data_member){
                 $current_lookup->{getter} = $1;
@@ -550,7 +580,7 @@ sub parse_module($) {
             next;
         }
 
-        if ($line =~ m/^\s+required\s+\=\>\s+'(\S+)',\s*$/){
+        if ($line =~ m/^\s+required\s+\=\>\s+'(\S+)',{0,1}\s*$/){
             if ($found_data_member){
                 $current_lookup->{required} = $1;
             }
