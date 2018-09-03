@@ -475,6 +475,24 @@ sub create_test_file($$){
     print OUTFILE '' . "\n\n";
 
 
+    if (exists $lookup->{data_member_name_to_lookup}){
+        for my $name (keys %{$lookup->{data_member_name_to_lookup}}){
+
+            if ($name =~ m/outfile/){
+                &add_example_outfile($package);
+            }
+            elsif ($name =~ m/outdir/){
+                &add_example_outdir();
+            }
+            elsif ($name =~ m/file/){
+                &add_example_outfile($package);
+            }
+            elsif ($name =~ m/dir/){
+                &add_example_outdir();
+            }
+        }
+    }
+
 
     if ($package =~ m/Parser/){
         if ($package =~ m/Tab/){
@@ -499,7 +517,7 @@ sub create_test_file($$){
     ## Create some variables for testing the data members
     my $declared_variables_lookup = {};
 
-    print OUTFILE "\n" . '## Declare variables to supporting testing' . "\n\n";
+    print OUTFILE "\n" . '## Declare variables to support testing' . "\n\n";
 
     for my $data_member (@{$lookup->{data_member_list}}){
 
@@ -522,8 +540,18 @@ sub create_test_file($$){
                 $declared_variables_lookup->{$name} = TRUE;
             }
             elsif ($type eq 'Str'){
-                print OUTFILE '\'SOME ' . uc($name) . '\';';
-                $declared_variables_lookup->{$name} = 'SOME ' . uc($name);
+                if ($name =~ /file/){
+                    print OUTFILE '$example_outfile;';
+                    $declared_variables_lookup->{$name} = '$example_outfile';
+                }
+                elsif ($name =~ /dir/){
+                    print OUTFILE '$example_outdir;';
+                    $declared_variables_lookup->{$name} = '$example_outdir';
+                }
+                else {
+                    print OUTFILE '\'SOME ' . uc($name) . '\';';
+                    $declared_variables_lookup->{$name} = 'SOME ' . uc($name);
+                }
             }
             elsif ($type eq 'ArrayRef'){
                 my @array = qw(a b c d);
@@ -539,9 +567,9 @@ sub create_test_file($$){
             else {
                 print OUTFILE "'',";
             }
-        }
 
-        print OUTFILE "\n";
+            print OUTFILE "\n";
+        }
     }
 
     print OUTFILE "\n\n\n";
@@ -593,7 +621,12 @@ sub create_test_file($$){
                     my $value = $declared_variables_lookup->{$name};
 
                     print OUTFILE $leading_space . $name . ' => ';
-                    print OUTFILE '\'' . $value . '\',' . "\n";
+                    if (($name =~ m/file/) || ($name =~ m/dir/)){
+                        print OUTFILE $value . ',' . "\n";
+                    }
+                    else {
+                        print OUTFILE '\'' . $value . '\',' . "\n";
+                    }
                 }
                 else {
                     print OUTFILE $leading_space . $name . ' => ';
@@ -620,7 +653,12 @@ sub create_test_file($$){
         if (!exists $data_member->{default}){
             if (exists $declared_variables_lookup->{$name}){
                 my $value = $declared_variables_lookup->{$name};
-                print OUTFILE 'is($instance->' . $getter . "(), '" . $value . "' , 'testing " . $getter . "()');" . "\n";
+                if (($name =~ m/file/) || ($name =~ m/dir/)){
+                    print OUTFILE 'is($instance->' . $getter . "(), " . $value . " , 'testing " . $getter . "()');" . "\n";
+                }
+                else{
+                    print OUTFILE 'is($instance->' . $getter . "(), '" . $value . "' , 'testing " . $getter . "()');" . "\n";
+                }
             }
             else {
                 $logger->logconfess("name '$name' does not exist in the declared_variables_lookup");
@@ -681,27 +719,44 @@ sub add_pod_usage($$){
     print OUTFILE '=cut' . "\n\n";
 }
 
+sub add_example_outfile($){
 
+    my ($package) = @_;
+
+    print OUTFILE "\n";
+    print OUTFILE 'my $example_outfile = "/tmp/example_outfile.txt";' . "\n";
+    print OUTFILE 'open(OUTFILE, ">>$example_outfile") || die "Could not open example output file \'$example_outfile\' : $!";' . "\n";
+    print OUTFILE 'print OUTFILE "Random example output file to test package \'' . $package . '\'\n";' . "\n";
+    print OUTFILE 'close OUTFILE;' . "\n";
+}
+
+sub add_example_outdir(){
+
+    print OUTFILE "\n";
+    print OUTFILE 'my $example_outdir = "/tmp/example_outdir";' . "\n";
+    print OUTFILE 'use File::Path;' . "\n";
+    print OUTFILE 'if (!-e $example_outdir){' . "\n";
+    print OUTFILE '    mkpath($example_outdir) || die "Could not create directory \'$example_outdir\'";' . "\n";
+    print OUTFILE '}' . "\n";
+}
 
 sub add_example_tab_file(){
 
+    print OUTFILE "\n";
     print OUTFILE 'my $example_tab_file = "/tmp/example_tab_file.txt";' . "\n";
-    print OUTFILE 'if (!-e $example_tab_file){' . "\n";
-    print OUTFILE '    open(OUTFILE, ">$example_tab_file") || die "Could not open example tab-delimted file \'$example_tab_file\' : $!";' . "\n";
-    print OUTFILE '    print OUTFILE "A\tB\tC\tD\nE\tF\tG\tH\n";' . "\n";
-    print OUTFILE '    close OUTFILE;' . "\n";
-    print OUTFILE '}' . "\n";
+    print OUTFILE 'open (OUTFILE, ">>$example_tab_file") || die "Could not open example tab-delimted file \'$example_tab_file\' : $!";' . "\n";
+    print OUTFILE 'print OUTFILE "A\tB\tC\tD\nE\tF\tG\tH\n";' . "\n";
+    print OUTFILE 'close OUTFILE;' . "\n";
 }
 
 
 sub add_example_csv_file(){
 
+    print OUTFILE "\n";
     print OUTFILE 'my $example_csv_file = "/tmp/example_csv_file.csv";' . "\n";
-    print OUTFILE 'if (!-e $example_csv_file){' . "\n";
-    print OUTFILE '    open(OUTFILE, ">$example_csv_file") || die "Could not open example comma-separated file \'$example_csv_file\' : $!";' . "\n";
-    print OUTFILE '    print OUTFILE "A,B,C,D\nE,F,G,H\n";' . "\n";
-    print OUTFILE '    close OUTFILE;' . "\n";
-    print OUTFILE '}' . "\n";
+    print OUTFILE 'open(OUTFILE, ">>$example_csv_file") || die "Could not open example comma-separated file \'$example_csv_file\' : $!";' . "\n";
+    print OUTFILE 'print OUTFILE "A,B,C,D\nE,F,G,H\n";' . "\n";
+    print OUTFILE 'close OUTFILE;' . "\n";
 }
 
 sub parse_module($) {
