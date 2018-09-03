@@ -64,6 +64,11 @@ if (!defined($logger)){
     $logger->logconfess("Could not instantiate DevelopmentUtils::Logger");
 }
 
+my $master_lookup = {};
+
+my $logger_module_found = FALSE;
+my $logger_module_package_name;
+
 &main();
 
 if ($verbose){
@@ -253,20 +258,29 @@ sub main($) {
         $file_list = \@list;
     }
 
+    my $file_count = scalar(@{$file_list});
+
+    $logger->info("Going to parse '$file_count' module files");
+
     for my $file (@{$file_list}){
 
-        &process_file($file);
+        my $lookup = &parse_module($file);
+
+        $master_lookup->{$file} = $lookup;
     }
 
-}
+    $logger->info("Going to create '$file_count' unit test files");
 
-sub process_file($) {
+    for my $file (sort keys %{$master_lookup}){
 
-    my ($file) = @_;
+        my $lookup = $master_lookup->{$file};
 
-    my $lookup = &parse_module($file);
+        &create_test_file($lookup, $file);
+    }
 
-    &create_test_file($lookup, $file);
+    print "\nWrote all unit-test files to $outdir/t/\n";
+
+    $logger->info("Wrote all unit-test files to $outdir/t/");
 }
 
 sub create_test_file($$){
@@ -339,6 +353,19 @@ sub create_test_file($$){
 
     print OUTFILE 'use lib "$FindBin::Bin/../lib/";' . "\n\n";
     print OUTFILE '' . "\n";
+
+
+    if ($logger_module_found){
+        if (defined($logger_module_package_name)){
+            print OUTFILE 'use ' . $logger_module_package_name . ';' . "\n\n";
+            print OUTFILE 'my $logfile = "/tmp/sample.log";' . "\n";
+            print OUTFILE 'my $logger = ' . $logger_module_package_name . '::getInstance(log_level => 4, log_file => $logfile);' . "\n";
+        }
+        else {
+            $logger->logconfess("logger_module_package_name was not defined while processing package '$package' file '$file'");
+        }
+        print OUTFILE "\n\n";
+    }
 
     if ($add_login){
         print OUTFILE 'my $login = \'sundaram\';' . "\n";
@@ -553,7 +580,15 @@ sub parse_module($) {
         $line_ctr++;
 
         if ($line =~ m/^package (\S+);/){
-            $lookup->{package} = $1;
+
+            my $package = $1;
+
+            if ($package =~ m/Logger/){
+                $logger_module_found = TRUE;
+                $logger_module_package_name = $package;
+            }
+
+            $lookup->{package} = $package;
             next;
         }
 
