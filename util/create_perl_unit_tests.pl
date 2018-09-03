@@ -37,7 +37,8 @@ my (
     $log_file,
     $log_level,
     $config_file,
-    $indir
+    $indir,
+    $infile,
     );
 
 my $results = GetOptions (
@@ -49,6 +50,7 @@ my $results = GetOptions (
     'log_level=s'   => \$log_level,
     'log_file=s'    => \$log_file,
     'indir=s'       => \$indir,
+    'infile=s'      => \$infile,
     );
 
 &checkCommandLineArguments();
@@ -91,9 +93,9 @@ sub checkCommandLineArguments {
 
     my $fatalCtr = 0;
 
-    if (!defined($indir)){
+    if ((!defined($indir)) && (!(defined($infile)))){
 
-        printBoldRed("--indir was not specified");
+        printBoldRed("You must specified either --indir or --infile was not specified");
 
         $fatalCtr++;
     }
@@ -115,7 +117,7 @@ sub checkCommandLineArguments {
 
         $config_file = DEFAULT_CONFIG_FILE;
 
-        printYellow("--verbose was not specified and therefore was set to default '$verbose'");
+        printYellow("--config_file was not specified and therefore was set to default '$config_file'");
     }
 
 
@@ -229,17 +231,29 @@ sub checkInfileStatus {
 
 sub main($) {
 
-    my $cmd = "find $indir -name '*.pm'";
+    my $file_list;
 
-    print "About to execute '$cmd'\n";
+    if (defined($infile)){
+        &checkInfileStatus($infile);
+        $file_list = [$infile];
+    }
 
-    $logger->info("About to execute '$cmd'");
+    if (defined($indir)){
 
-    my @file_list  = qx($cmd);
+        my $cmd = "find $indir -name '*.pm'";
 
-    chomp @file_list;
+        print "About to execute '$cmd'\n";
 
-    for my $file (@file_list){
+        $logger->info("About to execute '$cmd'");
+
+        my @list  = qx($cmd);
+
+        chomp @list;
+
+        $file_list = \@list;
+    }
+
+    for my $file (@{$file_list}){
 
         &process_file($file);
     }
@@ -285,16 +299,50 @@ sub create_test_file($$){
     print OUTFILE '#!/usr/bin/env perl' . "\n";
     print OUTFILE '## Test for ' . $file . "\n";
     print OUTFILE 'use strict;' . "\n";
-    print OUTFILE 'use File::Basename;' . "\n";
-    print OUTFILE 'use Cwd;' . "\n";
+
+    my $add_username = FALSE;
+    my $add_login = FALSE;
+
+    if (exists $lookup->{constant_list}){
+
+        ## Add core Perl modules needed by declared constants
+
+        for my $constant (@{$lookup->{constant_list}}){
+
+            if ($constant =~ m/File::Basename/){
+                print OUTFILE 'use File::Basename;' . "\n";
+            }
+            if ($constant =~ m/hostname/){
+                print OUTFILE 'use Sys::Hostname;' . "\n";
+            }
+            if ($constant =~ m/cwd/){
+                print OUTFILE 'use Cwd;' . "\n";
+            }
+            if ($constant =~ m/\$username/){
+                $add_username = TRUE;
+            }
+            if ($constant =~ m/\$login/){
+                $add_login = TRUE;
+            }
+
+        }
+    }
+
     print OUTFILE 'use FindBin;' . "\n\n";
     print OUTFILE 'use Test::More tests => 3;' . "\n";
 
     print OUTFILE 'use lib "$FindBin::Bin/../lib/";' . "\n\n";
     print OUTFILE '' . "\n";
 
-    if (exists $lookup->{constant_list}){
+    if ($add_login){
+        print OUTFILE 'my $login = \'sundaram\';' . "\n";
+    }
 
+    if ($add_username){
+        print OUTFILE 'my $username = \'sundaram\';' . "\n";
+    }
+
+    if (exists $lookup->{constant_list}){
         print OUTFILE '## constants declared in module ' . $package . "\n";
         print OUTFILE join("\n", @{$lookup->{constant_list}}) . "\n";
         print OUTFILE '' . "\n";
