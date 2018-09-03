@@ -360,6 +360,27 @@ sub create_test_file($$){
     print OUTFILE '' . "\n\n";
 
 
+
+    if ($package =~ m/Parser/){
+        if ($package =~ m/Tab/){
+            &add_example_tab_file();
+
+        }
+        elsif ($package =~ m/CSV/){
+            &add_example_csv_file();
+        }
+    }
+
+    if ($package =~ m/Writer/){
+        if ($package =~ m/Tab/){
+            &add_example_tab_file();
+
+        }
+        elsif ($package =~ m/CSV/){
+            &add_example_csv_file();
+        }
+    }
+
     ## Create some variables for testing the data members
     my $declared_variables_lookup = {};
 
@@ -483,6 +504,28 @@ sub create_test_file($$){
 
     print "Wrote '$test_file' for package '$package'\n";
 
+}
+
+
+sub add_example_tab_file(){
+
+    print OUTFILE 'my $example_tab_file = "/tmp/example_tab_file.txt";' . "\n";
+    print OUTFILE 'if (!-e $example_tab_file){' . "\n";
+    print OUTFILE '    open(OUTFILE, ">$example_tab_file") || die "Could not open example tab-delimted file \'$example_tab_file\' : $!";' . "\n";
+    print OUTFILE '    print OUTFILE "A\tB\tC\tD\nE\tF\tG\tH\n";' . "\n";
+    print OUTFILE '    close OUTFILE;' . "\n";
+    print OUTFILE '}' . "\n";
+}
+
+
+sub add_example_csv_file(){
+
+    print OUTFILE 'my $example_csv_file = "/tmp/example_csv_file.csv";' . "\n";
+    print OUTFILE 'if (!-e $example_csv_file){' . "\n";
+    print OUTFILE '    open(OUTFILE, ">$example_csv_file") || die "Could not open example comma-separated file \'$example_csv_file\' : $!";' . "\n";
+    print OUTFILE '    print OUTFILE "A,B,C,D\nE,F,G,H\n";' . "\n";
+    print OUTFILE '    close OUTFILE;' . "\n";
+    print OUTFILE '}' . "\n";
 }
 
 sub parse_module($) {
