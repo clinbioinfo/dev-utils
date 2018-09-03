@@ -313,6 +313,7 @@ sub create_test_file($$){
     print OUTFILE '#!/usr/bin/env perl' . "\n";
     print OUTFILE '## Test for ' . $file . "\n";
     print OUTFILE 'use strict;' . "\n";
+    print OUTFILE 'use Pod::Usage;' . "\n";
 
     my $add_username = FALSE;
     my $add_login = FALSE;
@@ -546,6 +547,8 @@ sub create_test_file($$){
 
     print OUTFILE "\n\n";
 
+    &add_pod_usage($test_file, $package);
+
     close OUTFILE;
 
     $logger->info("Wrote '$test_file' for package '$package'");
@@ -553,6 +556,44 @@ sub create_test_file($$){
     print "Wrote '$test_file' for package '$package'\n";
 
 }
+
+
+sub add_pod_usage($$){
+
+    my ($test_file, $package) = @_;
+
+    my $basename = File::Basename::basename($test_file);
+
+    print OUTFILE '__END__' . "\n\n";
+
+    print OUTFILE '=head1 NAME' . "\n\n";
+
+    print OUTFILE $basename . ' - Unit tests for ' . $package . "\n\n";
+
+
+    print OUTFILE '=head1 SYNOPSIS' . "\n\n";
+
+    print OUTFILE 'prove t/' . $basename . "\n\n";
+    print OUTFILE 'prove -v t/' . $basename . "\n\n";
+
+    print OUTFILE '=head1 DESCRIPTION' . "\n\n";
+
+    print OUTFILE 'This script should be used to execute unit tests against package' . "\n";
+    print OUTFILE $package . '.' . "\n\n";
+
+    print OUTFILE '=head1 CONTACT' . "\n\n";
+
+    print OUTFILE 'Jaideep Sundaram' . "\n\n";
+
+    print OUTFILE 'clinbioinfo@gmail.com' . "\n\n";
+
+    print OUTFILE 'Copyright Jaideep Sundaram 2018' . "\n\n";
+
+    print OUTFILE 'Can be distributed under GNU General Public License terms' . "\n\n";
+
+    print OUTFILE '=cut' . "\n\n";
+}
+
 
 
 sub add_example_tab_file(){
