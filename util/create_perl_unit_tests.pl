@@ -64,7 +64,8 @@ if (!defined($logger)){
     $logger->logconfess("Could not instantiate DevelopmentUtils::Logger");
 }
 
-my $master_lookup = {};
+my $file_to_module_lookup = {};
+my $package_to_file_lookup = {};
 
 my $logger_module_found = FALSE;
 my $logger_module_package_name;
@@ -266,14 +267,18 @@ sub main($) {
 
         my $lookup = &parse_module($file);
 
-        $master_lookup->{$file} = $lookup;
+        $file_to_module_lookup->{$file} = $lookup;
+
+        $package_to_file_lookup->{$lookup->{package}} = $file;
     }
 
     $logger->info("Going to create '$file_count' unit test files");
 
-    for my $file (sort keys %{$master_lookup}){
+    for my $file (sort keys %{$file_to_module_lookup}){
 
-        my $lookup = $master_lookup->{$file};
+        my $lookup = $file_to_module_lookup->{$file};
+
+        &transfer_all_base_class_attributes($lookup);
 
         &create_test_file($lookup, $file);
     }
@@ -282,6 +287,70 @@ sub main($) {
 
     $logger->info("Wrote all unit-test files to $outdir/t/");
 }
+
+sub transfer_all_base_class_attributes($){
+
+    my ($lookup) = @_;
+
+    my $package = $lookup->{package};
+
+    if (exists $lookup->{extends_list}){
+
+        for my $parent_package (@{$lookup->{extends_list}}){
+
+            $logger->info("package '$package' extends '$parent_package'");
+
+            my $file = $package_to_file_lookup->{$parent_package};
+
+            my $parent_lookup = $file_to_module_lookup->{$file};
+
+            &transfer_all_base_class_attributes($parent_lookup);
+
+            if (exists $parent_lookup->{data_member_name_to_lookup}){
+                for my $data_member_name (keys %{$parent_lookup->{data_member_name_to_lookup}}){
+                    if (!exists $lookup->{data_member_name_to_lookup}->{$data_member_name}){
+                        my $data_member_lookup = $parent_lookup->{data_member_name_to_lookup}->{$data_member_name};
+                        push(@{$lookup->{data_member_list}}, $data_member_lookup);
+                        $lookup->{data_member_name_to_lookup}->{$data_member_name} = $data_member_lookup;
+                    }
+                }
+            }
+
+            if (exists $parent_lookup->{constant_list}){
+                for my $constant (@{$parent_lookup->{constant_list}}){
+                    if (!exists $lookup->{constant_lookup}->{$constant}){
+                        push(@{$lookup->{constant_list}}, $constant);
+                    }
+                }
+            }
+
+            if (exists $parent_lookup->{constant_lookup}){
+                for my $constant (keys %{$parent_lookup->{constant_lookup}}){
+                    my $constant_value = $parent_lookup->{constant_lookup}->{$constant};
+                    $lookup->{constant_lookup}->{$constant} = $constant_value;
+                }
+            }
+
+            if (exists $parent_lookup->{method_list}){
+                for my $method (@{$parent_lookup->{method_list}}){
+                    if (!exists $lookup->{method_lookup}->{$method}){
+                        push(@{$lookup->{method_list}}, $method);
+                    }
+                }
+            }
+
+            if (exists $parent_lookup->{method_lookup}){
+                for my $method (keys %{$parent_lookup->{method_lookup}}){
+
+                    $lookup->{method_lookup}->{$method}++;
+                }
+            }
+        }
+    }
+}
+
+
+
 
 sub create_test_file($$){
 
@@ -311,7 +380,25 @@ sub create_test_file($$){
     open (OUTFILE, ">$test_file") || $logger->logconfess("Could not open output file '$test_file' in write mode : $!");
 
     print OUTFILE '#!/usr/bin/env perl' . "\n";
-    print OUTFILE '## Test for ' . $file . "\n";
+    print OUTFILE "\n";
+    print OUTFILE '## Test for package '. $package . "\n";
+    print OUTFILE '## defined in file ' . $file . "\n";
+
+    if (exists $lookup->{extends_list}){
+
+        my $extends_count = scalar(@{$lookup->{extends_list}});
+        if ($extends_count == 1){
+            print OUTFILE '## Extends the following ' . $extends_count . ' package:' . "\n";
+        }
+        else {
+            print OUTFILE '## Extends the following ' . $extends_count . ' packages:' . "\n";
+        }
+        for my $extends_package (@{$lookup->{extends_list}}){
+            print OUTFILE '##    ' . $extends_package . "\n";
+        }
+    }
+
+
     print OUTFILE 'use strict;' . "\n";
     print OUTFILE 'use Pod::Usage;' . "\n";
 
@@ -654,6 +741,18 @@ sub parse_module($) {
             next;
         }
 
+        if ($line =~ m/^extends '(\S+)';/){
+
+            push(@{$lookup->{extends_list}}, $1);
+            next;
+        }
+
+        if ($line =~ m/^extends "(\S+)";/){
+
+            push(@{$lookup->{extends_list}}, $1);
+            next;
+        }
+
         if ($line =~ m/^has '(\S+)' \=\>/){
 
             if (defined($current_lookup)){
@@ -768,6 +867,12 @@ sub parse_module($) {
 
     if (defined($current_lookup)){
         push(@{$lookup->{data_member_list}}, $current_lookup);
+    }
+
+
+    for my $data_member_lookup (@{$lookup->{data_member_list}}){
+        my $name = $data_member_lookup->{name};
+        $lookup->{data_member_name_to_lookup}->{$name} = $data_member_lookup;
     }
 
     my %hash = map{$_ => TRUE} @{$lookup->{method_list}};
