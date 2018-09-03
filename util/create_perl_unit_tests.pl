@@ -329,7 +329,10 @@ sub create_test_file($$){
     }
 
 
-    my $test_count = scalar(@{$lookup->{data_member_list}}) + 3;
+    my $test_count = 3;
+    if (exists $lookup->{data_member_list}){
+        $test_count = scalar(@{$lookup->{data_member_list}}) + 3;
+    }
 
     print OUTFILE 'use FindBin;' . "\n\n";
     print OUTFILE 'use Test::More tests => ' . $test_count . ';' . "\n";
@@ -468,7 +471,7 @@ sub create_test_file($$){
         }
         else {
             my $value = $data_member->{default};
-            print OUTFILE 'is($instance->' . $getter . "(), '" . $value . "' , 'testing " . $getter . "()');" . "\n";
+            print OUTFILE 'is($instance->' . $getter . "(), " . $value . " , 'testing " . $getter . "()');" . "\n";
         }
     }
 
