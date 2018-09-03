@@ -416,7 +416,12 @@ sub create_test_file($$){
         my $name = $data_member->{name};
         print OUTFILE 'my $' . $name . ' = ';
 
-        if (! exists $data_member->{default}){
+        if (exists $data_member->{default}){
+
+            my $default_value = $data_member->{default};
+            $logger->info("data member '$name' has default '$default_value' so will not create a variable");
+        }
+        else {
 
             my $type = $data_member->{type};
 
@@ -444,10 +449,6 @@ sub create_test_file($$){
                 print OUTFILE "'',";
             }
         }
-        else {
-            my $default_value = $data_member->{default};
-            print OUTFILE $default_value . ';';
-        }
 
         print OUTFILE "\n";
     }
@@ -472,9 +473,23 @@ sub create_test_file($$){
 
     for my $data_member (@{$lookup->{data_member_list}}){
 
-        if (! exists $data_member->{default}){
+        my $name = $data_member->{name};
 
-            my $name = $data_member->{name};
+        if (exists $data_member->{default}){
+            my $constant_name = $data_member->{default};
+            my $constant_value = $lookup->{constant_lookup}->{$constant_name};
+            if ($constant_value !~ m/time\(\)/){
+                ## Do nothing
+                $logger->info("member name '$name' constant name '$name' constant value '$constant_value'");
+            }
+            else {
+                my $value = $data_member->{default};
+                $logger->info("member name '$name' constant name '$name' constant value '$constant_value'");
+                print OUTFILE $leading_space . $name . ' => ' . $constant_name . ',' . "\n";
+            }
+        }
+        else {
+
             my $type = $data_member->{type};
 
             print OUTFILE $leading_space . $name . ' => ';
@@ -605,8 +620,11 @@ sub parse_module($) {
             next;
         }
 
-        if ($line =~ m/^use constant /){
+        if ($line =~ m/^use constant (\S+)\s*=>\s*(.+);/){
+            my $name = $1;
+            my $val = $2;
             push(@{$lookup->{constant_list}}, $line);
+            $lookup->{constant_lookup}->{$name} = $val;
         }
 
         if ($line =~ m/^\s+\);\s*$/){
@@ -672,7 +690,7 @@ sub parse_module($) {
             next;
         }
 
-        if ($line =~ m/^\s+default\s+\=\>\s+(\S+),{0,1}\s*$/){
+        if ($line =~ m/^\s+default\s+\=\>\s+(.+),{0,1}\s*$/){
             if ($found_data_member){
                 $current_lookup->{default} = $1;
             }
