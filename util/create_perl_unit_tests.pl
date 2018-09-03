@@ -411,10 +411,12 @@ sub create_test_file($$){
     ## Create some variables for testing the data members
     my $declared_variables_lookup = {};
 
+    print OUTFILE "\n" . '## Declare variables to supporting testing' . "\n\n";
+
     for my $data_member (@{$lookup->{data_member_list}}){
 
         my $name = $data_member->{name};
-        print OUTFILE 'my $' . $name . ' = ';
+
 
         if (exists $data_member->{default}){
 
@@ -425,6 +427,7 @@ sub create_test_file($$){
 
             my $type = $data_member->{type};
 
+            print OUTFILE 'my $' . $name . ' = ';
 
             if ($type eq 'Bool'){
                 print OUTFILE 'TRUE;';
@@ -470,7 +473,6 @@ sub create_test_file($$){
     my $leading_space = ' ' x $len;
     my $leading_space = "\t";
 
-
     for my $data_member (@{$lookup->{data_member_list}}){
 
         my $name = $data_member->{name};
@@ -492,17 +494,21 @@ sub create_test_file($$){
 
             my $type = $data_member->{type};
 
-            print OUTFILE $leading_space . $name . ' => ';
             if ($type eq 'Bool'){
+
+                print OUTFILE $leading_space . $name . ' => ';
                 print OUTFILE 'TRUE', . "\n";
             }
             else {
                 if (exists $declared_variables_lookup->{$name}){
-                    my $value = $declared_variables_lookup->{$name};
-                    print OUTFILE '\'' . $value . '\',' . "\n";
 
+                    my $value = $declared_variables_lookup->{$name};
+
+                    print OUTFILE $leading_space . $name . ' => ';
+                    print OUTFILE '\'' . $value . '\',' . "\n";
                 }
                 else {
+                    print OUTFILE $leading_space . $name . ' => ';
                     print OUTFILE "''," . "\n";
                 }
             }
@@ -511,7 +517,7 @@ sub create_test_file($$){
     print OUTFILE $leading_space . ');' . "\n\n";
 
 
-    print OUTFILE 'ok( defined($instance) && ref $instance eq \'' . $package . '\',     \'instantiantion works\' );' . "\n";
+    print OUTFILE 'ok( defined($instance) && ref $instance eq \'' . $package . '\', \'instantiation works\' );' . "\n";
 
 
     ## Write the data member value checks here
