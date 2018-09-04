@@ -730,7 +730,7 @@ sub add_pod_usage($$){
 
     print OUTFILE $author_email . "\n\n";
 
-    print OUTFILE 'Copyright Jaideep Sundaram 2018' . "\n\n";
+    print OUTFILE 'Copyright ' . $author_name  . ' 2018' . "\n\n";
 
     print OUTFILE 'Can be distributed under GNU General Public License terms' . "\n\n";
 
