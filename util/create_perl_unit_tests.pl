@@ -39,6 +39,8 @@ my (
     $config_file,
     $indir,
     $infile,
+    $author_name,
+    $author_email
     );
 
 my $results = GetOptions (
@@ -51,6 +53,8 @@ my $results = GetOptions (
     'log_file=s'    => \$log_file,
     'indir=s'       => \$indir,
     'infile=s'      => \$infile,
+    'author_name=s'  => \$author_name,
+    'author_email=s' => \$author_email,
     );
 
 &checkCommandLineArguments();
@@ -102,6 +106,20 @@ sub checkCommandLineArguments {
     if ((!defined($indir)) && (!(defined($infile)))){
 
         printBoldRed("You must specified either --indir or --infile was not specified");
+
+        $fatalCtr++;
+    }
+
+    if (!defined($author_email)){
+
+        printBoldRed("--author_email was not specified");
+
+        $fatalCtr++;
+    }
+
+    if (!defined($author_name)){
+
+        printBoldRed("--author_name was not specified");
 
         $fatalCtr++;
     }
@@ -708,9 +726,9 @@ sub add_pod_usage($$){
 
     print OUTFILE '=head1 CONTACT' . "\n\n";
 
-    print OUTFILE 'Jaideep Sundaram' . "\n\n";
+    print OUTFILE $author_name . "\n\n";
 
-    print OUTFILE 'clinbioinfo@gmail.com' . "\n\n";
+    print OUTFILE $author_email . "\n\n";
 
     print OUTFILE 'Copyright Jaideep Sundaram 2018' . "\n\n";
 
