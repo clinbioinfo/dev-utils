@@ -594,14 +594,23 @@ sub create_test_file($$){
 
     my $instantiation_string;
 
-    if (exists $lookup->{method_lookup}->{getInstance}){
-        $instantiation_string = 'my $instance = ' . $package . '::getInstance(';
-        print OUTFILE $instantiation_string . "\n";
+    if (($logger_module_found) && (defined($logger_module_package_name)) && ($logger_module_package_name eq $package)){
+
+        print OUTFILE 'my $instance = ' . $logger_module_package_name . '::getInstance(log_level => 4, log_file => $logfile);' . "\n";
+
     }
     else {
-        $instantiation_string = 'my $instance = new ' . $package . '(';
-        print OUTFILE $instantiation_string . "\n";
+        if (exists $lookup->{method_lookup}->{getInstance}){
+            $instantiation_string = 'my $instance = ' . $package . '::getInstance(';
+            print OUTFILE $instantiation_string . "\n";
+        }
+        else {
+            $instantiation_string = 'my $instance = new ' . $package . '(';
+            print OUTFILE $instantiation_string . "\n";
+        }
     }
+
+
 
     my $len = length($instantiation_string);
     my $leading_space = ' ' x $len;
@@ -653,10 +662,15 @@ sub create_test_file($$){
             }
         }
     }
-    print OUTFILE $leading_space . ');' . "\n\n";
 
 
-    print OUTFILE 'ok( defined($instance) && ref $instance eq \'' . $package . '\', \'instantiation works\' );' . "\n";
+    if (($logger_module_found) && (defined($logger_module_package_name)) && ($logger_module_package_name eq $package)){
+        print OUTFILE 'ok( defined($instance) && ref $instance eq \'Log::Log4perl::Logger\', \'instantiation works\' );' . "\n";
+    }
+    else {
+        print OUTFILE $leading_space . ');' . "\n\n";
+        print OUTFILE 'ok( defined($instance) && ref $instance eq \'' . $package . '\', \'instantiation works\' );' . "\n";
+    }
 
 
     ## Write the data member value checks here
@@ -928,7 +942,16 @@ sub parse_module($) {
             next;
         }
 
-        if ($line =~ m/^sub (\S+)\s*{\s*$/){
+
+        if ($line =~ m/^sub (\S+)\s*\(/){
+            if (defined $current_lookup){
+                push(@{$lookup->{data_member_list}}, $current_lookup);
+            }
+            $current_lookup = undef;
+            push(@{$lookup->{method_list}}, $1);
+            next;
+        }
+        elsif ($line =~ m/^sub (\S+)\s*{\s*$/){
             if (defined $current_lookup){
                 push(@{$lookup->{data_member_list}}, $current_lookup);
             }
