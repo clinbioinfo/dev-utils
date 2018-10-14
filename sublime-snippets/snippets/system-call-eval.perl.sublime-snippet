@@ -1,0 +1,19 @@
+<snippet>
+	<content><![CDATA[
+my \$cmd = "$1";
+
+print "About to execute '\$cmd'\n";
+
+eval {
+    qx(\$cmd);
+};
+
+if (\$?){
+    die "Encountered some error while attempting to execute '\$cmd' : \$! \$@";
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>system-call-eval</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>

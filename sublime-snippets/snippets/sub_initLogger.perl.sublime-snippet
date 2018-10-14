@@ -1,0 +1,20 @@
+<snippet>
+    <content><![CDATA[
+sub _initLogger {
+
+    my $self = shift;
+
+    my \$logger = Log::Log4perl->get_logger(__PACKAGE__);
+
+    if (!defined(\$logger)){
+        confess "logger was not defined";
+    }
+
+    \$self->{_logger} = \$logger;
+}
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>sub_initLogger</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.perl</scope>
+</snippet>

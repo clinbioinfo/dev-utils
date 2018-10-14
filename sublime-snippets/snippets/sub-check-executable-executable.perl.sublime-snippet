@@ -1,0 +1,46 @@
+<snippet>
+	<content><![CDATA[
+sub checkExecutable {
+
+    my (\$executable) = @_;
+
+    if (!defined(\$executable)){
+        die ("executable was not defined");
+    }
+
+    my \$errorCtr = 0 ;
+
+    if (!-e \$executable){
+        printBoldRed("executable '\$executable' does not exist");
+        \$errorCtr++;
+    }
+    else {
+
+        if (!-f \$executable){
+            printBoldRed("'\$executable' is not a regular file");            
+            \$errorCtr++;
+        }
+
+        if (!-x \$executable){
+            printBoldRed("executable '\$executable' does not have read permissions");
+            \$errorCtr++;
+        }
+        
+        if (!-s \$executable){
+            printBoldRed("executable '\$executable' does not have any content");
+            \$errorCtr++;
+        }
+    }
+     
+    if (\$errorCtr > 0){
+        printBoldRed("Encountered issues with executable '\$executable'");
+        exit(1);
+    }
+}
+
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sub-check-status-executable-executable</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>

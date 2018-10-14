@@ -1,0 +1,19 @@
+<snippet>
+    <content><![CDATA[
+sub _initConfigManager {
+
+    my \$self = shift;
+
+    my \$config_manager = PGDX::Config::Manager::getInstance();
+    if (!defined(\$config_manager)){
+        \$self->{_logger}->logconfess("Could not instantiate PGDX::Config::Manager");
+    }
+
+    \$self->{_config_manager} = \$config_manager;
+}
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>sub_initConfigManager</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.perl</scope>
+</snippet>

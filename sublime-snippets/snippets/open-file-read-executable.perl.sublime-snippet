@@ -1,0 +1,49 @@
+<snippet>
+    <content><![CDATA[
+
+
+open (INFILE, "<\$infile") || \$logger->logconfess("Could not open file '\$infile' in read mode : \$!");
+
+my \$line_ctr = 0;
+my \$blank_line_ctr = 0;
+my \$commented_line_ctr = 0;
+
+my \$list = [];
+my \$item_ctr = 0;
+
+while (my \$line = <INFILE>){
+
+    chomp \$line;
+
+    \$line_ctr++;
+
+    if (\$line =~ /^\s*\$/){
+         \$blank_line_ctr++;
+         next;
+    }
+
+    if (\$line =~ /^\#/){
+         \$commented_line_ctr++;
+         next;
+    }
+
+    \$line =~ s/^\s+//;
+    \$line =~ s/\s+\$//;
+
+
+    \$item_ctr++;
+    push(@{\$list}, \$line);
+}
+
+close INFILE;
+
+\$logger->info("Parsed '\$line_ctr' lines in file '\$infile'");
+
+return \$list;
+
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>open-file-read-executable</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.perl</scope>
+</snippet>

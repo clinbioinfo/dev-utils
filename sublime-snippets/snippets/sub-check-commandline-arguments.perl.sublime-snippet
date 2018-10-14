@@ -1,0 +1,74 @@
+<snippet>
+	<content><![CDATA[
+sub checkCommandLineArguments {
+   
+    if (\$man){
+    	&pod2usage({-exitval => 1, -verbose => 2, -output => \*STDOUT});
+    }
+    
+    if (\$help){
+    	&pod2usage({-exitval => 1, -verbose => 1, -output => \*STDOUT});
+    }
+
+    if (!defined(\$verbose)){
+
+        \$verbose = DEFAULT_VERBOSE;
+
+        printYellow("--verbose was not specified and therefore was set to '\$verbose'");
+    }
+
+    if (!defined(\$log_level)){
+
+        \$log_level = DEFAULT_LOG_LEVEL;
+
+        printYellow("--log_level was not specified and therefore was set to '\$log_level'");
+    }
+
+    if (!defined(\$outdir)){
+
+        \$outdir = DEFAULT_OUTDIR;
+
+        printYellow("--outdir was not specified and therefore was set to '\$outdir'");
+    }
+
+    \$outdir = File::Spec->rel2abs(\$outdir);
+
+    if (!-e \$outdir){
+
+        mkpath (\$outdir) || die "Could not create output directory '\$outdir' : \$!";
+
+        printYellow("Created output directory '\$outdir'");
+
+    }
+    
+    if (!defined(\$logfile)){
+
+    	\$logfile = \$outdir . '/' . File::Basename::basename(\$0) . '.log';
+
+    	printYellow("--logfile was not specified and therefore was set to '\$logfile'");
+
+    }
+
+    \$logfile = File::Spec->rel2abs(\$logfile);
+
+
+    my \$fatalCtr=0;
+
+    if (!defined(\$infile)){
+
+    	printBoldRed("--infile was not specified");
+
+    	\$fatalCtr++;
+
+    }
+
+    if (\$fatalCtr> 0 ){
+    	die "Required command-line arguments were not specified\n";
+    }
+}
+]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>sub-check-commandline-arguments</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.perl</scope>
+</snippet>

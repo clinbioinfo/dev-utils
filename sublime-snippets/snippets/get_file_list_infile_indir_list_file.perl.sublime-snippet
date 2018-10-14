@@ -1,0 +1,91 @@
+<snippet>
+    <content><![CDATA[
+sub _get_file_list(){
+
+    my \$self = shift;
+
+    my @list;
+
+    if (defined(\$infile)){
+
+        \$self->_checkInfileStatus(\$infile);
+
+        push(@list, \$infile);
+    }
+
+    if (defined(\$list_file)){
+
+        my @lines = read_file(\$file_list);
+
+        for my \$line (@lines){
+
+            chomp \$line;
+
+            if (\$line =~ m/^\#/){
+                next;
+            }
+
+            if (\$line =~ m/^\s*\$/){
+                next;
+            }
+
+            \$line =~ s/^\s+//;
+
+            \$line =~ s/\s+\$//;
+
+            \$self->_checkInfileStatus(\$line);
+
+            push(@list, \$line);
+        }
+    }
+
+    if (defined(\$indir)){
+
+        my \$cmd = "find \$indir -type f -name '*.txt'";
+
+        my @file_list;
+
+        \$self->{_logger}->info("About to execute '\$cmd'");
+
+        eval {
+            @file_list = qx(\$cmd);
+        };
+
+        if (\$?){
+            \$self->{_logger}->logconfess("Encountered some problem while attempting to execute '\$cmd' : \$! \$@");
+        }
+
+        my \$ctr = 0;
+
+        for my \$file (@file_list){
+
+            my \$path = \$indir . '/' . \$file;
+
+            \$self->_checkInfileStatus(\$path);
+
+            push(@list, \$path);
+
+            \$ctr++;
+        }
+
+        \$self->{_logger}->info("Added '\$ctr' files found in directory '\$indir'");
+    }
+
+    my \$count = scalar(@list);
+
+    if (\$count > 0){
+        \$self->{_logger}->info("Accumulated '\$count' trigger files");
+    }
+    else {
+        \$self->{_logger}->logdie("There are no trigger files to be processed");
+    }
+
+    return \@list;
+}
+
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>sub-get-file-list-infile-indir-list-file</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.perl</scope>
+</snippet>

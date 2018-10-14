@@ -1,0 +1,10 @@
+<snippet>
+    <content><![CDATA[
+    print OUTFILE "## method-created: ". File::Spec->rel2abs(\$0) . "\n";
+    print OUTFILE "## date-created: " . localtime() . "\n";
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>print-outfile-method-created</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.perl</scope>
+</snippet>
