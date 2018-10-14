@@ -56,3 +56,5 @@ alias bb="perl ~/dev-utils/util/backup.pl "
 alias terminator-help="cat ~/dev-utils/doc/terminator_help.txt"
 alias send-aliases="perl ~/dev-utils/util/send_aliases.pl"
 alias log-viewer="perl ~/dev-utils/util/logfile_viewer.pl "
+alias ccc='xclip -selection clipboard'
+alias vvv='xclip -o'
