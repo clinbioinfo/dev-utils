@@ -1,0 +1,32 @@
+alias e='emacs -fg white -bg black '
+alias lll='ls -ltr '
+alias lk='less '
+alias eb='e ~/.bashrc & '
+alias sb='source ~/.bashrc '
+alias catb='cat ~/.bashrc '
+alias nn='nano '
+alias bb="perl /opt/labops-utils/bin/backup.pl "
+
+##-------------------------------------------
+##
+## Git
+##
+##-------------------------------------------
+alias gga="git add "
+alias ggc="git commit "
+alias ggd="git diff "
+alias ggp="git push "
+alias ggs="git status "
+alias ggl="git clone "
+alias ggba="git branch -a "
+
+
+##-------------------------------------------
+##
+## Perl
+##
+##-------------------------------------------
+alias fl='find . -name "*.pl"'
+alias fm='find . -name "*.pm"'
+alias pb='perlbrew '
+alias pbh='pb help | less'
