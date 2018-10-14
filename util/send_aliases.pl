@@ -165,6 +165,10 @@ sub write_scp_conf_file {
 
 	print OUTFILE "## created-by: " . $username . "\n";
 
+	print OUTFILE "## infile: " . File::Spec->rel2abs($aliases_file) . "\n";
+
+	print OUTFILE "## working directory: " . File::Spec->rel2abs(cwd()) . "\n";
+
 	close OUTFILE;
 
 	print("Wrote records to '$scp_conf_file'\n");
