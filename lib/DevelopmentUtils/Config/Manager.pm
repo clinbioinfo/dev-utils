@@ -151,6 +151,20 @@ sub getQualifiedProjectDirectoriesFile {
     return $self->{_parser}->getQualifiedProjectDirectoriesFile(@_);
 }
 
+sub get_zenity_info_width {
+
+    my $self = shift;
+
+    return $self->{_parser}->get_zenity_info_width(@_);
+}
+
+sub get_zenity_info_height {
+
+    my $self = shift;
+
+    return $self->{_parser}->get_zenity_info_height(@_);
+}
+
 1==1; ## End of module
 
 __END__
