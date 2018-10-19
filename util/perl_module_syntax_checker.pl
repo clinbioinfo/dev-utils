@@ -16,6 +16,7 @@ use constant TRUE => 1;
 use constant FALSE => 0;
 
 use constant DEFAULT_VERBOSE   => FALSE;
+
 use constant DEFAULT_LOG_LEVEL => 4;
 
 use constant DEFAULT_INDIR => File::Spec->rel2abs(cwd());
@@ -28,10 +29,10 @@ $|=1; ## do not buffer output stream
 
 ## Command-line arguments
 my (
-    $indir, 
+    $indir,
     $outdir,
-    $help, 
-    $man, 
+    $help,
+    $man,
     $verbose,
     );
 
@@ -40,6 +41,7 @@ my $results = GetOptions (
     'man|m'                          => \$man,
     'indir=s'                        => \$indir,
     'outdir=s'                       => \$outdir,
+    'verbose'                       => \$verbose,
     );
 
 &checkCommandLineArguments();
@@ -49,6 +51,10 @@ my $module_file_list = [];
 my @dir_list = split(',', $indir);
 
 foreach my $dir (@dir_list){
+
+  if (File::Basename::basename($dir) ne 'lib'){
+    $dir .= '/lib';
+  }
 
   if (!-e $dir){
     confess("'$dir' is not a regular directory");
@@ -67,15 +73,15 @@ my @error_list;
 foreach my $module_file (@{$module_file_list}){
 
   $module_file_ctr++;
-  
+
   my $cmd = "perl -wc -I $libraries $module_file";
-  
+
   my $results = execute_cmd($cmd);
-  
+
   if ($results->[0] !~ m/syntax OK\s*$/){
-  
+
     push(@error_list, $module_file);
-  
+
     $error_ctr++;
   }
 }
@@ -108,11 +114,11 @@ exit(0);
 ##-----------------------------------------------------------
 
 sub checkCommandLineArguments {
-   
+
     if ($man){
     	&pod2usage({-exitval => 1, -verbose => 2, -output => \*STDOUT});
     }
-    
+
     if ($help){
     	&pod2usage({-exitval => 1, -verbose => 1, -output => \*STDOUT});
     }
@@ -149,7 +155,7 @@ sub checkCommandLineArguments {
         printYellow("Created output directory '$outdir'");
 
     }
-  
+
 
     my $fatalCtr=0;
 
@@ -188,12 +194,12 @@ sub checkOutdirStatus {
     my ($outdir) = @_;
 
     if (!-e $outdir){
-        
+
         mkpath($outdir) || die "Could not create output directory '$outdir' : $!";
-        
+
         printYellow("Created output directory '$outdir'");
     }
-    
+
     if (!-d $outdir){
 
         printBoldRed("'$outdir' is not a regular directory\n");
@@ -232,7 +238,7 @@ sub checkInfileStatus {
 
             $errorCtr++;
         }
-        
+
         if (!-s $infile){
 
             printBoldRed("input file '$infile' does not have any content");
@@ -240,7 +246,7 @@ sub checkInfileStatus {
             $errorCtr++;
         }
     }
-     
+
     if ($errorCtr > 0){
 
         printBoldRed("Encountered issues with input file '$infile'");
@@ -267,14 +273,16 @@ sub _load_module_list {
 
 
 sub execute_cmd {
-    
+
     my ($cmd) = @_;
 
     if (!defined($cmd)){
         confess("cmd was not defined");
     }
 
-    print "About to execute '$cmd'\n";
+    if ($verbose){
+      print "About to execute '$cmd'\n";
+    }
 
     my @results;
 
@@ -287,9 +295,9 @@ sub execute_cmd {
     }
 
     chomp @results;
-    
+
     return \@results;
-}   
+}
 
 
 __END__
@@ -376,7 +384,7 @@ __END__
 
 =item B<--debug_level>
 
-  The debug level for Log4perl logging.  
+  The debug level for Log4perl logging.
   Default is set to 3.
 
 =item B<--logfile>
@@ -404,7 +412,7 @@ __END__
 
 =head1 CONTACT
 
- Jaideep Sundaram 
+ Jaideep Sundaram
 
  Copyright Jaideep Sundaram
 
