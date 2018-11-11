@@ -132,6 +132,20 @@ sub getQualifiedProjectDirectoriesFile {
     return $self->_getValue('Projects', 'qualified_project_directories_file');
 }
 
+sub get_zenity_info_width {
+
+    my $self = shift;
+
+    return $self->_getValue('zenity', 'info_width');
+}
+
+sub get_zenity_info_height {
+
+    my $self = shift;
+
+    return $self->_getValue('zenity', 'info_height');
+}
+
 sub _getValue {
 
     my $self = shift;

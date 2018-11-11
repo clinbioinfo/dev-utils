@@ -4,10 +4,13 @@ use Moose;
 use Cwd;
 use Data::Dumper;
 use File::Path;
+use File::Slurp;
 use FindBin;
 
 use DevelopmentUtils::Logger;
 use DevelopmentUtils::Config::Manager;
+
+use JIRA::Client::Automated;
 
 use constant TRUE  => 1;
 use constant FALSE => 0;
@@ -43,6 +46,14 @@ has 'password' => (
     writer   => 'setPassword',
     reader   => 'getPassword',
     required => FALSE
+    );
+
+has 'jira_url' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'setJiraURL',
+    reader   => 'getJiraURL',
+    required => FALSE,
     );
 
 has 'issue_url' => (
@@ -118,6 +129,14 @@ has 'comment' => (
     isa      => 'Str',
     writer   => 'setComment',
     reader   => 'getComment',
+    required => FALSE
+    );
+
+has 'credential_file' => (
+    is       => 'rw',
+    isa      => 'Str',
+    writer   => 'set_credential_file',
+    reader   => 'get_credential_file',
     required => FALSE
     );
 
@@ -535,6 +554,64 @@ sub _is_jira_issue_id_valid {
     }
 
     return FALSE;
+}
+
+sub get_issue {
+
+    my $self = shift;
+    my ($id) = @_;
+
+    if (!defined($id)){
+        $self->{_logger}->logconfess("id was not defined");
+    }
+
+    $self->_init_automation();
+
+    return $self->{_converter}->get_issue($self->{_automation_util}->get_issue($id));
+}
+
+sub _get_util {
+
+    my $self = shift;
+    
+    if (! exists $self->{_automation_util}){
+        
+        my $util = new JIRA::Client::Automated($self->getJiraURL, $self->getUsername, $self->getPassword);
+        if (!defined($util)){
+            $self->{_logger}->logconfess("Could not instantiate JIRA::Client::Automated");
+        }
+
+        $self->{_automation_util} = $util;
+
+
+        my $converter = DevelopmentUtils::Atlassian::Jira::Converter::getInstance();
+        if (!defined($converter)){
+            $self->{_logger}->logconfess("Could not instantiate DevelopmentUtils::Atlassian::Jira::Converter");
+        }
+
+        $self->{_converter} = $converter;
+    }
+}
+
+sub _initialize_credentials {
+
+    my $self = shift;
+
+    my $file = $self->get_credential_file;
+    if (!defined($file)){
+        $self->{_logger}->logconfess("file was not defined");
+    }
+    
+    my @content = read_file($file);
+    
+    chomp @content;
+    
+    my $cred_line = $content[0];
+    
+    my ($username, $password) = split(/:/, $cred_line);
+
+    $self->setUsername($username);
+    $self->setPassword($password);
 }
 
 
