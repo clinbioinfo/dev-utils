@@ -4,6 +4,8 @@ alias lk='less '
 alias eb='e ~/.bashrc & '
 alias sb='source ~/.bashrc '
 alias catb='cat ~/.bashrc '
+alias fhn='find . -name '
+alias fht='find . -type '
 
 ##-------------------------------------------
 ##
@@ -29,7 +31,7 @@ alias fl='find . -name "*.pl"'
 alias fm='find . -name "*.pm"'
 alias pb='perlbrew '
 alias pbh='pb help | less'
-
+alias check-perl-modules="find . -name '*.pm' -exec sh -c 'perl -wc -I lib {} ' \;"
 
 ##-------------------------------------------
 ##
