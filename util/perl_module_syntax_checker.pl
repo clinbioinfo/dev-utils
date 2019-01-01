@@ -69,6 +69,11 @@ my $libraries = join(" -I ", @dir_list);
 my $module_file_ctr = 0;
 my $error_ctr = 0;
 my @error_list;
+my @okay_list;
+my $okay_ctr = 0;
+
+
+*STDERR = *STDOUT;
 
 foreach my $module_file (@{$module_file_list}){
 
@@ -76,13 +81,46 @@ foreach my $module_file (@{$module_file_list}){
 
   my $cmd = "perl -wc -I $libraries $module_file";
 
-  my $results = execute_cmd($cmd);
+  if ($verbose){
+    print "About to execute '$cmd'\n";
+  }
 
-  if ($results->[0] !~ m/syntax OK\s*$/){
+  my @results;
 
-    push(@error_list, $module_file);
+  eval {
+      @results = qx($cmd);
+  };
+
+  if ($?){
+
+    printBoldRed("Encountered error for '$module_file'");
 
     $error_ctr++;
+
+    push(@error_list, $module_file);
+  }
+  else {
+
+    chomp @results;
+
+    my $string = $module_file . ' syntax OK';
+    my $last_line = $results[$#results-1];
+#    my $last_line = pop(@results);
+    print "last line '$last_line'\n";
+
+    if ($results[$#results] =~ m/$string\s*$/){
+
+      push(@okay_list, $module_file);
+
+      $okay_ctr++;
+    }
+    else {
+
+      push(@error_list, $module_file);
+
+      $error_ctr++;
+
+    }
   }
 }
 
@@ -261,43 +299,68 @@ sub _load_module_list {
 
   my $cmd = "find $dir -name '*.pm'";
 
-  my $results = execute_cmd($cmd);
+  if ($verbose){
+    print "About to execute '$cmd'\n";
+  }
 
-  foreach my $module_file (@{$results}){
+  my @results;
+
+  eval {
+      @results = qx($cmd);
+  };
+
+  if ($?){
+    confess("Encountered some error while attempting to execute '$cmd' : $! $@");
+  }
+
+  chomp @results;
+
+  my $ctr = 0;
+
+  foreach my $module_file (@results){
 
     chomp $module_file;
 
     push(@{$module_file_list}, $module_file);
+
+    $ctr++;
+  }
+
+  if ($verbose){
+    print "Found '$ctr' modules\n";
   }
 }
 
 
-sub execute_cmd {
+# sub execute_cmd {
 
-    my ($cmd) = @_;
+#     my ($cmd, $file) = @_;
 
-    if (!defined($cmd)){
-        confess("cmd was not defined");
-    }
+#     if (!defined($cmd)){
+#         confess("cmd was not defined");
+#     }
 
-    if ($verbose){
-      print "About to execute '$cmd'\n";
-    }
+#     if ($verbose){
+#       print "About to execute '$cmd'\n";
+#     }
 
-    my @results;
+#     my @results;
 
-    eval {
-        @results = qx($cmd);
-    };
+#     eval {
+#         @results = qx($cmd);
+#     };
 
-    if ($?){
-        confess("Encountered some error while attempting to execute '$cmd' : $! $@");
-    }
+#     if ($?){
+#       printBoldRed("Encountered error for '$file'");
+#       $error_ctr++;
+#       push(@{$error_list}, [$cmd, $file]);
+#         # confess("Encountered some error while attempting to execute '$cmd' : $! $@");
+#     }
 
-    chomp @results;
+#     chomp @results;
 
-    return \@results;
-}
+#     return \@results;
+# }
 
 
 __END__
