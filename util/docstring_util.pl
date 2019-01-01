@@ -289,37 +289,40 @@ sub analyze_file {
     }
 
 
-    print OUTFILE "Analysis of file '$file'\n";
+    print OUTFILE "\nAnalysis of file '$file'\n";
 
     my $error_ctr = 0;
 
     if ($main_docstring_found){
 
-        print OUTFILE "main docstring was found\n";
+        print OUTFILE "found   : ";
     }
     else {
 
-        print OUTFILE "main docstring was not found\n";
+        print OUTFILE "missing : ";
 
         $error_ctr++;
     }
+
+
+    print OUTFILE "for main\n";
 
     for my $class_name (sort keys %{$class_lookup}){
 
         my $found = $class_lookup->{$class_name};
 
-        print OUTFILE "For class '$class_name' at line '$line_number_lookup->{$class_name}' : ";
-
         if ($found){
 
-            print OUTFILE "found\n";
+            print OUTFILE "found   : ";
         }
         else {
 
-            print OUTFILE "missing\n";
+            print OUTFILE "missing : ";
 
             $error_ctr++;
         }
+
+        print OUTFILE "for class '$class_name' at line '$line_number_lookup->{$class_name}'\n";
     }
 
 
@@ -327,21 +330,19 @@ sub analyze_file {
 
         my $found = $function_lookup->{$function_name};
 
-        print OUTFILE "For function '$function_name' at line '$line_number_lookup->{$function_name}' : ";
-
         if ($found){
 
-            print OUTFILE "found\n";
+            print OUTFILE "found   : ";
         }
         else {
 
-            print OUTFILE "missing\n";
+            print OUTFILE "missing : ";
 
             $error_ctr++;
         }
-    }
 
-    print OUTFILE "\n\n";
+        print OUTFILE "for function '$function_name' at line '$line_number_lookup->{$function_name}'\n";
+    }
 
     print $file . " was ";
 
