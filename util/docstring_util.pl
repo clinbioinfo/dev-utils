@@ -135,7 +135,19 @@ sub main {
 
     $logger->info("Processed '$file_ctr' files");
 
+    print OUTFILE "\n## Here are the docstring recommendations:\n";
+    print_module_function_docstring_recommendations();
+
+    print_module_docstring_recommendations();
+
+    print_class_docstring_recommendations();
+
+    print_class_method_docstring_recommendations();
+
+    print OUTFILE "\n## Reference: https://realpython.com/documenting-python-code/\n";
+
     close OUTFILE;
+
 
     print "Wrote report file '$outfile'\n";
 
@@ -517,6 +529,48 @@ sub printYellow {
     print color 'yellow';
     print $msg . "\n";
     print color 'reset';
+}
+
+
+sub print_module_function_docstring_recommendations {
+
+    print OUTFILE "\n## The docstring for a module function should include the same items as a class method:\n";
+    print OUTFILE "- A brief description of what the function is and what it’s used for\n";
+    print OUTFILE "- Any arguments (both required and optional) that are passed including keyword arguments\n";
+    print OUTFILE "- Label any arguments that are considered optional\n";
+    print OUTFILE "- Any side effects that occur when executing the function\n";
+    print OUTFILE "- Any exceptions that are raised\n";
+    print OUTFILE "- Any restrictions on when the function can be called\n";
+}
+
+sub print_module_docstring_recommendations {
+
+    print OUTFILE "\n## Module docstrings should include the following:\n";
+    print OUTFILE "- A brief description of the module and its purpose\n";
+    print OUTFILE "- A list of any classes, exception, functions, and any other objects exported by the module\n";
+}
+
+sub print_class_docstring_recommendations {
+
+    ## https://realpython.com/documenting-python-code/
+    print OUTFILE "\n## Class docstrings should contain the following information:\n\n";
+    print OUTFILE "- A brief summary of its purpose and behavior\n";
+    print OUTFILE "- Any public methods, along with a brief description\n";
+    print OUTFILE "- Any class properties (attributes)\n";
+    print OUTFILE "- Anything related to the interface for subclassers, if the class is intended to be subclassed\n";
+}
+
+sub print_class_method_docstring_recommendations {
+
+    print OUTFILE "\n## The class constructor parameters should be documented within the __init__ class method docstring.\n";
+    print OUTFILE "Individual methods should be documented using their individual docstrings. Class method docstrings should contain the following:\n";
+
+    print OUTFILE "- A brief description of what the method is and what it’s used for\n";
+    print OUTFILE "- Any arguments (both required and optional) that are passed including keyword arguments\n";
+    print OUTFILE "- Label any arguments that are considered optional or have a default value\n";
+    print OUTFILE "- Any side effects that occur when executing the method\n";
+    print OUTFILE "- Any exceptions that are raised\n";
+    print OUTFILE "- Any restrictions on when the method can be called\n";
 }
 
 
