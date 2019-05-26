@@ -4,6 +4,7 @@ use Cwd;
 use Carp;
 use Data::Dumper;
 use Pod::Usage;
+use File::Copy;
 use File::Spec;
 use File::Slurp;
 use File::Path;
@@ -20,6 +21,7 @@ use constant FALSE => 0;
 
 use constant DEFAULT_VERBOSE   => FALSE;
 
+use constant DEFAULT_NO_CREATE_COMMIT_COMMENT_FILE => FALSE;
 
 $|=1; ## do not buffer output stream
 
@@ -28,12 +30,14 @@ my (
     $help,
     $man,
     $verbose,
+    $no_create_commit_comment_file
     );
 
 my $results = GetOptions (
     'help|h'     => \$help,
     'man|m'      => \$man,
     'verbose'    => \$verbose,
+    'no_create_commit_comment_file' => \$no_create_commit_comment_file,
     );
 
 &checkCommandLineArguments();
@@ -164,12 +168,43 @@ sub main {
 
     printYellow("\nPlease add this to '$jira_url'\n");
 
-    print "Committed the following to git repo for $git_project ($branch_name branch):\n";
+    my $full_url =  $url . '/commits/' . $commit_checksum;
 
-    print $url . '/commits/' . $commit_checksum . "\n";
+    print "Committed [this|$full_url] to git repo for $git_project ($branch_name branch) with the following commit comment;\n";
 
     print join("\n", @{$commit_message}) . "\n\n";
+
+    if (! $no_create_commit_comment_file){
+
+        my $outfile = "./commit_comment_file.txt";
+
+        if (-e $outfile){
+
+            _backup_file($outfile);
+        }
+
+        open (OUTFILE, ">$outfile") || die ("Could not open '$outfile' in write mode : $!");
+
+        print OUTFILE "Committed [this|$full_url] to git repo for $git_project ($branch_name branch) with the following commit comment:\n";
+
+        print OUTFILE join("\n", @{$commit_message}) . "\n\n";
+
+        close OUTFILE;
+
+        print ("Wrote commit comment file '$outfile'\n");
+    }
   }
+}
+
+sub _backup_file {
+
+    my ($file) = @_;
+
+    my $bakfile = $file . '.bak';
+
+    move($file, $bakfile) || die ("Could not move '$file' to '$bakfile' : $!");
+
+    print("Backed-up '$file' to '$bakfile'\n");
 }
 
 sub get_current_branch_name {
