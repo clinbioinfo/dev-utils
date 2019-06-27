@@ -170,7 +170,7 @@ sub main {
 
     my $full_url =  $url . '/commits/' . $commit_checksum;
 
-    print "Committed [this|$full_url] to git repo for $git_project ($branch_name branch) with the following commit comment;\n";
+    print "Committed [this|$full_url] to git repo for $git_project ($branch_name branch) with the following commit comment:\n";
 
     print join("\n", @{$commit_message}) . "\n\n";
 
