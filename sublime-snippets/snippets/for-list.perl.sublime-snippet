@@ -1,0 +1,17 @@
+<snippet>
+    <content><![CDATA[
+my \$ctr = 0;
+for my \$${1:item} (@{\$${2:list}}){
+    \$ctr++;
+    ## ${3:Doing something with this list}
+
+}
+\$logger->info("Processed '\$ctr' items");
+\$self->{_logger}->info("Processed '\$ctr' items");
+print ("Processed '\$ctr' items\n");
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>for-list</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.perl</scope>
+</snippet>

@@ -1,0 +1,16 @@
+<snippet>
+    <content><![CDATA[
+use Time::Piece;
+my (\$sec,\$min,\$hour,\$mday,\$mon,\$year,\$wday,\$yday,\$isdst) = localtime();
+
+my \$time = sprintf("%02d%02d", \$hour, \$min);
+my \$date = localtime->strftime("%Y-%m-%d");
+my \$timestamp = \$date . '-' . \$time;
+print \$timestamp ."\n";
+
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>timestamp</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.perl</scope>
+</snippet>

@@ -1,0 +1,15 @@
+<snippet>
+    <content><![CDATA[
+open (OUTFILE, ">\$outfile") || \$logger->logconfess("Could not open output file '\$outfile' in write mode : \$!");
+
+print OUTFILE "## method-created: " . File::Spec->rel2abs(\$0) . "\n";
+print OUTFILE "## date-created: " . localtime() . "\n";
+print OUTFILE "## server: " . Sys::Hostname::hostname() . "\n";
+print OUTFILE "## logfile: " . File::Spec->rel2abs(\$logfile)  . "\n";
+
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>print-provenance</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.perl</scope>
+</snippet>

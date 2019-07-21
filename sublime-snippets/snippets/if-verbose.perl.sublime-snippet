@@ -1,0 +1,11 @@
+<snippet>
+    <content><![CDATA[
+if (\$verbose){
+    print "$1\n";
+}
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>if-verbose</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.perl</scope>
+</snippet>

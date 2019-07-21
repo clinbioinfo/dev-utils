@@ -1,0 +1,12 @@
+<snippet>
+    <content><![CDATA[
+if (!-e \$${1:outdir}){
+    mkpath(\$${1:outdir}) || \$self->{_logger}->logconfess("Could not create directory '\$${1:outdir}' : \$!");
+    \$self->{_logger}->info("Created directory '\$${1:outdir}");
+}
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>make-directory</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.perl</scope>
+</snippet>
