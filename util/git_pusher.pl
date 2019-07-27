@@ -172,7 +172,7 @@ sub main {
 
     print "Committed [this|$full_url] to git repo for $git_project ($branch_name branch) with the following commit comment:\n";
 
-    print join("\n", @{$commit_message}) . "\n\n";
+    print "{quote}\n" . join("\n", @{$commit_message}) . "\n{quote}\n\n";
 
     if (! $no_create_commit_comment_file){
 
