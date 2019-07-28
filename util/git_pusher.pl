@@ -23,6 +23,8 @@ use constant DEFAULT_VERBOSE   => FALSE;
 
 use constant DEFAULT_NO_CREATE_COMMIT_COMMENT_FILE => FALSE;
 
+use constant DEFAULT_JIRA_ADD_COMMENT_EXECUTABLE => $ENV{HOME} . "/jira-python-utils/jira_add_comment.sh";
+
 $|=1; ## do not buffer output stream
 
 ## Command-line arguments
@@ -30,7 +32,8 @@ my (
     $help,
     $man,
     $verbose,
-    $no_create_commit_comment_file
+    $no_create_commit_comment_file,
+    $jira_add_comment_executable
     );
 
 my $results = GetOptions (
@@ -38,10 +41,10 @@ my $results = GetOptions (
     'man|m'      => \$man,
     'verbose'    => \$verbose,
     'no_create_commit_comment_file' => \$no_create_commit_comment_file,
+    'jira_add_comment_executable'   => \$jira_add_comment_executable,
     );
 
 &checkCommandLineArguments();
-
 
 main();
 
@@ -68,6 +71,13 @@ sub checkCommandLineArguments {
         $verbose = DEFAULT_VERBOSE;
 
         printYellow("--verbose was not specified and therefore was set to default '$verbose'");
+    }
+
+    if (!defined($jira_add_comment_executable)){
+
+        $jira_add_comment_executable = DEFAULT_JIRA_ADD_COMMENT_EXECUTABLE;
+
+        printYellow("--jira_add_comment_executable was not specified and therefore was set to default '$jira_add_comment_executable'");
     }
 
     my $fatalCtr=0;
@@ -149,6 +159,7 @@ sub checkInfileStatus {
     }
 }
 
+my $jira_id;
 my $jira_url;
 my $branch_name;
 my $commit_checksum;
@@ -164,7 +175,24 @@ sub main {
 
   my $commit_message = get_commit_message();
 
-  if (defined($jira_url)){
+  if (!defined($jira_url)){
+    if (-e $jira_add_comment_executable){
+      prompt_for_jira_id();
+      if (defined($jira_id)){
+        my $full_url =  $url . '/commits/' . $commit_checksum;
+        my $comment = "Committed [this|$full_url] to git repo for $git_project ($branch_name branch) with the following commit comment:{quote}" . join("\n", @{$commit_message}) . "{quote}";
+        my $cmd = "bash $jira_add_comment_executable --comment '$comment' $jira_id";
+        execute_cmd($cmd);
+      }
+      else {
+        print "JIRA ID was not provided so will not update any ticket\n";
+      }
+    }
+    else {
+        die "JIRA add comment executable '$jira_add_comment_executable' does not exist so cannot update the JIRA ticket";
+    }
+  }
+  else {
 
     printYellow("\nPlease add this to '$jira_url'\n");
 
@@ -194,6 +222,29 @@ sub main {
         print ("Wrote commit comment file '$outfile'\n");
     }
   }
+}
+
+sub prompt_for_jira_id {
+
+    print "Update JIRA? [n]: ";
+
+    my $answer = <STDIN>;
+
+    chomp $answer;
+
+    $answer = uc($answer);
+
+    if ((!defined($answer)) || ($answer eq '')){
+        $answer = 'N';
+    }
+
+    if ($answer eq 'N'){
+
+        print "No JIRA ticket will be updated\n";
+    }
+    else {
+        $jira_id = $answer;
+    }
 }
 
 sub _backup_file {
