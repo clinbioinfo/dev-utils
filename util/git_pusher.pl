@@ -165,63 +165,100 @@ my $branch_name;
 my $commit_checksum;
 my $git_project;
 
+sub send_comment_to_jira {
+
+    my ($comment, $jira_id) = @_;
+
+    if (!-e $jira_add_comment_executable){
+        die "JIRA add comment executable '$jira_add_comment_executable' does not exist so cannot update the JIRA ticket";
+    }
+
+    if (!defined($jira_id)){
+
+        if (!defined($jira_url)){
+            die "Neither JIRA ID nor JIRA URL were defined";
+        }
+
+        $jira_id = File::Basename::basename($jira_url);
+    }
+
+    my $cmd = "bash $jira_add_comment_executable --comment '$comment' $jira_id";
+
+    print "Will attempt to add the git commit comment to JIRA '$jira_id'\n";
+
+    execute_cmd($cmd);
+}
+
 sub main {
 
   my $url = get_repos_url();
-
-  # print "url '$url'\n";
 
   get_current_branch_name();
 
   my $commit_message = get_commit_message();
 
+  my $full_url =  $url . '/commits/' . $commit_checksum;
+
+  my $comment = "Committed [this|$full_url] to git repo for $git_project ($branch_name branch) with the following commit comment:{quote}" . join("\n", @{$commit_message}) . "{quote}";
+
   if (!defined($jira_url)){
+    ## The Reference line was not provided in the commit comment
+
     if (-e $jira_add_comment_executable){
+      ## The JIRA util does exist so can attempt to automatically update the JIRA ticket
+
       prompt_for_jira_id();
+
       if (defined($jira_id)){
-        my $full_url =  $url . '/commits/' . $commit_checksum;
-        my $comment = "Committed [this|$full_url] to git repo for $git_project ($branch_name branch) with the following commit comment:{quote}" . join("\n", @{$commit_message}) . "{quote}";
-        my $cmd = "bash $jira_add_comment_executable --comment '$comment' $jira_id";
-        execute_cmd($cmd);
+        send_comment_to_jira($comment, $jira_id);
       }
       else {
         print "JIRA ID was not provided so will not update any ticket\n";
       }
     }
     else {
-        die "JIRA add comment executable '$jira_add_comment_executable' does not exist so cannot update the JIRA ticket";
+        print "JIRA util '$jira_add_comment_executable' does not exist so cannot attempt to automatically update the JIRA ticket";
     }
   }
   else {
 
-    printYellow("\nPlease add this to '$jira_url'\n");
+    if (-e $jira_add_comment_executable){
+      ## The JIRA util does exist so can attempt to automatically update the JIRA ticket
+      send_comment_to_jira($comment);
+    }
+    else {
 
-    my $full_url =  $url . '/commits/' . $commit_checksum;
+      print "JIRA util '$jira_add_comment_executable' does not exist so cannot attempt to automatically update the JIRA ticket";
 
-    print "Committed [this|$full_url] to git repo for $git_project ($branch_name branch) with the following commit comment:\n";
+      printYellow("\nPlease add this to '$jira_url'\n");
 
-    print "{quote}\n" . join("\n", @{$commit_message}) . "\n{quote}\n\n";
+      print $comment . "\n";
+    }
 
     if (! $no_create_commit_comment_file){
-
-        my $outfile = "./commit_comment_file.txt";
-
-        if (-e $outfile){
-
-            _backup_file($outfile);
-        }
-
-        open (OUTFILE, ">$outfile") || die ("Could not open '$outfile' in write mode : $!");
-
-        print OUTFILE "Committed [this|$full_url] to git repo for $git_project ($branch_name branch) with the following commit comment:\n";
-
-        print OUTFILE join("\n", @{$commit_message}) . "\n\n";
-
-        close OUTFILE;
-
-        print ("Wrote commit comment file '$outfile'\n");
+      write_commit_comment_file($comment);
     }
   }
+}
+
+sub write_commit_comment_file {
+
+    my ($comment) = @_;
+
+    my $outfile = "./commit_comment_file.txt";
+
+    if (-e $outfile){
+
+        _backup_file($outfile);
+    }
+
+    open (OUTFILE, ">$outfile") || die ("Could not open '$outfile' in write mode : $!");
+
+    print OUTFILE $comment . "\n";
+
+    close OUTFILE;
+
+    print ("Wrote commit comment file '$outfile'\n");
 }
 
 sub prompt_for_jira_id {
