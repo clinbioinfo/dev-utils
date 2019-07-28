@@ -5,11 +5,14 @@ use File::Basename;
 use Term::ANSIColor;
 use Try::Tiny;
 use File::Slurp;
+use POSIX;
 
 use constant TRUE => 1;
 use constant FALSE => 0;
 
 my $username = getlogin || getpwuid($<) || $ENV{USER} || 'sundaramj';
+
+$username = 'root';
 
 my $scp_conf_file = cwd() . '/scp_conf.txt';
 
@@ -38,7 +41,7 @@ if (scalar(@{$file_list}) > 0){
 else {
 
     printBoldRed("The asset list was empty.  Please check your file '$asset_list_file'.");
-    
+
     exit(1);
 }
 
@@ -61,14 +64,14 @@ sub scp_assets {
 		if (! are_all_defaults_correct()){
 
 			print "Okay, please provide the appropriate values:\n";
-		
+
 			prompt_user_for_values();
 		}
 	}
 	else {
-		
+
 		print "Looks like there is no scp configuration file to read defaults from.\n";
-		
+
 		print "Please provide those values now:\n";
 
 		prompt_user_for_values();
@@ -132,18 +135,38 @@ sub execute_transfer {
 	my $transfer_ctr = 0;
 
     foreach my $file (@{$file_list}){
-		
+
 		$ctr++;
-		
+
 		chomp $file;
-		
+
 		my $ex;
-		
+
 		if (-f $file){
-		    $ex = "scp $file $username\@$target_machine:$target_base_dir/$project_dir/$file";
+
+            my $target_file = $target_base_dir . '/' . $project_dir . '/' . $file;
+
+            my $bakfile = $target_file .  '.' . strftime "%Y-%m-%d-%H%M%S", gmtime time;
+
+            $bakfile .= '.bak';
+
+            my $cmd = "ssh $username\@$target_machine \"cp $target_file $bakfile\"";
+
+            execute_cmd($cmd);
+
+		    $ex = "scp $file $username\@$target_machine:$target_file";
 		}
 		elsif (-d $file){
-		    $ex = "scp -r $file $username\@$target_machine:$target_base_dir/$project_dir/$file";
+
+            my $target_dir = $target_base_dir . '/' . $project_dir . '/' . $file;
+
+            my $bakdir = $target_dir .  '.' . strftime "%Y-%m-%d-%H%M%S", gmtime time;
+
+            $bakdir .= '.bak';
+
+            my $cmd = "ssh $username\@$target_machine \"cp $target_dir $bakdir\"";
+
+		    $ex = "scp -r $file $username\@$target_machine:$target_dir";
 		}
 		else{
 		    print color 'bold red';
@@ -152,28 +175,34 @@ sub execute_transfer {
 		    next;
 		}
 
-		$ex =~ s|/+|/|g; ## replace multiple forward slashes with a single one
-
-		print "About to execute '$ex'\n";
-		
-		try {
-		    
-		    qx($ex);
-		    
-		} catch {
-		    
-		    print color 'bold red';
-		    print "Encountered the following error: $_\n";
-		    print color 'reset';
-		    exit(1);
-		};
+        execute_cmd($ex);
 
 		$transfer_ctr++;
-
     }
 
     print "Processed '$ctr' assets\n";
     print "Transfered '$transfer_ctr' assets\n";
+}
+
+sub execute_cmd {
+
+    my ($ex) = @_;
+
+    $ex =~ s|/+|/|g; ## replace multiple forward slashes with a single one
+
+    print "About to execute '$ex'\n";
+
+    try {
+
+        qx($ex);
+
+    } catch {
+
+        print color 'bold red';
+        print "Encountered the following error: $_\n";
+        print color 'reset';
+        exit(1);
+    };
 }
 
 sub read_scp_conf_file {
@@ -181,9 +210,9 @@ sub read_scp_conf_file {
 	print "Reading values from the scp configuration file '$scp_conf_file'\n";
 
 	my @lines = read_file($scp_conf_file);
-	
+
 	foreach my $line (@lines){
-	
+
 		chomp $line;
 
 		if ($line =~ m|^target_machine=(\S+)\s*$|){
@@ -204,7 +233,7 @@ sub read_scp_conf_file {
 sub write_scp_conf_file {
 
 	open (OUTFILE, ">$scp_conf_file") || confess("Could not open '$scp_conf_file' in write mode : $!");
-	
+
 	print OUTFILE "target_machine=$target_machine\n";
 
 	print OUTFILE "target_base_dir=$target_base_dir\n";
@@ -212,14 +241,14 @@ sub write_scp_conf_file {
 	print OUTFILE "project_dir=$project_dir\n";
 
 	close OUTFILE;
-	
-	print("Wrote records to '$scp_conf_file'\n");	
+
+	print("Wrote records to '$scp_conf_file'\n");
 }
 
 sub get_answer {
 
     my ($question, $default) = @_;
-    
+
     my $answer;
 
     while (1){
@@ -235,16 +264,16 @@ sub get_answer {
 		else {
 			print " ";
 		}
-	    
+
 	    $answer = <STDIN>;
-	    
+
 	    chomp $answer;
 
 	    if ((!defined($answer)) || ($answer eq '')){
 
 	    	if (defined($default)){
 				return $default;
-			}			
+			}
 	    }
 	    else {
 			return $answer;
@@ -261,19 +290,19 @@ sub check_all_files {
     my $error_ctr = 0;
 
     my $final_file_list = [];
-    
+
     foreach my $file (@{$file_list}){
 
 		if (!-e $file){
 
 		    if ($file =~ m/^\s*modified:\s+(\S+)\s*$/){
-			
+
 				$file = $1;
 
 				if (!-e $file){
 
 				    $error_ctr++;
-				    
+
 				    push(@{$error_list}, $file);
 
 				}
@@ -290,7 +319,7 @@ sub check_all_files {
 		}
 		else {
 		    push(@{$final_file_list}, $file);
-		}	    
+		}
     }
 
     if ($error_ctr > 0){
@@ -312,7 +341,7 @@ sub get_file_list {
     my $file_list = [];
 
     my $file_ctr = 0;
-    
+
     while (my $file = <INFILE>){
 
 
@@ -323,7 +352,7 @@ sub get_file_list {
 	if ($file =~ /^\s*$/){
 	    next;
 	}
-	
+
 	$file_ctr++;
 
 	chomp $file;
@@ -340,13 +369,13 @@ sub get_file_list {
 		print "Found '$file_ctr' files in asset list file '$asset_list_file'\n";
     }
     else {
-		
+
 		printBoldRed("Did not find any files in asset list file '$asset_list_file'");
-		
+
 		exit(1);
     }
 
-    
+
     return $file_list;
 }
 

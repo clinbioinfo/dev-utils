@@ -6,11 +6,14 @@ use Term::ANSIColor;
 use Try::Tiny;
 use File::Slurp;
 use Sys::Hostname;
+use POSIX;
 
 use constant TRUE => 1;
 use constant FALSE => 0;
 
 my $username = getlogin || getpwuid($<) || $ENV{USER} || 'sundaramj';
+
+$username = 'root';
 
 my $scp_conf_file = cwd() . '/scp_conf.txt';
 
@@ -31,9 +34,9 @@ if (scalar(@ARGV) > 0){
 	exit(0);
 }
 else {
-    
+
     printBoldRed("Usage : perl $0 list-of-files-or-directories");
-    
+
     exit(1);
 }
 
@@ -52,14 +55,14 @@ sub scp_assets {
 		if (! are_all_defaults_correct()){
 
 			print "Okay, please provide the appropriate values:\n";
-		
+
 			prompt_user_for_values();
 		}
 	}
 	else {
-		
+
 		print "Looks like there is no scp configuration file to read defaults from.\n";
-		
+
 		print "Please provide those values now:\n";
 
 		prompt_user_for_values();
@@ -125,11 +128,11 @@ sub execute_transfer {
 	my $transfer_ctr = 0;
 
     foreach my $file (@ARGV){
-		
+
 		$ctr++;
-		
+
 		chomp $file;
-		
+
 		transfer_file($file);
 
 		$transfer_ctr++;
@@ -144,17 +147,34 @@ sub transfer_file {
 	my ($file) = @_;
 
 	my $ex;
-	
+
 	if (-f $file){
-		
+
 		if (File::Basename::basename($file) eq 'scp_conf.txt'){
 			$file = File::Basename::basename($file);
 		}
 
-	    $ex = "scp $file $username\@$target_machine:$target_base_dir/$project_dir/$file";
+        my $target_file = $target_base_dir . '/' . $project_dir . '/' . $file;
+
+        my $bakfile = $target_file .  '.' . strftime "%Y-%m-%d-%H%M%S", gmtime time;
+
+        $bakfile .= '.bak';
+
+        my $cmd = "ssh $username\@$target_machine \"cp $target_file $bakfile\"";
+
+        execute_cmd($cmd);
+
+	    $ex = "scp $file $username\@$target_machine:$target_file";
 	}
 	elsif (-d $file){
-	    $ex = "scp -r $file $username\@$target_machine:$target_base_dir/$project_dir/$file";
+
+        my $target_dir = $target_base_dir . '/' . $project_dir . '/' . $file;
+
+        my $bakdir = $target_dir .  '.' . strftime "%Y-%m-%d-%H%M%S", gmtime time;
+
+        my $cmd = "ssh $username\@$target_machine \"cp $target_dir $bakdir\"";
+
+        $ex = "scp -r $file $username\@$target_machine:$target_dir";
 	}
 	else{
 	    print color 'bold red';
@@ -163,16 +183,23 @@ sub transfer_file {
 	    next;
 	}
 
+    execute_cmd($ex);
+}
+
+sub execute_cmd {
+
+    my ($ex) = @_;
+
 	$ex =~ s|/+|/|g; ## replace multiple forward slashes with a single one
 
 	print "About to execute '$ex'\n";
-	
+
 	try {
-	    
+
 	    qx($ex);
-	    
+
 	} catch {
-	    
+
 	    print color 'bold red';
 	    print "Encountered the following error: $_\n";
 	    print color 'reset';
@@ -185,9 +212,9 @@ sub read_scp_conf_file {
 	print "Reading values from the scp configuration file '$scp_conf_file'\n";
 
 	my @lines = read_file($scp_conf_file);
-	
+
 	foreach my $line (@lines){
-	
+
 		chomp $line;
 
 		if ($line =~ m|^target_machine=(\S+)\s*$|){
@@ -208,7 +235,7 @@ sub read_scp_conf_file {
 sub write_scp_conf_file {
 
 	open (OUTFILE, ">$scp_conf_file") || confess("Could not open '$scp_conf_file' in write mode : $!");
-	
+
 	print OUTFILE "target_machine=$target_machine\n";
 
 	print OUTFILE "target_base_dir=$target_base_dir\n";
@@ -222,14 +249,14 @@ sub write_scp_conf_file {
 	print OUTFILE "## created-by: " . $username . "\n";
 
 	close OUTFILE;
-	
-	print("Wrote records to '$scp_conf_file'\n");	
+
+	print("Wrote records to '$scp_conf_file'\n");
 }
 
 sub get_answer {
 
     my ($question, $default) = @_;
-    
+
     my $answer;
 
     while (1){
@@ -245,16 +272,16 @@ sub get_answer {
 		else {
 			print " ";
 		}
-	    
+
 	    $answer = <STDIN>;
-	    
+
 	    chomp $answer;
 
 	    if ((!defined($answer)) || ($answer eq '')){
 
 	    	if (defined($default)){
 				return $default;
-			}			
+			}
 	    }
 	    else {
 			return $answer;
