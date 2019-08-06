@@ -29,6 +29,7 @@ my (
     $man,
     $project_base_directory,
     $project_comparison_directory,
+    $report_file,
     $scp_conf_file,
     $username,
     $verbose,
@@ -40,9 +41,10 @@ my $results = GetOptions (
     'man|m'                          => \$man,
     'project_base_directory=s'       => \$project_base_directory,
     'project_comparison_directory=s' => \$project_comparison_directory,
+    'report_file=s'                  => \$report_file,
     'scp_conf_file=s'                => \$scp_conf_file,
     'username=s'                     => \$username,
-    'verbose=s'                      => \$verbose,
+    'verbose'                        => \$verbose,
     );
 
 &checkCommandLineArguments();
@@ -58,6 +60,8 @@ my $target_machine;
 my $target_base_dir;
 
 my $project_dir;
+
+open (REPORTFILE, ">$report_file") || die "Could not open report file '$report_file' in write mode : $!";
 
 my $file_list = get_file_list($asset_list_file);
 
@@ -80,8 +84,10 @@ else {
     exit(1);
 }
 
-printGreen("$0 execution completed");
+close REPORTFILE;
 
+printGreen("$0 execution completed");
+print "The report file is '$report_file'\n";
 exit(0);
 
 ##----------------------------------------------------------------------
@@ -133,6 +139,23 @@ sub checkCommandLineArguments {
         $verbose = DEFAULT_VERBOSE;
 
         printYellow("--verbose was not specified and therefore was set to default '$verbose'");
+    }
+
+    if (!defined($report_file)){
+
+        $report_file = $project_comparison_directory . '/' . strftime "%Y-%m-%d-%H%M%S", gmtime time;
+        $report_file .= '/report.txt';
+
+        printYellow("--report_file was not specified and therefore was set to default '$report_file'");
+    }
+
+    my $report_file_dir = File::Basename::dirname($report_file);
+
+    if (!-e $report_file_dir){
+
+        mkpath($report_file_dir) || die "Could not create directory '$report_file_dir' : $!";
+
+        printYellow("Created directory '$report_file_dir'");
     }
 
     my $fatalCtr=0;
@@ -236,7 +259,11 @@ sub execute_transfer {
 		chomp $file;
 
         if (! exists $only_changed_files_lookup->{$file}){
-            print "Will not attempt to transfer file '$file' because it has not changed since last the last transfer session\n";
+            if ($verbose){
+                print "Will not attempt to transfer file '$file' because it has not changed since last the last transfer session\n";
+            }
+
+            print REPORTFILE "Will not attempt to transfer file '$file' because it has not changed since last the last transfer session\n";
             next;
         }
 
@@ -273,7 +300,10 @@ sub execute_transfer {
             }
             else {
                 ## It is a new file so should attempt to back it up on the remote server
-                print "The target file '$target_file' does not yet exist on server '$target_machine' so will not attempt to back it up\n";
+                if ($verbose){
+                    print "The target file '$target_file' does not yet exist on server '$target_machine' so will not attempt to back it up\n";
+                }
+                print REPORTFILE "The target file '$target_file' does not yet exist on server '$target_machine' so will not attempt to back it up\n";
             }
 
 		    $ex = "scp $file $username\@$target_machine:$target_file";
@@ -293,7 +323,10 @@ sub execute_transfer {
                 execute_cmd($cmd);
             }
             else {
-                print "The target directory '$target_dir' does not yet exist on server '$target_machine' so will not attempt to back it up\n";
+                if ($verbose){
+                    print "The target directory '$target_dir' does not yet exist on server '$target_machine' so will not attempt to back it up\n";
+                }
+                print REPORTFILE "The target directory '$target_dir' does not yet exist on server '$target_machine' so will not attempt to back it up\n";
             }
 
 		    $ex = "scp -r $file $username\@$target_machine:$target_dir";
@@ -322,7 +355,11 @@ sub execute_cmd {
 
     $ex =~ s|/+|/|g; ## replace multiple forward slashes with a single one
 
-    print "About to execute '$ex'\n";
+    if ($verbose){
+        print "About to execute '$ex'\n";
+    }
+
+    print REPORTFILE "About to execute '$ex'\n";
 
     try {
 
@@ -339,7 +376,11 @@ sub execute_cmd {
 
 sub read_scp_conf_file {
 
-	print "Reading values from the scp configuration file '$scp_conf_file'\n";
+    if ($verbose){
+        print "Reading values from the scp configuration file '$scp_conf_file'\n";
+    }
+
+	print REPORTFILE "Reading values from the scp configuration file '$scp_conf_file'\n";
 
 	my @lines = read_file($scp_conf_file);
 
@@ -374,7 +415,11 @@ sub write_scp_conf_file {
 
 	close OUTFILE;
 
-	print("Wrote records to '$scp_conf_file'\n");
+    if ($verbose){
+        print "Wrote records to '$scp_conf_file'\n";
+    }
+
+	print REPORTFILE "Wrote records to '$scp_conf_file'\n";
 }
 
 sub get_answer {
@@ -498,7 +543,11 @@ sub get_file_list {
 
     if ($file_ctr > 0){
 
-		print "Found '$file_ctr' files in asset list file '$asset_list_file'\n";
+        if ($verbose){
+            print "Found '$file_ctr' files in asset list file '$asset_list_file'\n";
+        }
+
+		print REPORTFILE "Found '$file_ctr' files in asset list file '$asset_list_file'\n";
     }
     else {
 
@@ -515,7 +564,11 @@ sub compare_files {
 
     my ($file_list) = @_;
 
-    print "Going to compare files to those stored in the project comparison directory '$project_comparison_directory'\n";
+    if ($verbose){
+        print "Going to compare files to those stored in the project comparison directory '$project_comparison_directory'\n";
+    }
+
+    print REPORTFILE "Going to compare files to those stored in the project comparison directory '$project_comparison_directory'\n";
 
     for my $file (@{$file_list}){
 
@@ -526,16 +579,34 @@ sub compare_files {
         my $comparison_file = $project_comparison_directory . '/' . $path;
 
         if (!-e $comparison_file){
-            print "comparison version file '$comparison_file' does not exist\n";
+
+            if ($verbose){
+                print "comparison version file '$comparison_file' does not exist\n";
+            }
+
+            print REPORTFILE "comparison version file '$comparison_file' does not exist\n";
+
             $new_file_lookup->{$path}++;
+
             $only_changed_files_lookup->{$path}++;
         }
         else {
             if (compare($path, $comparison_file) == 0){
-                print "file '$path' has not changed since last session\n";
+
+                if ($verbose){
+                    print "file '$path' has not changed since last session\n";
+                }
+
+                print REPORTFILE "file '$path' has not changed since last session\n";
             }
             else {
-                print "file '$path' has changed since last session\n";
+
+                if ($verbose){
+                    print "file '$path' has changed since last session\n";
+                }
+
+                print REPORTFILE "file '$path' has changed since last session\n";
+
                 $only_changed_files_lookup->{$path}++;
             }
         }
@@ -553,7 +624,13 @@ sub copy_file_to_comparison_dir {
     my $comparison_file = $project_comparison_directory . '/' . $path;
 
     if (-e $comparison_file){
-        print "comparison version '$comparison_file' exists and so will be removed\n";
+
+        if ($verbose){
+            print "comparison version '$comparison_file' exists and so will be removed\n";
+        }
+
+        print REPORTFILE "comparison version '$comparison_file' exists and so will be removed\n";
+
         unlink($comparison_file) || die "Could not delete '$comparison_file' : $!";
     }
 
@@ -561,11 +638,21 @@ sub copy_file_to_comparison_dir {
 
     if (!-e $comparison_dir){
         mkpath($comparison_dir) || die "Could not create comparison directory '$comparison_dir' : $!";
-        print "Created comparison directory '$comparison_dir'\n";
+
+        if ($verbose){
+            print "Created comparison directory '$comparison_dir'\n";
+        }
+
+        print REPORTFILE "Created comparison directory '$comparison_dir'\n";
     }
 
     copy($path, $comparison_file) || die "Could not copy '$path' to '$comparison_file' : $!";
-    print "Copied '$path' to '$comparison_file'\n";
+
+    if ($verbose){
+        print "Copied '$path' to '$comparison_file'\n";
+    }
+
+    print REPORTFILE "Copied '$path' to '$comparison_file'\n";
 }
 
 sub printBoldRed {
