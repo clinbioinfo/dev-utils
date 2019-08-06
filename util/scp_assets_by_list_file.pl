@@ -5,23 +5,47 @@ use File::Basename;
 use File::Compare;
 use File::Copy;
 use File::Path;
+use Getopt::Long qw(:config no_ignore_case no_auto_abbrev);
 use Term::ANSIColor;
 use Try::Tiny;
 use File::Slurp;
 use POSIX;
 
+## Do not buffer output stream
+$|=1;
+
 use constant TRUE => 1;
 use constant FALSE => 0;
 
-my $username = getlogin || getpwuid($<) || $ENV{USER} || 'sundaramj';
+# username = getlogin || getpwuid($<) || $ENV{USER} || 'sundaramj';
+use constant DEFAULT_USERNAME => 'root';
 
-$username = 'root';
+use constant DEFAULT_VERBOSE => FALSE;
 
-my $scp_conf_file = cwd() . '/scp_conf.txt';
+## Command-line arguments
+my (
+    $asset_list_file,
+    $help,
+    $man,
+    $project_base_directory,
+    $project_comparison_directory,
+    $scp_conf_file,
+    $username,
+    $verbose,
+    );
 
-my $project_base_directory = File::Basename::basename(cwd());
+my $results = GetOptions (
+    'asset_list_file=s'              => \$asset_list_file,
+    'help|h'                         => \$help,
+    'man|m'                          => \$man,
+    'project_base_directory=s'       => \$project_base_directory,
+    'project_comparison_directory=s' => \$project_comparison_directory,
+    'scp_conf_file=s'                => \$scp_conf_file,
+    'username=s'                     => \$username,
+    'verbose=s'                      => \$verbose,
+    );
 
-my $project_comparison_directory = '/tmp/' . File::Basename::basename($0) . '/' . $project_base_directory;
+&checkCommandLineArguments();
 
 if (!-e $project_comparison_directory){
     mkpath($project_comparison_directory) || die "Could not create comparison directory '$project_comparison_directory' : $!";
@@ -34,12 +58,6 @@ my $target_machine;
 my $target_base_dir;
 
 my $project_dir;
-
-my $asset_list_file = $ARGV[0];
-if (!defined($asset_list_file)){
-	printBoldRed("Usage : $0 asset-list-file");
-	exit(1);
-}
 
 my $file_list = get_file_list($asset_list_file);
 
@@ -71,6 +89,66 @@ exit(0);
 ##   END OF MAIN -- SUBROUTINES FOLLOW
 ##
 ##----------------------------------------------------------------------
+
+sub checkCommandLineArguments {
+
+    if ($man){
+        &pod2usage({-exitval => 1, -verbose => 2, -output => \*STDOUT});
+    }
+
+    if ($help){
+        &pod2usage({-exitval => 1, -verbose => 1, -output => \*STDOUT});
+    }
+
+    if (!defined($username)){
+
+        $username = DEFAULT_USERNAME;
+
+        printYellow("--username was not specified and therefore was set to default '$username'");
+    }
+
+    if (!defined($project_base_directory)){
+
+        $project_base_directory = File::Basename::basename(cwd());
+
+        printYellow("--project_base_directory was not specified and therefore was set to default '$project_base_directory'");
+    }
+
+    if (!defined($project_comparison_directory)){
+
+        $project_comparison_directory = '/tmp/' . File::Basename::basename($0) . '/' . $project_base_directory;
+
+        printYellow("--project_comparison_directory was not specified and therefore was set to default '$project_comparison_directory'");
+    }
+
+    if (!defined($scp_conf_file)){
+
+        $scp_conf_file = cwd() . '/scp_conf.txt';
+
+        printYellow("--scp_conf_file was not specified and therefore was set to default '$scp_conf_file'");
+    }
+
+    if (!defined($verbose)){
+
+        $verbose = DEFAULT_VERBOSE;
+
+        printYellow("--verbose was not specified and therefore was set to default '$verbose'");
+    }
+
+    my $fatalCtr=0;
+
+    if (!defined($asset_list_file)) {
+
+        printBoldRed("--asset_list_file was not specified");
+
+        $fatalCtr++;
+    }
+
+    if ($fatalCtr> 0 ){
+
+        die "Required command-line arguments were not specified\n";
+    }
+}
 
 sub scp_assets {
 
