@@ -2,6 +2,9 @@
 use strict;
 use Cwd;
 use File::Basename;
+use File::Compare;
+use File::Copy;
+use File::Path;
 use Term::ANSIColor;
 use Try::Tiny;
 use File::Slurp;
@@ -15,6 +18,14 @@ my $username = getlogin || getpwuid($<) || $ENV{USER} || 'sundaramj';
 $username = 'root';
 
 my $scp_conf_file = cwd() . '/scp_conf.txt';
+
+my $project_base_directory = File::Basename::basename(cwd());
+
+my $project_comparison_directory = '/tmp/' . File::Basename::basename($0) . '/' . $project_base_directory;
+
+if (!-e $project_comparison_directory){
+    mkpath($project_comparison_directory) || die "Could not create comparison directory '$project_comparison_directory' : $!";
+}
 
 my $default_project_dir = File::Basename::basename(cwd());
 
@@ -33,6 +44,12 @@ if (!defined($asset_list_file)){
 my $file_list = get_file_list($asset_list_file);
 
 $file_list = check_all_files($file_list);
+
+my $only_changed_files_lookup = {};
+
+my $new_file_lookup = {};
+
+compare_files($file_list);
 
 if (scalar(@{$file_list}) > 0){
 
@@ -140,19 +157,46 @@ sub execute_transfer {
 
 		chomp $file;
 
+        if (! exists $only_changed_files_lookup->{$file}){
+            print "Will not attempt to transfer file '$file' because it has not changed since last the last transfer session\n";
+            next;
+        }
+
+        if (exists $new_file_lookup->{$file}){
+
+            ## This a new local project file so the parent directory does not exist on the remote server.
+            ## Attempt to create the parent directory on the remote server.
+
+            my $dirname = File::Basename::dirname($file);
+
+            my $target_dir = $target_base_dir . '/' . $project_dir . '/' . $dirname;
+
+            my $cmd = "ssh $username\@$target_machine \"mkdir -p $target_dir\"";
+
+            execute_cmd($cmd);
+        }
+
 		my $ex;
 
 		if (-f $file){
 
             my $target_file = $target_base_dir . '/' . $project_dir . '/' . $file;
 
-            my $bakfile = $target_file .  '.' . strftime "%Y-%m-%d-%H%M%S", gmtime time;
+            if (! exists $new_file_lookup->{$file}){
+                ## It is not a new file so should attempt to back it up on the remote server
 
-            $bakfile .= '.bak';
+                my $bakfile = $target_file .  '.' . strftime "%Y-%m-%d-%H%M%S", gmtime time;
 
-            my $cmd = "ssh $username\@$target_machine \"cp $target_file $bakfile\"";
+                $bakfile .= '.bak';
 
-            execute_cmd($cmd);
+                my $cmd = "ssh $username\@$target_machine \"cp $target_file $bakfile\"";
+
+                execute_cmd($cmd);
+            }
+            else {
+                ## It is a new file so should attempt to back it up on the remote server
+                print "The target file '$target_file' does not yet exist on server '$target_machine' so will not attempt to back it up\n";
+            }
 
 		    $ex = "scp $file $username\@$target_machine:$target_file";
 		}
@@ -160,11 +204,19 @@ sub execute_transfer {
 
             my $target_dir = $target_base_dir . '/' . $project_dir . '/' . $file;
 
-            my $bakdir = $target_dir .  '.' . strftime "%Y-%m-%d-%H%M%S", gmtime time;
+            if (! exists $new_file_lookup->{$file}){
 
-            $bakdir .= '.bak';
+                my $bakdir = $target_dir .  '.' . strftime "%Y-%m-%d-%H%M%S", gmtime time;
 
-            my $cmd = "ssh $username\@$target_machine \"cp $target_dir $bakdir\"";
+                $bakdir .= '.bak';
+
+                my $cmd = "ssh $username\@$target_machine \"cp $target_dir $bakdir\"";
+
+                execute_cmd($cmd);
+            }
+            else {
+                print "The target directory '$target_dir' does not yet exist on server '$target_machine' so will not attempt to back it up\n";
+            }
 
 		    $ex = "scp -r $file $username\@$target_machine:$target_dir";
 		}
@@ -178,6 +230,8 @@ sub execute_transfer {
         execute_cmd($ex);
 
 		$transfer_ctr++;
+
+        copy_file_to_comparison_dir($file);
     }
 
     print "Processed '$ctr' assets\n";
@@ -379,7 +433,62 @@ sub get_file_list {
     return $file_list;
 }
 
+sub compare_files {
 
+    my ($file_list) = @_;
+
+    print "Going to compare files to those stored in the project comparison directory '$project_comparison_directory'\n";
+
+    for my $file (@{$file_list}){
+
+        my $path = $file;
+
+        $path =~ s/$project_base_directory//;
+
+        my $comparison_file = $project_comparison_directory . '/' . $path;
+
+        if (!-e $comparison_file){
+            print "comparison version file '$comparison_file' does not exist\n";
+            $new_file_lookup->{$path}++;
+            $only_changed_files_lookup->{$path}++;
+        }
+        else {
+            if (compare($path, $comparison_file) == 0){
+                print "file '$path' has not changed since last session\n";
+            }
+            else {
+                print "file '$path' has changed since last session\n";
+                $only_changed_files_lookup->{$path}++;
+            }
+        }
+    }
+}
+
+sub copy_file_to_comparison_dir {
+
+    my ($file) = @_;
+
+    my $path = $file;
+
+    $path =~ s/$project_base_directory//;
+
+    my $comparison_file = $project_comparison_directory . '/' . $path;
+
+    if (-e $comparison_file){
+        print "comparison version '$comparison_file' exists and so will be removed\n";
+        unlink($comparison_file) || die "Could not delete '$comparison_file' : $!";
+    }
+
+    my $comparison_dir = File::Basename::dirname($comparison_file);
+
+    if (!-e $comparison_dir){
+        mkpath($comparison_dir) || die "Could not create comparison directory '$comparison_dir' : $!";
+        print "Created comparison directory '$comparison_dir'\n";
+    }
+
+    copy($path, $comparison_file) || die "Could not copy '$path' to '$comparison_file' : $!";
+    print "Copied '$path' to '$comparison_file'\n";
+}
 
 sub printBoldRed {
 
