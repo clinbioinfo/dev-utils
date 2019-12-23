@@ -14,6 +14,7 @@ alias fht='find . -type '
 ##-------------------------------------------
 alias gga="git add "
 alias ggc="git commit "
+alias ggcci="git comment -m 'initial check-in' "
 alias ggd="git diff "
 alias ggp="git push && perl ~/dev-utils/util/git_pusher.pl"
 alias ggs="git status "
@@ -60,3 +61,6 @@ alias send-aliases="perl ~/dev-utils/util/send_aliases.pl"
 alias log-viewer="perl ~/dev-utils/util/logfile_viewer.pl "
 alias ccc='xclip -selection clipboard'
 alias vvv='xclip -o'
+alias restart-network="sudo service network-manager restart"
+alias sss="perl ~/dev-utils/util/scp_assets_by_list_file.pl --asset_list_file "
+alias sssv="perl ~/dev-utils/util/scp_assets_by_list_file.pl --verbose --asset_list_file "
