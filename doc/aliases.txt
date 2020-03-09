@@ -1,3 +1,4 @@
+
 alias e='emacs -fg white -bg black '
 alias lll='ls -ltr '
 alias lk='less '
@@ -21,6 +22,7 @@ alias ggs="git status "
 alias ggl="git clone "
 alias ggba="git branch -a "
 alias ggh="cat ~/aliases.txt | grep alias | grep git | grep -v clone-"
+alias ggdev="git checkout devel"
 
 
 ##-------------------------------------------
@@ -65,4 +67,4 @@ alias restart-network="sudo service network-manager restart"
 alias sss="perl ~/dev-utils/util/scp_assets_by_list_file.pl --asset_list_file "
 alias sssv="perl ~/dev-utils/util/scp_assets_by_list_file.pl --verbose --asset_list_file "
 alias send-changed-assets="ggs | grep modified | grep -v Makefile > scp_transfer_list.txt && sssv scp_transfer_list.txt"
-alias get-server-info="perl ~/dev-utils/util/get_server_status.pl --server "
+alias get-server-info="perl ~/dev-utils/util/get_server_status.pl "
