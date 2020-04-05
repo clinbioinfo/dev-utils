@@ -1,7 +1,7 @@
 <snippet>
-	<content><![CDATA[
-sub execute_cmd {
-    
+    <content><![CDATA[
+sub execute_cmd_with_results {
+
     my (\$cmd) = @_;
 
     if (!defined(\$cmd)){
@@ -21,12 +21,12 @@ sub execute_cmd {
     }
 
     chomp @results;
-    
+
     return \@results;
-}   
+}
 ]]></content>
-	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
-	<tabTrigger>sub-execute-cmd-executable-function-with-return-results</tabTrigger>
-	<!-- Optional: Set a scope to limit where the snippet will trigger -->
-	<scope>source.perl</scope>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>sub-execute-cmd-with-results</tabTrigger>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <scope>source.perl</scope>
 </snippet>

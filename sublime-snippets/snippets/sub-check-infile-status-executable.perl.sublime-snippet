@@ -11,39 +11,29 @@ sub checkInfileStatus {
     my \$errorCtr = 0 ;
 
     if (!-e \$infile){
-        print color 'bold red';
-        print ("input file '\$infile' does not exist\\n");
-        print color 'reset';
+        printBoldRed("input file '\$infile' does not exist");
         \$errorCtr++;
     }
     else {
 
         if (!-f \$infile){
-            print color 'bold red';
-            print ("'\$infile' is not a regular file\\n");
-            print color 'reset';
+            printBoldRed("'\$infile' is not a regular file");            
             \$errorCtr++;
         }
 
         if (!-r \$infile){
-            print color 'bold red';
-            print ("input file '\$infile' does not have read permissions\\n");
-            print color 'reset';
+            printBoldRed("input file '\$infile' does not have read permissions");
             \$errorCtr++;
         }
         
         if (!-s \$infile){
-            print color 'bold red';
-            print ("input file '\$infile' does not have any content\\n");
-            print color 'reset';
+            printBoldRed("input file '\$infile' does not have any content");
             \$errorCtr++;
         }
     }
      
     if (\$errorCtr > 0){
-        print color 'bold red';
-        print ("Encountered issues with input file '\$infile'\\n");
-        print color 'reset';
+        printBoldRed("Encountered issues with input file '\$infile'");
         exit(1);
     }
 }
