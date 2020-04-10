@@ -55,7 +55,6 @@ alias clone-rest-web-service-bootstrap-utils='git clone https://github.com/clinb
 ##
 ## misc.
 ##
-alias create-python-venv="perl ~/dev-utils/util/create_python_venv.pl "
 alias hipchat-tips="cat ~/dev-utils/docs/hipchat_slash_commands.txt"
 alias bb="perl ~/dev-utils/util/backup.pl "
 alias terminator-help="cat ~/dev-utils/doc/terminator_help.txt"
@@ -68,4 +67,8 @@ alias sss="perl ~/dev-utils/util/scp_assets_by_list_file.pl --asset_list_file "
 alias sssv="perl ~/dev-utils/util/scp_assets_by_list_file.pl --verbose --asset_list_file "
 alias send-changed-assets="ggs | grep modified | grep -v Makefile > scp_transfer_list.txt && sssv scp_transfer_list.txt"
 alias get-server-info="perl ~/dev-utils/util/get_server_status.pl "
-alias charm="pycharm-community . &"
+
+##
+## python
+##
+source ${HOME}/dev-utils/doc/python_aliases.txt
