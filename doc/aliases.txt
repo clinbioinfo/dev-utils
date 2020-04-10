@@ -63,3 +63,5 @@ alias get-server-info="perl ~/dev-utils/util/get_server_status.pl "
 ## python
 ##
 source ${HOME}/dev-utils/doc/python_aliases.txt
+
+alias vscode="code --disable-gpu . "
