@@ -1,9 +1,7 @@
 <snippet>
 	<content><![CDATA[
 
-use constant DEFAULT_USERNAME =>  getpwuid($<) || $ENV{USER} || "sundaramj";
-
-use constant DEFAULT_OUTDIR => '/tmp/' . DEFAULT_USERNAME . '/' . File::Basename::basename($0) . '/' . time();
+use constant DEFAULT_OUTDIR => '/tmp/' . File::Basename::basename(\$0) . '/' . time();
 
 has 'outdir' => (
     is       => 'rw',

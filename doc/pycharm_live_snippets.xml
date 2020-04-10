@@ -1,0 +1,207 @@
+<templateSet group="sundaram_pycharm_live_snippets">
+  <template name="class" value="class $class$($object$):&#10;    &quot;&quot;&quot;$cls_doc$&quot;&quot;&quot;&#10;    &#10;    def __init__(self, $args$):&#10;        &quot;&quot;&quot;Constructor for $class$&quot;&quot;&quot;&#10; $END$" description="Declare a class" toReformat="false" toShortenFQNames="true">
+    <variable name="class" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="object" expression="" defaultValue="object" alwaysStopAt="true" />
+    <variable name="cls_doc" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="args" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="if-not-defined-variable" value="if $variable$ is None:&#10;    logging.fatal(&quot;$variable$ was not defined&quot;)&#10;    sys.exit(1)&#10; $END$" description="Check if variable is not defined" toReformat="false" toShortenFQNames="true">
+    <variable name="variable" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="if-not-exists-variable" value="if $variable$ not in $hash$:&#10;    logging.$log_level$(&quot;$variable$ does not exist in $hash$&quot;)&#10;    sys.exit(1)&#10;    continue&#10; $END$" description="Check if key exists in hash" toReformat="false" toShortenFQNames="true">
+    <variable name="variable" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="hash" expression="" defaultValue="lookup" alwaysStopAt="true" />
+    <variable name="log_level" expression="" defaultValue="fatal" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="def-check-infile-status-method" value="def check_infile_status(self, $file$):&#10;    &quot;&quot;&quot;Check if the file exists, if it is a regular file and whether it has content&quot;&quot;&quot;&#10;    &#10;    error_ctr = 0&#10;    &#10;    if not os.path.exists($file$):&#10;        error_ctr += 1&#10;        logging.error(&quot;'{}' does not exist&quot;.format($file$))&#10;    else:&#10;        if not os.path.isfile($file$):&#10;            error_ctr += 1&#10;            logging.error(&quot;'{}' is not a regular file&quot;.format($file$)) &#10;        if os.stat($file$).st_size == 0:&#10;            logging.error(&quot;'{}' has no content&quot;.format($file$))&#10;            error_ctr += 1&#10;            &#10;    if error_ctr &gt; 0:&#10;        logging.error(&quot;Detected problems with input file '{}'&quot;.format($file$))&#10;        sys.exit(1)&#10;$END$" description="Check status of the input file" toReformat="false" toShortenFQNames="true">
+    <variable name="file" expression="" defaultValue="infile" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="def-check-indir-status-method" value="def check_indir_status(self, $indir$):&#10;    &quot;&quot;&quot;Check whether directory exists, is a regular directory and whether has content&quot;&quot;&quot;&#10;    &#10;    error_ctr = 0&#10;&#10;    if not os.path.exists($indir$):&#10;        error_ctr += 1&#10;        logging.error(&quot;'{}' does not exist&quot;.format($indir$))&#10;    else:&#10;        if not os.path.isdir($indir$):&#10;            error_ctr += 1&#10;            logging.error(&quot;'{}' is not a regular directory&quot;.format($indir$))&#10;        if len(os.listdir($indir$)) == 0:&#10;            error_ctr += 1&#10;            logging.error(&quot;'{}' has no content&quot;.format($indir$))&#10;&#10;    if error_ctr &gt; 0:&#10;        logging.error(&quot;Detected problems with input directory '{}'&quot;.format($indir$))&#10;        sys.exit(1)&#10; $END$" description="Check status of input directory" toReformat="false" toShortenFQNames="true">
+    <variable name="indir" expression="" defaultValue="indir" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="logging-setup-executable" value="import logging&#10;&#10;DEFAULT_LOGGING_FORMAT = &quot;%(levelname)s : %(asctime)s : %(pathname)s : %(lineno)d : %(message)s&quot;&#10;&#10;DEFAULT_LOG_LEVEL = logging.INFO&#10;&#10;logging.basicConfig(filename=logfile, format=DEFAULT_LOGGING_FORMAT, level=DEFAULT_LOG_LEVEL)&#10;&#10;$END$" description="Set up the logging in an executable" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="declare-constant" value="# $description$ &#10;DEFAULT_CONSTANT_$name$ = $value$&#10;&#10;$END$" description="Declare a constant" toReformat="false" toShortenFQNames="true">
+    <variable name="description" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="name" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="value" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="param-docstring-method" value=":param $variable$: $datatype$ - $description$&#10;$END$" description="Description of param in docstring of method" toReformat="false" toShortenFQNames="true">
+    <variable name="variable" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="datatype" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="description" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="primary-executable" value="import os&#10;import sys&#10;import click&#10;import json&#10;import logging&#10;import calendar&#10;import time&#10;import pathlib&#10;from colorama import Fore, Style&#10;import datetime&#10;&#10;currentDT = datetime.datetime.now()&#10;&#10;DEFAULT_CONFIG_FILE = os.path.dirname(os.path.abspath(__file__)) + '/conf/config.json'&#10;&#10;DEFAULT_OUTDIR = '/tmp/' + os.path.basename(__file__) + '/' + str(currentDT.strftime(&quot;%Y-%m-%d-%H%M%S&quot;))&#10;&#10;LOGGING_FORMAT = &quot;%(levelname)s : %(asctime)s : %(pathname)s : %(lineno)d : %(message)s&quot;&#10;&#10;LOG_LEVEL = logging.INFO&#10;&#10;DEFAULT_VERBOSE = True&#10;&#10;&#10;def check_infile_status(self, infile):&#10;    &quot;&quot;&quot;Check if the file exists, if it is a regular file and whether it has content&quot;&quot;&quot;&#10;    &#10;    error_ctr = 0&#10;    &#10;    if not os.path.exists(infile):&#10;        error_ctr += 1&#10;        logging.error(&quot;'{}' does not exist&quot;.format(infile))&#10;    else:&#10;        if not os.path.isfile(infile):&#10;            error_ctr += 1&#10;            logging.error(&quot;'{}' is not a regular file&quot;.format(infile)) &#10;        if os.stat(infile).st_size == 0:&#10;            logging.error(&quot;'{}' has no content&quot;.format(infile))&#10;            error_ctr += 1&#10;            &#10;    if error_ctr &gt; 0:&#10;        logging.error(&quot;Detected problems with input file '{}'&quot;.format(infile))&#10;        sys.exit(1)&#10;&#10;&#10;def check_indir_status(self, indir):&#10;    &quot;&quot;&quot;Check whether directory exists, is a regular directory and whether has content&quot;&quot;&quot;&#10;    &#10;    error_ctr = 0&#10;&#10;    if not os.path.exists(indir):&#10;        error_ctr += 1&#10;        logging.error(&quot;'{}' does not exist&quot;.format(indir))&#10;    else:&#10;        if not os.path.isdir(indir):&#10;            error_ctr += 1&#10;            logging.error(&quot;'{}' is not a regular directory&quot;.format(indir))&#10;        if len(os.listdir(indir)) == 0:&#10;            error_ctr += 1&#10;            logging.error(&quot;'{}' has no content&quot;.format(indir))&#10;&#10;    if error_ctr &gt; 0:&#10;        logging.error(&quot;Detected problems with input directory '{}'&quot;.format(indir))&#10;        sys.exit(1)&#10; &#10;&#10;@click.command()&#10;@click.option('--verbose', is_flag=True, help='Will print more info to STDOUT')&#10;@click.option('--outdir', help='The default is the current working directory')&#10;@click.option('--config_file', type=click.Path(exists=True), help=&quot;The configuration file for this project&quot;)&#10;@click.option('--logfile', help=&quot;The log file&quot;)&#10;@click.option('--outfile', help=&quot;The output final report file&quot;)&#10;@click.option('--infile', help=&quot;input file&quot;)&#10;@click.option('--indir', help=&quot;input directory&quot;)&#10;def main(verbose, outdir, config_file, logfile, outfile, infile, indir):&#10;    &quot;&quot;&quot;&#10;    :return: None&#10;&#10;    &quot;&quot;&quot;&#10;&#10;    error_ctr = 0&#10;&#10;    if infile is None:&#10;        print(Fore.RED + &quot;--infile was not specified&quot;)&#10;        print(Style.RESET_ALL + '', end='')&#10;        error_ctr += 1&#10;&#10;    if indir is None:&#10;        print(Fore.RED + &quot;--indir was not specified&quot;)&#10;        print(Style.RESET_ALL + '', end='')&#10;        error_ctr += 1&#10;&#10;    if error_ctr &gt; 0:&#10;        print(Fore.RED + &quot;Required variable(s) not specified&quot;)&#10;        print(Style.RESET_ALL + '', end='')&#10;        sys.exit(1)&#10;&#10;    assert isinstance(infile, str)&#10;    assert isinstance(indir, str)&#10;&#10;    check_infile_status(infile)&#10;    check_indir_status(indir)&#10;&#10;    if config_file is None:&#10;&#10;        config_file = DEFAULT_CONFIG_FILE&#10;        print(Fore.YELLOW + &quot;--config_file was not specified and therefore was set to '{}'&quot;.format(config_file))&#10;        print(Style.RESET_ALL + '', end='')&#10;&#10;    assert isinstance(config_file, str)&#10;&#10;    check_infile_status(config_file)&#10;&#10;    if outdir is None:&#10;        outdir = DEFAULT_OUTDIR&#10;        print(Fore.YELLOW + &quot;--outdir was not specified and therefore was set to '{}'&quot;.format(outdir))&#10;        print(Style.RESET_ALL + '', end='')&#10;&#10;    if not os.path.exists(outdir):&#10;        pathlib.Path(outdir).mkdir(parents=True, exist_ok=True)&#10;        print(Fore.YELLOW + &quot;Created output directory '{}'&quot;.format(outdir))&#10;        print(Style.RESET_ALL + '', end='')&#10;&#10;    if logfile is None:&#10;        logfile = outdir + '/' + os.path.basename(__file__) + '.log'&#10;        print(Fore.YELLOW + &quot;--logfile was not specified and therefore was set to '{}'&quot;.format(logfile))&#10;        print(Style.RESET_ALL + '', end='')&#10;&#10;    print(&quot;&quot;)&#10;&#10;    logging.basicConfig(filename=logfile, format=LOGGING_FORMAT, level=LOG_LEVEL)&#10;&#10;    # Read the configuration from the JSON file and load into dictionary.&#10;    logging.info(&quot;Loading configuration from '{}'&quot;.format(config_file))&#10;&#10;    config = json.loads(open(config_file).read())&#10;&#10;&#10;if __name__ == &quot;__main__&quot;:&#10;    main()&#10;" description="Set up a primary executable" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="print-bold-red" value="print(Fore.RED + &quot;$message$&quot;, end='')&#10;print(Style.RESET_ALL + '', end='')&#10;&#10;$END$" description="Print statement in bold red" toReformat="false" toShortenFQNames="true">
+    <variable name="message" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="print-green" value="print(Fore.GREEN + &quot;$message$&quot;, end='')&#10;print(Style.RESET_ALL + '', end='')&#10;&#10;$END$" description="Print statement in green" toReformat="false" toShortenFQNames="true">
+    <variable name="message" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="print-yellow" value="print(Fore.YELLOW + &quot;$message$&quot;, end='')&#10;print(Style.RESET_ALL + '', end='')&#10;&#10;$END$" description="Print statement in yellow" toReformat="false" toShortenFQNames="true">
+    <variable name="message" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="def-backup-file" value="def _backup_file(self, $file$):&#10;    &quot;&quot;&quot;Backup file&#10;    :param $file$: str - file to be backed-up&#10;    &quot;&quot;&quot;&#10;    bakfile = os.path.abspath($file$) + time.strftime(&quot;%Y-%m-%d-%H%M&quot;) + '.bak'&#10;    shutil.copy($file$, bakfile)&#10;    logging.info(&quot;Copied '{}' to '{}'&quot;.format($file$, bakfile))&#10;&#10;$END$&#10;" description="Create backup copy of a file" toReformat="false" toShortenFQNames="true">
+    <variable name="file" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="try-catch-block" value="try:&#10;    $do_something$&#10;except $Error$ as e:&#10;    logging.fatal(&quot;$message$ : '{}'&quot;.format(e))&#10;else:&#10;    $do_something_else$&#10;    logging.info(&quot;something else happened&quot;)&#10;finally:&#10;    $do_something_finally$&#10;    logging.info(&quot;finally doing this&quot;)&#10;&#10;$END$" description="try-catch-block" toReformat="false" toShortenFQNames="true">
+    <variable name="do_something" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="Error" expression="snakeCase(String)" defaultValue="&quot;Error&quot;" alwaysStopAt="true" />
+    <variable name="message" expression="" defaultValue="&quot;Encountered some exception&quot;" alwaysStopAt="true" />
+    <variable name="do_something_else" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="do_something_finally" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="for-loop-list" value="$ctr$ = 0&#10;for $variable$ in $array_list$:&#10;    $ctr$ += 1&#10;    if $condition_1$:&#10;        continue&#10;&#10;logging.info(&quot;Processed '{}' $items$&quot;.format($ctr$))&#10;&#10;$END$" description="Iterate over elements in an array" toReformat="false" toShortenFQNames="true">
+    <variable name="ctr" expression="" defaultValue="&quot;ctr&quot;" alwaysStopAt="true" />
+    <variable name="variable" expression="" defaultValue="&quot;item&quot;" alwaysStopAt="true" />
+    <variable name="array_list" expression="" defaultValue="&quot;my_list&quot;" alwaysStopAt="true" />
+    <variable name="condition_1" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="items" expression="" defaultValue="&quot;items&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="for-loop-hash" value="$ctr$ = 0&#10;for $key$ in $hashref$:&#10;    $ctr$ += 1&#10;    $val$ = $hashref$[$key$]&#10;    if $val$:&#10;        continue&#10;&#10;logging.info(&quot;Processed '{}' $items$ in $hashref$&quot;.format($ctr$))&#10;&#10;$END$" description="Iterate over elements in hash" toReformat="false" toShortenFQNames="true">
+    <variable name="ctr" expression="" defaultValue="&quot;ctr&quot;" alwaysStopAt="true" />
+    <variable name="key" expression="" defaultValue="&quot;key&quot;" alwaysStopAt="true" />
+    <variable name="hashref" expression="" defaultValue="&quot;hash_lookup&quot;" alwaysStopAt="true" />
+    <variable name="val" expression="" defaultValue="&quot;val&quot;" alwaysStopAt="true" />
+    <variable name="items" expression="" defaultValue="&quot;keys&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="if-regex-match" value="if re.match(r'^$expression$$', str($var$)):&#10;    logging.info(&quot;Found match in '{}'&quot;.format($var$))&#10;else:&#10;    logging.info(&quot;Did not find match for '{}'&quot;.format($var$))&#10;    &#10; $END$" description="Regular expression match" toReformat="false" toShortenFQNames="true">
+    <variable name="expression" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="var" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="regex-substitution" value="# Will replace $val1$ with $val2$&#10;$var2$ = re.sub(&quot;$val1$&quot;, &quot;$val2$&quot;, $var1$)&#10;logging.info(&quot;Derived '{}' from '{}' by replacing '{}' with '{}'&quot;.format($var2$, $var1$, $val1$, $val2$))&#10;&#10;$END$" description="Perform regex substitution" toReformat="false" toShortenFQNames="true">
+    <variable name="val1" expression="" defaultValue="&quot;val1&quot;" alwaysStopAt="true" />
+    <variable name="val2" expression="" defaultValue="&quot;val2&quot;" alwaysStopAt="true" />
+    <variable name="var2" expression="" defaultValue="&quot;var2&quot;" alwaysStopAt="true" />
+    <variable name="var1" expression="" defaultValue="&quot;var1&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="initialize-configparser" value="import configparser&#10;import os&#10;import sys&#10;&#10;if not os.path.exists(config_file):&#10;    logging.fatal(&quot;config_file '{}' does not exist&quot;.format(config_file))&#10;    sys.exit(1)&#10;    &#10;# initialize configparser&#10;config = configparser.ConfigParser()&#10;config.read(config_file)&#10;&#10;$END$" description="Initialize configparser" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="def-get-val-from-config-ini" value="def get_val_from_config(self, section, param):&#10;    &quot;&quot;&quot;Attempt to retrieve the value for a param in a give section of the configuration INI file&#10;    :param section: {str} - the name of the section&#10;    :param param: {str} - the name of the param&#10;    &quot;&quot;&quot;&#10;    if self._config is None:&#10;        raise Exception(&quot;config is not defined&quot;)        &#10;&#10;    if section not in self._config:&#10;        raise Exception(&quot;section '{}' does not exist in the config&quot;.format(section))&#10;    &#10;    if param not in self._config:&#10;        raise Exception(&quot;param '{}' does not exist in section '{}'&quot;.format(param, section))&#10;&#10;    return self._config[section][param]&#10;&#10;$END$&#10;" description="Get val from config.ini file for a given param and section" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="open-read-tab-delimited-file" value="import csv&#10;import logging&#10;import os&#10;&#10;if not os.path.exists($infile$):&#10;    raise Exception(&quot;file '{}' does not exist&quot;.format($infile$))&#10;&#10;header_to_position_lookup = {}&#10;$record_list$ = []&#10;$record_ctr$ = 0&#10;    &#10;with open($infile$) as f:&#10;    reader = csv.reader(f, delimiter='\t')&#10;    row_ctr = 0&#10;    for row in reader:&#10;        row_ctr += 1&#10;        if row_ctr == 1:&#10;            field_ctr = 0&#10;            for field in row:&#10;                header_to_position_lookup[field] = field_ctr&#10;                field_ctr += 1&#10;            logging.info(&quot;Processed the header of csv file '{}'&quot;.format($infile$))&#10;        else:&#10;            record_lookup = {}&#10;            field_ctr = 0&#10;            for field in row:&#10;                record_lookup[field] = header_to_postion_lookup[field]&#10;                field_ctr += 1&#10;            $record_list$.append(record_lookup)&#10;            $record_ctr$ += 1&#10;    logging.info(&quot;Processed '{}' records in csv file '{}'&quot;.format($record_ctr$, $infile$))&#10;&#10;$END$" description="Open and read tab-delimited text file" toReformat="false" toShortenFQNames="true">
+    <variable name="infile" expression="" defaultValue="&quot;infile&quot;" alwaysStopAt="true" />
+    <variable name="record_list" expression="" defaultValue="&quot;record_list&quot;" alwaysStopAt="true" />
+    <variable name="record_ctr" expression="" defaultValue="&quot;record_ctr&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="open-read-csv-file" value="import csv&#10;import logging&#10;import os&#10;&#10;if not os.path.exists($infile$):&#10;    raise Exception(&quot;file '{}' does not exist&quot;.format($infile$))&#10;&#10;header_to_position_lookup = {}&#10;record_list = []&#10;record_ctr = 0&#10;    &#10;with open($infile$) as f:&#10;    reader = csv.reader(f)&#10;    row_ctr = 0&#10;    for row in reader:&#10;        row_ctr += 1&#10;        if row_ctr == 1:&#10;            field_ctr = 0&#10;            for field in row:&#10;                header_to_position_lookup[field] = field_ctr&#10;                field_ctr += 1&#10;            logging.info(&quot;Processed the header of csv file '{}'&quot;.format($infile$))&#10;        else:&#10;            $record_lookup$ = {}&#10;            field_ctr = 0&#10;            for field in row:&#10;                $record_lookup$[field] = header_to_postion_lookup[field]&#10;                field_ctr += 1&#10;            $record_list$.append($record_lookup$)&#10;            record_ctr += 1&#10;    logging.info(&quot;Processed '{}' records in csv file '{}'&quot;.format(record_ctr, $infile$))&#10;&#10;$END$" description="Open and read comma-separated file" toReformat="false" toShortenFQNames="true">
+    <variable name="infile" expression="" defaultValue="&quot;infile&quot;" alwaysStopAt="true" />
+    <variable name="record_lookup" expression="" defaultValue="&quot;record_lookup&quot;" alwaysStopAt="true" />
+    <variable name="record_list" expression="" defaultValue="&quot;record_list&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="open-read-json-file" value="import json&#10;import logging&#10;&#10;if not os.path.exists($infile$):&#10;    raise Exception(&quot;json file '{}' does not exist&quot;.format($infile$))&#10;&#10;with open($infile$, 'r') as json_file:&#10;    text = json_file.read()&#10;    json_data = json.loads(text)&#10;&#10;    for $key$ in json_data:&#10;        $val$ = json_data[$key$]&#10;        logging.info(&quot;$key$ '{}' $val$ '{}'&quot;.format($key$, $val$))&#10;&#10;$END$" description="Open and read a json file" toReformat="false" toShortenFQNames="true">
+    <variable name="infile" expression="" defaultValue="&quot;infile&quot;" alwaysStopAt="true" />
+    <variable name="key" expression="" defaultValue="&quot;key&quot;" alwaysStopAt="true" />
+    <variable name="val" expression="" defaultValue="&quot;val&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="def-execute-command" value="import logging&#10;import os&#10;import re&#10;import subprocess&#10;&#10;def _execute_$cmd$(self, $cmd$, $args_string$, $outdir$, $stdout_file$=None, $stderr_file$=None):&#10;    &quot;&quot;&quot;Execute a command via system call using the subprocess module&#10;    :param $cmd$: {str} - the executable to be invoked&#10;    :param $args_string$: {str} - the arguments to be specified when the executable is invoked&#10;    :param $outdir$: {str} - the output directory where STDOUT, STDERR and the shell script should be written to&#10;    :param $stdout_file$: {str} - the file to which STDOUT will be captured in&#10;    :param $stderr_file$: {str} - the file to which STDERR will be captured in&#10;    &quot;&quot;&quot;&#10;    if $cmd$ is None:&#10;        raise Exception(&quot;$cmd$ was not specified&quot;)&#10;&#10;    if not os.path.exists($cmd$):&#10;        raise Exception(&quot;$cmd$ '{}' does not exist&quot;.format($cmd$))&#10;&#10;    logging.info(&quot;Will attempt to execute '{}' with arguments '{}'&quot;.format($cmd$, args_string))&#10;&#10;    if $outdir$ is None:&#10;        $outdir$ = '/tmp'&#10;        logging.info(&quot;outdir was not defined and therefore was set to default '{}'&quot;.format($outdir$))&#10;&#10;    if $stdout_file$ is None:&#10;        $stdout_file$ = os.path.join($outdir$, os.path.basename($cmd$) + '.stdout')&#10;        logging.info(&quot;$stdout_file$ was not specified and therefore was set to '{}'&quot;.format($stdout_file$))&#10;&#10;    if $stderr_file$ is None:&#10;        $stderr_file$ = os.path.join($outdir$, os.path.basename($cmd$) + '.stderr')&#10;        logging.info(&quot;$stderr_file$ was not specified and therefore was set to '{}'&quot;.format($stderr_file$))&#10;&#10;    if os.path.exists($stdout_file$):&#10;        logging.info(&quot;STDOUT file '{}' already exists so will delete it now&quot;.format($stdout_file$))&#10;        os.remove($stdout_file$)&#10;&#10;    if os.path.exists($stderr_file$):&#10;        logging.info(&quot;STDERR file '{}' already exists so will delete it now&quot;.format($stderr_file$))&#10;        os.remove($stderr_file$)&#10;&#10;    self._write_shell_script($cmd$, $args_string$, $outdir$, $stdout_file$, $stderr_file$)&#10;&#10;    consolidated_cmd = $cmd$ + ' ' + $args_string$&#10;    p = subprocess.Popen(consolidated_cmd, shell=True)&#10;&#10;    (stdout, stderr) = p.communicate()&#10;&#10;    pid = p.pid&#10;&#10;    logging.info(&quot;The child process ID is '{}'&quot;.format(pid))&#10;&#10;    p_status = p.wait()&#10;&#10;    p_returncode = p.returncode&#10;&#10;    if p_returncode is not None:&#10;        logging.info(&quot;The return code was '{}'&quot;.format(p_returncode))&#10;    else:&#10;        logging.info(&quot;There was no return code&quot;)&#10;&#10;    if p_status == 0:&#10;        logging.info(&quot;Execution of $cmd$ '{}' has completed&quot;.format($cmd$))&#10;    else:&#10;        raise Exception(&quot;Received status '{}'&quot;.format(p_status))&#10;&#10;    if stdout is not None:&#10;        logging.info(&quot;stdout is: &quot; + stdout)&#10;&#10;    if stderr is not None:&#10;        logging.info(&quot;stderr is: &quot; + stderr)&#10;&#10;    return stdout_file&#10;&#10;def _write_shell_script(self, $cmd$, $args_string$, $outdir$, $stdout_file$, $stderr_file$):&#10;    &quot;&quot;&quot;Write the command and argsuments to a shell script file so can be manually executed later&#10;&#10;    :param $cmd$: {str} - the command-line executable&#10;    :param $args_string$: {str} - the command-line arguments&#10;    :param $outdir$: {str} - the output directory in which the shell script should be written in&#10;    :param $stdout_file$: {str} - the file to which the STDOUT will be directed into&#10;    :param $stderr_file$: {str} - the file to which the STDERR will be directed into&#10;    &quot;&quot;&quot;&#10;    outfile = os.path.join(outdir, os.path.basename($cmd$) + '.sh')&#10;    formatted_args = re.sub(&quot; --&quot;, &quot; \\\n--&quot;, $args_string$)&#10;    with open(outfile, 'w') as of:&#10;        of.write(&quot;#!/bin/sh\n&quot;)&#10;        of.write(&quot;# method-created: &quot; + os.path.abspath(__file__) + &quot;\n&quot;)&#10;        of.write(&quot;# date-created: &quot; + str(currentDT.strftime(&quot;%Y-%m-%d-%H%M%S&quot;)) + &quot;\n&quot;)&#10;        of.write($cmd$ + ' \\' + &quot;\n&quot;)&#10;        of.write(formatted_args + ' \\' + &quot;\n&quot;)&#10;        of.write('1&gt;' + $stdout_file$ + ' \\' + &quot;\n&quot;)&#10;        of.write('2&gt;' + $stderr_file$)&#10;&#10;    logging.info(&quot;Wrote shell script '{}'&quot;.format(outfile))&#10;&#10;$END$" description="Execute a command via system call using subprocess" toReformat="false" toShortenFQNames="true">
+    <variable name="cmd" expression="" defaultValue="&quot;cmd&quot;" alwaysStopAt="true" />
+    <variable name="args_string" expression="" defaultValue="&quot;args_string&quot;" alwaysStopAt="true" />
+    <variable name="outdir" expression="" defaultValue="&quot;outdir&quot;" alwaysStopAt="true" />
+    <variable name="stdout_file" expression="" defaultValue="&quot;stdout_file&quot;" alwaysStopAt="true" />
+    <variable name="stderr_file" expression="" defaultValue="&quot;stderr_file&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="prepare-execute-command" value="$outdir$ = self.get_outdir()&#10;basename = os.path.basename($cmd$)&#10;$stdout_file$ = os.path.join($outdir$, basename, '.stdout') &#10;$stderr_file$ = os.path.join($outdir$, basename, '.stderr') &#10;$logfile$ = os.path.join($outdir$, basename, '.log')&#10;&#10;$args$ += &quot; --logfile &quot; + $logfile$&#10;&#10;self.execute_command($cmd$, $args$, $stdout_file$, $stderr_file$)&#10;&#10;$END$" description="Prepare to execute a command" toReformat="false" toShortenFQNames="true">
+    <variable name="outdir" expression="" defaultValue="&quot;outdir&quot;" alwaysStopAt="true" />
+    <variable name="cmd" expression="" defaultValue="&quot;cmd&quot;" alwaysStopAt="true" />
+    <variable name="stdout_file" expression="" defaultValue="&quot;stdout_file&quot;" alwaysStopAt="true" />
+    <variable name="stderr_file" expression="" defaultValue="&quot;stderr_file&quot;" alwaysStopAt="true" />
+    <variable name="logfile" expression="" defaultValue="&quot;logfile&quot;" alwaysStopAt="true" />
+    <variable name="args" expression="" defaultValue="&quot;args&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="open-read-plain-text-file-line-by-line" value="$line_ctr$ = 0&#10;with open($infile$, 'r') as fh:&#10;    line = fh.readline()&#10;    $line_ctr$ += 1&#10;    while line:&#10;        line = line.strip()&#10;        print(line)&#10;        line = fh.readline()&#10;        line_ctr += 1&#10;&#10;if $line_ctr$ &gt; 0:&#10;    logging.info(&quot;Read '{}' $lines$ from file '{}'&quot;.format($line_ctr$, $infile$))&#10;else:&#10;    logging.info(&quot;Did not read any lines from file '{}'&quot;.format($infile$))    &#10;&#10;$END$" description="Open and read a plain text file line-by-line" toReformat="false" toShortenFQNames="true">
+    <variable name="infile" expression="" defaultValue="&quot;infile&quot;" alwaysStopAt="true" />
+    <variable name="line_ctr" expression="" defaultValue="&quot;line_ctr&quot;" alwaysStopAt="true" />
+    <variable name="lines" expression="" defaultValue="&quot;lines&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="if-kwargs" value="if '$key$' in kwargs.keys():&#10;    self._$key$ = kwargs['$key$']&#10;    &#10;$END$" description="Unpack kwargs lookup" toReformat="false" toShortenFQNames="true">
+    <variable name="key" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="main-cli" value="import os&#10;import sys&#10;import click&#10;import pathlib&#10;import json&#10;import logging&#10;import calendar&#10;import time&#10;import pathlib&#10;from colorama import Fore, Style&#10;from datetime import datetime&#10;&#10;DEFAULT_OUTDIR = &quot;/tmp/&quot; + os.path.basename(__file__) + '/' + str(datetime.today().strftime('%Y-%m-%d-%H%M%S'))&#10;&#10;DEFAULT_CONFIG_FILE = os.path.dirname(os.path.abspath(__file__)) + '/conf/config.json'&#10;&#10;CONFIG = {}&#10;&#10;LOGGING_FORMAT = &quot;%(levelname)s : %(asctime)s : %(pathname)s : %(lineno)d : %(message)s&quot;&#10;&#10;LOG_LEVEL = logging.INFO&#10;&#10;&#10;@click.command()&#10;@click.option('--verbose', is_flag=True, help='Will print more info to STDOUT')&#10;@click.option('--outdir', help='The default is the current working directory')&#10;@click.option('--config_file', type=click.Path(exists=True), help=&quot;The configuration file for this project&quot;)&#10;@click.option('--logfile', help=&quot;The log file&quot;)&#10;@click.option('--outfile', help=&quot;The output final report file&quot;)&#10;@click.option('--infile', help=&quot;The primary input file&quot;)&#10;def main(verbose, outdir, config_file, logfile, outfile, infile):&#10;    &quot;&quot;&quot;Template command-line executable&#10;    &quot;&quot;&quot;&#10;&#10;    error_ctr = 0&#10;&#10;    if infile is None:&#10;        print(Fore.RED + &quot;--infile was not specified&quot;)&#10;        print(Style.RESET_ALL + '', end='')&#10;        error_ctr += 1&#10;&#10;    if error_ctr &gt; 0:&#10;        sys.exit(1)&#10;&#10;    assert isinstance(infile, str)&#10;&#10;    if config_file is None:&#10;        config_file = DEFAULT_CONFIG_FILE&#10;        print(Fore.YELLOW + &quot;--config_file was not specified and therefore was set to '{}'&quot;.format(config_file))&#10;        print(Style.RESET_ALL + '', end='')&#10;        error_ctr += 1&#10;&#10;    assert isinstance(config_file, str)&#10;&#10;    if outdir is None:&#10;        outdir = DEFAULT_OUTDIR&#10;        print(Fore.YELLOW + &quot;--outdir was not specified and therefore was set to '{}'&quot;.format(outdir))&#10;        print(Style.RESET_ALL + '', end='')&#10;&#10;    assert isinstance(outdir, str)&#10;&#10;    if not os.path.exists(outdir):&#10;        pathlib.Path(outdir).mkdir(parents=True, exist_ok=True)&#10;        print(Fore.YELLOW + &quot;Created output directory '{}'&quot;.format(outdir))&#10;        print(Style.RESET_ALL + '', end='')&#10;&#10;    if logfile is None:&#10;        logfile = outdir + '/' + os.path.basename(__file__) + '.log'&#10;        print(Fore.YELLOW + &quot;--logfile was not specified and therefore was set to '{}'&quot;.format(logfile))&#10;        print(Style.RESET_ALL + '', end='')&#10;&#10;    assert isinstance(logfile, str)&#10;&#10;    logging.basicConfig(filename=logfile, format=LOGGING_FORMAT, level=LOG_LEVEL)&#10;&#10;    if not os.path.isfile(infile):&#10;        print(&quot;'{}' is not a file&quot;.format(infile))&#10;        logging.error(&quot;'{}' is not a file&quot;.format(infile))&#10;        sys.exit(1)&#10;&#10;    if verbose:&#10;        print(&quot;The input file is '{}'&quot;.format(infile))&#10;&#10;    logging.info(&quot;The input file is '{}'&quot;.format(infile))&#10;&#10;    # Read the configuration from the JSON file and&#10;    # load into dictionary.&#10;    logging.info(&quot;Loading configuration from '{}'&quot;.format(config_file))&#10;&#10;    CONFIG = json.loads(open(config_file).read())&#10;&#10;    logging.info(&quot;Time to do something interesting&quot;)&#10;&#10;&#10;if __name__ == &quot;__main__&quot;:&#10;    main()&#10;" description="definition of main CLI program" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+</templateSet>
