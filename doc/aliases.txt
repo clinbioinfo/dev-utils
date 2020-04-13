@@ -1,6 +1,7 @@
 
 alias e='emacs -fg white -bg black '
 alias lll='ls -ltr '
+alias llldl='ls -ltr ~/Downloads'
 alias lk='less '
 alias eb='e ~/.bashrc & '
 alias sb='source ~/.bashrc '
