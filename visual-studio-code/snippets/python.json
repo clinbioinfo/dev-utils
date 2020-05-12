@@ -164,5 +164,61 @@
 		],
 		"description": "for each file in directory"
 	},
-
+	"ppp-regex-content-has-text" : {
+		"prefix": "ppp-regex-has-text",
+		"body": [
+			"# import re",
+			"",
+			"def context_has_text(${1:text}, ${2:content}):",
+			"    pattern_obj = re.compile(r'{}'.format(${1:text}))",
+			"    if pattern_obj.search(${2:content}):",
+			"        logging.info(\"Found '{}' in ${2:content}\".format(${1:text}))",
+			"        return True",
+			"    else:",
+			"        logging.info(\"Did not find '{}' in ${2:content}\".format(${1:text}))",
+			"        return False",
+			"$0"
+		],
+		"description": "check whether the text is present in the content using regex"
+	},
+	"ppp-regex-find-matches" : {
+		"prefix": "ppp-regex-find-matches",
+		"body": [
+			"# import re",
+			"",
+			"pattern_obj = re.compile(r'${1}')",
+			"matches = pattern_obj.finditer(${2:content})",
+			"if len(matches) == 0:",
+			"    logging.info(\"Did not find any matches for pattern '${1}' in content '{}'\".format(${2:content}))",
+			"else:",
+			"   logging.info(\"Found the following matches:\")",
+			"   for match in matches:",
+			"        logging.info(\"'{}'\".format(match))",
+			"        # for groupings, try match.group(index)",
+			"$0"
+		],
+		"description": "find matches in content using regex"
+	},
+	"ppp-if-not-file-exists" : {
+		"prefix": "ppp-if-not-file-exists",
+		"body": [
+			"if not os.path.exists(infile):",
+			"    print(f\"infile '{infile}' does not exist\")",
+			"    sys.exit(1)",
+			"$0"
+		],
+		"description": "find matches in content using regex"
+	},
+	"ppp-write-provenance-to-outfile" : {
+		"prefix": "ppp-write-provenance-to-outfile",
+		"body": [
+			"fh.write(f\"## method-created: {os.path.abspath(__file__)}\\n\")",
+			"fh.write(f\"## date-created: {str(datetime.today().strftime('%Y-%m-%d-%H%M%S'))}\\n\")",
+			"fh.write(f\"## created-by: {os.environ.get('USER')}\\n\")",
+			"fh.write(f\"## infile: {infile}\\n\")",
+			"fh.write(f\"## logfile: {logfile}\\n\")",
+			"$0"
+		],
+		"description": "write provenance info to the output file"
+	},
 }
