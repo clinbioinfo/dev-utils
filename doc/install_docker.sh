@@ -20,5 +20,14 @@ sudo systemctl enable docker
 echo "About to execute: docker --version"
 docker --version
 
+echo "About to create docker group"
+sudo groupadd docker
 
+echo "About to add $USER to the docker group"
+sudo gpasswd -a $USER docker
 
+echo "About to log into the new docker group"
+newgrp docker
+
+echo "About to test docker"
+docker run hello-world
