@@ -28,7 +28,7 @@ with open(outfile, 'wt') as of:
         for line in f:
             line = line.strip()
             if 'reference' in line.lower():
-                of.write(f"{line}\n")
+                of.write(f'echo "{line}"\n')
             else:
                 of.write(f'echo "Will attempt to execute: {line}"\n')
                 of.write(f"{line}\n\n")
