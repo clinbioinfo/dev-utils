@@ -30,4 +30,8 @@ sudo usermod -aG docker ${USER}
 echo "Will attempt to execute: su - ${USER}"
 su - ${USER}
 
+echo "Will attempt to execute: sudo usermod -aG docker ${USER}"
+sudo usermod -aG docker ${USER}
+
+
 Reference: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04
