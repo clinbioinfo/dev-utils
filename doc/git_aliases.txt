@@ -1,4 +1,5 @@
 alias gga="git add "
+alias ggau="git add -u "
 alias ggc="git commit "
 alias ggcci="git commit -m 'initial check-in' "
 alias ggd="git diff "
