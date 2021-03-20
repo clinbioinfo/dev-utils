@@ -185,10 +185,9 @@
       <option name="Python" value="true" />
     </context>
   </template>
-  <template name="jj-open-read-plain-text-file-line-by-line" value="$line_ctr$ = 0&#10;with open($infile$, 'r') as fh:&#10;    line = fh.readline()&#10;    $line_ctr$ += 1&#10;    while line:&#10;        line = line.strip()&#10;        print(line)&#10;        line = fh.readline()&#10;        line_ctr += 1&#10;&#10;if $line_ctr$ &gt; 0:&#10;    logging.info(&quot;Read '{}' $lines$ from file '{}'&quot;.format($line_ctr$, $infile$))&#10;else:&#10;    logging.info(&quot;Did not read any lines from file '{}'&quot;.format($infile$))    &#10;&#10;$END$" description="Open and read a plain text file line-by-line" toReformat="false" toShortenFQNames="true">
+  <template name="jj-open-read-plain-text-file-line-by-line" value="logging.info(f&quot;Will read file '{$infile$}'&quot;)&#10;$line_ctr$ = 0&#10;with open($infile$, 'r') as f:&#10;    for line in f:&#10;        $line_ctr$ += 1&#10;        line = line.strip()&#10;        print(line)&#10;&#10;if $line_ctr$ &gt; 0:&#10;    logging.info(&quot;Read '{$line_ctr$}' lines from file '{$infile$}'&quot;)&#10;else:&#10;    logging.info(&quot;Did not read any lines from file '{$infile$}'&quot;)    &#10;&#10;$END$" description="Open and read a plain text file line-by-line" toReformat="false" toShortenFQNames="true">
     <variable name="infile" expression="" defaultValue="&quot;infile&quot;" alwaysStopAt="true" />
     <variable name="line_ctr" expression="" defaultValue="&quot;line_ctr&quot;" alwaysStopAt="true" />
-    <variable name="lines" expression="" defaultValue="&quot;lines&quot;" alwaysStopAt="true" />
     <context>
       <option name="Python" value="true" />
     </context>
@@ -232,6 +231,56 @@
     <variable name="name" expression="" defaultValue="" alwaysStopAt="true" />
     <variable name="type" expression="" defaultValue="" alwaysStopAt="true" />
     <variable name="default" expression="" defaultValue="&quot;None&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="jj-default-outdir" value="DEFAULT_OUTDIR = os.path.join(&#10;    &quot;/tmp&quot;,&#10;    os.path.splitext(os.path.basename(__file__))[0],&#10;    str(datetime.today().strftime(&quot;%Y-%m-%d-%H%M%S&quot;)),&#10;)" description="Declare DEFAULT_OUTDIR constant" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="jj-get-file-list-from-indir" value="def get_file_list(indir: str = None, extension: str = None) -&gt; list:&#10;    &quot;&quot;&quot;Get the list of files in the specified directory&#10;    :param indir: {str} - the directory to search for files&#10;    :param extension: {str} - the file extension to filter on&#10;    :returns file_list: {list} - the list of files found in the directory&#10;    &quot;&quot;&quot;&#10;    if extension is None:&#10;        logging.info(f&quot;Going to search for files in directory '{indir}'&quot;)&#10;    else:&#10;        logging.info(f&quot;Going to search for files with extension '{extension}' in directory '{indir}'&quot;)&#10;    &#10;    file_list = []&#10;    for dirpath, dirnames, filenames in os.walk(indir):&#10;        if &quot;venv&quot; in dirpath:&#10;            logging.info(f&quot;Going to ignore files in directory '{dirpath}'&quot;)&#10;            continue&#10;        for name in filenames:&#10;            path = os.path.normpath(os.path.join(dirpath, name))&#10;            if os.path.isfile(path):&#10;                if extension is not None&#10;                    if path.endswith(&quot;.{extension}&quot;):&#10;                        file_list.append(path)&#10;                else:&#10;                    file_list.append(path)&#10;                &#10;    return file_list&#10;&#10;$END$" description="Get the list of files in a directory" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="jj-def-print-yellow-text" value="def print_yellow(msg: str = None) -&gt; None:&#10;    &quot;&quot;&quot;Print message to STDOUT in yellow text.&#10;    :param msg: {str} - the message to be printed&#10;    &quot;&quot;&quot;&#10;    if msg is None:&#10;        raise Exception(&quot;msg was not defined&quot;)&#10;    &#10;    print(Fore.YELLOW + msg)&#10;    print(Style.RESET_ALL + &quot;&quot;, end=&quot;&quot;)&#10;&#10;$END$" description="Define function for printing text to STDOUT in yellow" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="jj-def-print-red-text" value="def print_red(msg: str = None) -&gt; None:&#10;    &quot;&quot;&quot;Print message to STDOUT in yellow text.&#10;    :param msg: {str} - the message to be printed&#10;    &quot;&quot;&quot;&#10;    if msg is None:&#10;        raise Exception(&quot;msg was not defined&quot;)&#10;    &#10;    print(Fore.RED + msg)&#10;    print(Style.RESET_ALL + &quot;&quot;, end=&quot;&quot;)&#10;&#10;$END$" description="Define function for printing text to STDOUT in red" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="jj-def-print-green-text" value="def print_green(msg: str = None) -&gt; None:&#10;    &quot;&quot;&quot;Print message to STDOUT in yellow text.&#10;    :param msg: {str} - the message to be printed&#10;    &quot;&quot;&quot;&#10;    if msg is None:&#10;        raise Exception(&quot;msg was not defined&quot;)&#10;    &#10;    print(Fore.GREEN + msg)&#10;    print(Style.RESET_ALL + &quot;&quot;, end=&quot;&quot;)&#10;&#10;$END$" description="Define function for printing text to STDOUT in green" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="jj-regex-match" value="match_obj = re.match(&quot;({$exp$})&quot;, {$text$})&#10;if match_obj:&#10;    print(f&quot;Found '{match_obj[1]}' in '{$text$}'&quot;)&#10;" description="Regular expression for matching some pattern" toReformat="false" toShortenFQNames="true">
+    <variable name="exp" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="text" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="jj-backup-copy-file" value="bakfile = f&quot;{$infile$}.bak&quot;&#10;shutil.copy($infile$, bakfile)&#10;logging.info(f&quot;Copied '{$infile$}' to '{bakfile}'&quot;)&#10;&#10;$END$" description="Create a backup copy of the file" toReformat="false" toShortenFQNames="true">
+    <variable name="infile" expression="" defaultValue="infile" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="jj-open-write-file" value="with open($outfile$, 'w') as of:&#10;    of.write(&quot;$line$\n&quot;)&#10;    $END$&#10; &#10; logging.info(f&quot;Wrote file '{$outfile$}'&quot;)&#10; if verbose: &#10;    print(f&quot;Wrote file '{$outfile$}'&quot;)&#10;" description="Open file in write mode" toReformat="false" toShortenFQNames="true">
+    <variable name="outfile" expression="" defaultValue="outfile" alwaysStopAt="true" />
+    <variable name="line" expression="" defaultValue="line" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="jj-print-execution-completed" value="print_green(f&quot;{os.path.abspath(__file__)} execution completed&quot;)&#10;print(f&quot;The log file is '{logfile}'&quot;)&#10;print(f&quot;The output file is '{outfile}'&quot;)&#10;sys.exit(0)&#10;&#10;$END$&#10;" description="Print execution completed" toReformat="false" toShortenFQNames="true">
     <context>
       <option name="Python" value="true" />
     </context>
