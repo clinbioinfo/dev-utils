@@ -8,14 +8,17 @@ echo "Will attempt to execute: ~/.fzf/install"
 ~/.fzf/install
 
 if [ -f ${HOME}/.zshrc ]; then
-  echo "Will attempt to append the following to the ${HOME}/.zshrc"
-  echo "export FZF_DEFAULT_OPS='--extended'" >> ${HOME}/.zshrc
+  echo "Will attempt to append exports in fzf_exports.sh to ${HOME}/.zshrc"
+  cat ${HOME}/dev-utils/doc/fzf_exports.sh >> ${HOME}/.zshrc
 fi
 
 if [ -f ${HOME}/.bashrc ]; then
-  echo "Will attempt to append the following to the ${HOME}/.bashrc"
-  echo "export FZF_DEFAULT_OPS='--extended'" >> ${HOME}/.bashrc
+  echo "Will attempt to append exports in fzf_exports.sh to ${HOME}/.bashrc"
+  cat ${HOME}/dev-utils/doc/fzf_exports.sh >> ${HOME}/.bashrc
 fi
+
+echo "Will attempt to execute: sudo apt install fd-find"
+sudo apt install fd-find
 
 echo "You can periodically update fzf by executing:"
 echo "cd ~/.fzf && git pull && ./install"
