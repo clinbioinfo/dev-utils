@@ -1,0 +1,7 @@
+echo "Will enable custom perl aliases (in $0)"
+alias fl="find . -name '*.pl'"
+alias fm="find . -name '*.pm'"
+alias pb="perlbrew "
+alias pbh="pb help | less"
+alias check-perl-modules="find . -name '*.pm' -exec sh -c 'perl -wc -I lib {} ' \;"
+alias show-perl-aliases="cat ~/dev-utils/doc/perl_aliases.txt | grep '^alias ' |  sed 's/^alias //' | sed 's/=\"/ -> /' | sed 's/\"$//'"

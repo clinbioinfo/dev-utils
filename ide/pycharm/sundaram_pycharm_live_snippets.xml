@@ -78,7 +78,7 @@
       <option name="Python" value="true" />
     </context>
   </template>
-  <template name="jj-def-backup-file" value="def _backup_file(self, $file$):&#10;    &quot;&quot;&quot;Backup file&#10;    :param $file$: str - file to be backed-up&#10;    &quot;&quot;&quot;&#10;    bakfile = os.path.abspath($file$) + time.strftime(&quot;%Y-%m-%d-%H%M&quot;) + '.bak'&#10;    shutil.copy($file$, bakfile)&#10;    logging.info(&quot;Copied '{}' to '{}'&quot;.format($file$, bakfile))&#10;&#10;$END$&#10;" description="Create backup copy of a file" toReformat="false" toShortenFQNames="true">
+  <template name="jj-def-backup-file" value="import time&#10;import shutil&#10;&#10;def _backup_file(self, $file$):&#10;    &quot;&quot;&quot;Backup file&#10;    :param $file$: str - file to be backed-up&#10;    &quot;&quot;&quot;&#10;    if os.path.exists($file$):&#10;        bakfile = os.path.abspath($file$) + time.strftime(&quot;%Y-%m-%d-%H%M&quot;) + '.bak'&#10;        shutil.copy($file$, bakfile)&#10;        logging.info(&quot;Copied '{}' to '{}'&quot;.format($file$, bakfile))&#10;    else:&#10;        logging.info(&quot;File '{$file$}' does not exist, so nothing to backup&quot;)&#10;&#10;$END$&#10;" description="Create backup copy of a file if it exists" toReformat="false" toShortenFQNames="true">
     <variable name="file" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
       <option name="Python" value="true" />
@@ -281,6 +281,14 @@
     </context>
   </template>
   <template name="jj-print-execution-completed" value="print_green(f&quot;{os.path.abspath(__file__)} execution completed&quot;)&#10;print(f&quot;The log file is '{logfile}'&quot;)&#10;print(f&quot;The output file is '{outfile}'&quot;)&#10;sys.exit(0)&#10;&#10;$END$&#10;" description="Print execution completed" toReformat="false" toShortenFQNames="true">
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="jj-get-env-var" value="$var$ = os.getenv('$envvar$', $default$)&#10;if $var$ is None:&#10;    logging.error(&quot;environment variable '$envvar$' is not defined&quot;)&#10;    raise Exception(&quot;environment variable '$envvar$' is not defined&quot;)&#10;&#10;$END$" description="Get environment variable" toReformat="false" toShortenFQNames="true">
+    <variable name="var" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="envvar" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="default" expression="" defaultValue="None" alwaysStopAt="true" />
     <context>
       <option name="Python" value="true" />
     </context>
