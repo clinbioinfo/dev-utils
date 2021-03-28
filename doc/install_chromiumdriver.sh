@@ -35,7 +35,7 @@ wget http://www.java2s.com/Code/JarDownload/testng/testng-6.8.7.jar.zip
 echo "About to execute: unzip testng-6.8.7.jar.zip"
 unzip testng-6.8.7.jar.zip
 
-echo "Execute the follwoing to run chromedriver:"
+echo "Execute the following to run chromedriver:"
 echo "xvfb-run java -Dwebdriver.chrome.driver=/usr/bin/chromedriver -jar selenium-server-standalone-3.13.0.jar"
 
 echo "Reference: https://tecadmin.net/setup-selenium-chromedriver-on-ubuntu/"
