@@ -1,69 +1,39 @@
+echo "Will enable custom aliases (in $0)"
+alias e="emacs -fg white -bg black "
+alias lll="ls -ltr "
+alias llll="ls -ltrias "
+alias llldl="ls -ltr ~/Downloads"
+alias lk="less "
+alias eb="e ~/.bashrc & "
+alias sb="source ~/.bashrc "
+alias catb="cat ~/.bashrc "
+alias fhn="find . -name "
+alias fht="find . -type "
+alias sz="source ~/.zshrc"
+alias show-custom-aliases="cat ${HOME}/dev-utils/doc/aliases.txt | grep '^alias ' | sed 's/^alias //' | sed 's/=\"/ -> /' | sed 's/\"$//'"
 
-alias e='emacs -fg white -bg black '
-alias lll='ls -ltr '
-alias llll='ls -ltrias '
-alias llldl='ls -ltr ~/Downloads'
-alias lk='less '
-alias eb='e ~/.bashrc & '
-alias sb='source ~/.bashrc '
-alias catb='cat ~/.bashrc '
-alias fhn='find . -name '
-alias fht='find . -type '
 
-##-------------------------------------------
-##
 ## Git
-##
-##-------------------------------------------
 source ${HOME}/dev-utils/doc/git_aliases.txt
 
-
-##-------------------------------------------
-##
 ## Perl
-##
-##-------------------------------------------
-alias fl='find . -name "*.pl"'
-alias fm='find . -name "*.pm"'
-alias pb='perlbrew '
-alias pbh='pb help | less'
-alias check-perl-modules="find . -name '*.pm' -exec sh -c 'perl -wc -I lib {} ' \;"
+source ${HOME}/dev-utils/doc/perl_aliases.txt
 
-##-------------------------------------------
-##
-## Git Clone
-##
-##-------------------------------------------
-alias clone-vwb='git clone https://github.com/clinbioinfo/vwb.git'
-alias clone-vwb-dashboard='git clone https://github.com/clinbioinfo/vwb-dashboard.git'
-alias clone-umlet-utils='git clone https://github.com/clinbioinfo/umlet-utils.git'
-alias clone-log4perl-to-html='git clone https://github.com/clinbioinfo/log4perl-to-html.git'
-alias clone-queries-benchmarker-utils='git clone https://github.com/clinbioinfo/queries-benchmarker-utils.git'
-alias clone-sharepoint-utils='git clone https://github.com/clinbioinfo/sharepoint-utils.git'
-alias clone-installer-config-utils='git clone https://github.com/clinbioinfo/installer-config-utils.git'
-alias clone-flowjo-utils='git clone https://github.com/clinbioinfo/flowjo-utils.git'
-alias clone-perlbrew-utils='git clone https://github.com/clinbioinfo/perlbrew-utils.git'
-alias clone-rest-web-service-bootstrap-utils='git clone https://github.com/clinbioinfo/rest-web-service-bootstrap-utils.git'
-
-##
 ## misc.
-##
 alias hipchat-tips="cat ~/dev-utils/docs/hipchat_slash_commands.txt"
 alias bb="perl ~/dev-utils/util/backup.pl "
 alias terminator-help="cat ~/dev-utils/doc/terminator_help.txt"
 alias send-aliases="perl ~/dev-utils/util/send_aliases.pl"
 alias log-viewer="perl ~/dev-utils/util/logfile_viewer.pl "
-alias ccc='xclip -selection clipboard'
-alias vvv='xclip -o'
+alias ccc="xclip -selection clipboard"
+alias vvv="xclip -o"
 alias restart-network="sudo service network-manager restart"
 alias sss="perl ~/dev-utils/util/scp_assets_by_list_file.pl --asset_list_file "
 alias sssv="perl ~/dev-utils/util/scp_assets_by_list_file.pl --verbose --asset_list_file "
 alias send-changed-assets="ggs | grep modified | grep -v Makefile > scp_transfer_list.txt && sssv scp_transfer_list.txt"
 alias get-server-info="perl ~/dev-utils/util/get_server_status.pl "
 
-##
-## python
-##
+## Python
 source ${HOME}/dev-utils/doc/python_aliases.txt
 
 alias vscode="code --disable-gpu . "
