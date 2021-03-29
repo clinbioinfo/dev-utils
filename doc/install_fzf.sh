@@ -20,6 +20,12 @@ fi
 echo "Will attempt to execute: sudo apt install fd-find"
 sudo apt install fd-find
 
+echo "Will attempt to execute: mkdir -p ${HOME}/.local/bin"
+mkdir -p ${HOME}/.local/bin
+
+echo "Will attempt to execute : ln -s $(which fdfind) ${HOME}/.local/bin/fd"
+ln -s $(which fdfind) ${HOME}/.local/bin/fd
+
 echo "You can periodically update fzf by executing:"
 echo "cd ~/.fzf && git pull && ./install"
 
