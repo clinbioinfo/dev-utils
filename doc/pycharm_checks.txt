@@ -1,0 +1,17 @@
+echo "Execute the following to check on the status of the Pycharm Live Templates"
+
+# check status
+cd ${HOME}/dev-utils
+git status
+
+# retrieve new/updated
+git pull
+
+# compare
+diff ${HOME}/dev-utils/ide/pycharm/sundaram_pycharm_live_snippets.xml  ${HOME}/.config/JetBrains/PyCharmCE2020.3/templates/sundaram_pycharm_live_snippets.xml    
+
+# deploy updates
+cp ${HOME}/dev-utils/ide/pycharm/sundaram_pycharm_live_snippets.xml  ${HOME}/.config/JetBrains/PyCharmCE2020.3/templates/sundaram_pycharm_live_snippets.xml
+
+# capture new/updated 
+cp ${HOME}/.config/JetBrains/PyCharmCE2020.3/templates/sundaram_pycharm_live_snippets.xml ${HOME}/dev-utils/ide/pycharm/sundaram_pycharm_live_snippets.xml
