@@ -2,7 +2,7 @@
 echo "About to install docker-compose"
 echo "Reference: https://www.digitalocean.com/community/tutorials/how-to-install-docker-compose-on-ubuntu-18-04"
 
-VERSION=1.25.5
+VERSION=1.28.5
 
 echo "About to execute: sudo curl -L https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose"
 sudo curl -L https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
