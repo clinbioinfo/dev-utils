@@ -1,0 +1,133 @@
+{
+	// Place your snippets for php here. Each snippet is defined under a snippet name and has a prefix, body and 
+	// description. The prefix is what is used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. Placeholders with the 
+	// same ids are connected.
+	// Example:
+	"Create PHP code block": {
+		"prefix": "jj-php-code-block",
+		"body": [
+			"<?php",
+			"  $0",
+			"?>"
+		],
+		"description": "Create PHP code block"
+	},
+	"Define constructor": {
+		"prefix": "jj-constructor-function",
+		"body": [
+			"public function __constructor($1){",
+			"  $0",
+			"}"
+		],
+		"description": "Define the constructor for a class"
+	},
+	"Implement class": {
+		"prefix": "jj-class",
+		"body": [
+			"<?php",
+			"  class $1{",
+			"",
+			"    public function __construct(){",
+			"",
+			"    }",
+			"$0"
+		],
+		"description": "Implement a class"
+	},
+	"Implement function": {
+		"prefix": "jj-function",
+		"body": [
+			"public function $1($2){",
+			"",
+			"  $0",
+			"",
+			"}"
+		],
+		"description": "Implement a function"
+	},
+	"Check if $_SESSION key is defined": {
+		"prefix": "jj-if-isset-session",
+		"body": [
+			"if (isset($$_SESSION['$1'])){",
+			"  $0",
+			"}"
+		],
+		"description": "Check if $_SESSION key is defined"
+	},
+	"Check unset $_SESSION key": {
+		"prefix": "jj-unisset-session",
+		"body": [
+			"unset($$_SESSION['$0']);"
+		],
+		"description": "Check if $_SESSION key is defined"
+	},
+	"Check if REQUEST_METHOD is POST": {
+		"prefix": "jj-if-request-method-post",
+		"body": [
+			"if($$_SERVER['REQUEST_METHOD'] == 'POST'){",
+			"  $0",
+			"}"
+		],
+		"description": "Check if REQUEST_METHOD == POST"
+	},
+	"Filter POST input array": {
+		"prefix": "jj-filter-post-input-array",
+		"body": [
+			"$$_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);",
+			"$0"
+		],
+		"description": "Filter POST input array"
+	},
+	"Check if key not in associative array": {
+		"prefix": "jj-if-key-not-in",
+		"body": [
+			"if (empty($${1:data}['${2:mykey}'])){",
+			"  $3;",     
+			"} else {",
+			"  $4;",
+			"}",
+			"$0"
+		],
+		"description": "Filter POST input array"
+	},
+	"require once": {
+		"prefix": "jj-require-once",
+		"body": [
+			"require_once($1 . '.php');",
+			"$0"
+		],
+		"description": "require_once();"
+	},
+	"Check if file exists": {
+		"prefix": "jj-if-file-exists",
+		"body": [
+			"if (file_exists($1 . '.php')){",
+			"  $0;",
+			"}"
+		],
+		"description": "Check if the file exists"
+	},
+	"Check if file not exists": {
+		"prefix": "jj-if-file-not-exists",
+		"body": [
+			"if (! file_exists($1 . '.php')){",
+			"  $0;",
+			"}"
+		],
+		"description": "Check if the file does not exists"
+	},
+	"session helper start": {
+		"prefix": "jj-session-helper-start",
+		"body": [
+			"<?php",
+			"start_session();",
+			"$0"
+		],
+		"description": "Create session_helper start_session() code"
+	}
+
+
+
+
+}
