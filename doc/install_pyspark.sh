@@ -56,12 +56,12 @@ fi
 
 if [ -f ${HOME}/.bashrc ]; then
   echo "Will attempt to append some export statements to ${HOME}/.bashrc"
-  cat pyspark_exports.sh >> ${HOME}/.bashrc
+  cat ${HOME}/dev-utils/doc/pyspark_exports.sh >> ${HOME}/.bashrc
 fi
 
 if [ -f ${HOME}/.zshrc ]; then
   echo "Will attempt to append some export statements to ${HOME}/.zshrc"
-  cat pyspark_exports.sh >> ${HOME}/.zshrc
+  cat ${HOME}/dev-utils/doc/pyspark_exports.sh >> ${HOME}/.zshrc
 fi
 
 
