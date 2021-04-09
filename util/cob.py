@@ -2,6 +2,7 @@ import click
 import logging
 import os
 import pathlib
+import pyfiglet
 import subprocess
 import sys
 
@@ -120,6 +121,9 @@ def _execute_cmd(cmd, outdir: str = DEFAULT_OUTDIR, stdout_file=None, stderr_fil
 def main(logfile: str, outdir: str, verbose: bool):
     """Run Close-of-Business scripts"""
 
+    print(pyfiglet.figlet_format("Close of Business"))
+
+
     error_ctr = 0
 
     if error_ctr > 0:
@@ -146,7 +150,8 @@ def main(logfile: str, outdir: str, verbose: bool):
 
     cmd = f"bash {os.path.join(os.getenv('HOME'), 'dev-utils', 'util', 'check_pycharm_live_templates.sh')}"
     _execute_cmd(cmd)
-
+    print("Have a great day!!")
+    
 
 if __name__ == "__main__":
     main()
