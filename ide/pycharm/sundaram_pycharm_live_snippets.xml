@@ -316,4 +316,33 @@
       <option name="Python" value="true" />
     </context>
   </template>
+  <template name="jj-concurrent-futures-processor-pool-executor" value="# Reference: https://stackoverflow.com/questions/20776189/concurrent-futures-vs-multiprocessing-in-python-3&#10;&#10;import os&#10;import time&#10;import concurrent.futures&#10;&#10;start = time.perf_counter()&#10;&#10;&#10;def $my_function$($p1$: $int$ = 1):&#10;    pid = os.getpid()&#10;    time.sleep(1)&#10;    # TODO: enter some useful code&#10;    return f&quot;Done something with parameter '{$p1$}' process ID '{pid}'!&quot;&#10;&#10;&#10;with concurrent.futures.ProcessPoolExecutor() as executor:&#10;    &#10;    # f1 = executor.submit($my_function$, 1)&#10;    # print(f1.result())&#10;&#10;    # Contrived example where want to submit/schedule 10 instance jobs of $my_function$&#10;    # and will pass in one parameter to $my_function$&#10;    $param_1$ = 1&#10;    logging.info(f&quot;Will attempt to submit/schedule '{$count$}' instance jobs of $my_function$&quot;)&#10;    results = [executor.submit($my_function$, $param_1$) for _ in range($count$)]&#10;&#10;    # As the instance jobs are completed i.e.: yielded, access their results&#10;    logging.info(f&quot;Here are the yielded results:&quot;)&#10;    for f in concurrent.futures.as_completed(results):&#10;        print(f.result())&#10;        logging.info(f.result())&#10;&#10;end = time.perf_counter()&#10;print(f&quot;Finished in {round(end-start, 2)} seconds(s)&quot;)&#10;&#10;$END$" description="Use concurrent futures ProcessorPoolExecutor" toReformat="false" toShortenFQNames="true">
+    <variable name="my_function" expression="" defaultValue="&quot;my_function&quot;" alwaysStopAt="true" />
+    <variable name="p1" expression="" defaultValue="&quot;p1&quot;" alwaysStopAt="true" />
+    <variable name="int" expression="" defaultValue="&quot;int&quot;" alwaysStopAt="true" />
+    <variable name="param_1" expression="" defaultValue="&quot;param_1&quot;" alwaysStopAt="true" />
+    <variable name="count" expression="" defaultValue="&quot;10&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="jj-concurrent-futures-processor-pool-executor-over-list-of-items" value="# Reference: https://stackoverflow.com/questions/20776189/concurrent-futures-vs-multiprocessing-in-python-3&#10;&#10;import os&#10;import time&#10;import concurrent.futures&#10;&#10;start = time.perf_counter()&#10;&#10;&#10;def $my_function$($p1$: $int$ = 1):&#10;    pid = os.getpid()&#10;    time.sleep(1)&#10;    # TODO: enter some useful code&#10;    return f&quot;Done something with parameter '{$p1$}' process ID '{pid}'!&quot;&#10;&#10;&#10;with concurrent.futures.ProcessPoolExecutor() as executor:&#10;    &#10;    # Contrived example where want to submit/schedule 10 instance jobs of $my_function$&#10;    # and will pass in one parameter to $my_function$&#10;    $items$ = [5, 4, 3, 2, 1]&#10;    logging.info(f&quot;Will attempt to submit/schedule '{len($items$)}' instance jobs of $my_function$&quot;)&#10;    results = [executor.submit($my_function$, $item$) for $item$ in $items$]&#10;&#10;    # As the instance jobs are completed i.e.: yielded, access their results&#10;    logging.info(f&quot;Here are the yielded results:&quot;)&#10;    for f in concurrent.futures.as_completed(results):&#10;        print(f.result())&#10;        logging.info(f.result())&#10;&#10;end = time.perf_counter()&#10;print(f&quot;Finished in {round(end-start, 2)} seconds(s)&quot;)&#10;&#10;$END$" description="Use concurrent futures ProcessorPoolExecutor over a fixed list of items" toReformat="false" toShortenFQNames="true">
+    <variable name="my_function" expression="" defaultValue="&quot;my_function&quot;" alwaysStopAt="true" />
+    <variable name="p1" expression="" defaultValue="&quot;p1&quot;" alwaysStopAt="true" />
+    <variable name="int" expression="" defaultValue="&quot;int&quot;" alwaysStopAt="true" />
+    <variable name="items" expression="" defaultValue="&quot;items&quot;" alwaysStopAt="true" />
+    <variable name="item" expression="" defaultValue="&quot;item&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
+  <template name="jj-concurrent-futures-processor-pool-executor-over-list-of-items-using-map" value="# Reference: https://stackoverflow.com/questions/20776189/concurrent-futures-vs-multiprocessing-in-python-3&#10;&#10;import os&#10;import logging&#10;import time&#10;import concurrent.futures&#10;&#10;&#10;start = time.perf_counter()&#10;&#10;&#10;def $my_function$($p1$: $int$ = 1):&#10;    pid = os.getpid()&#10;    time.sleep(1)&#10;    # TODO: enter some useful code&#10;    return f&quot;Done something with parameter '{$p1$}' process ID '{pid}'!&quot;&#10;&#10;&#10;with concurrent.futures.ProcessPoolExecutor() as executor:&#10;    &#10;    # Contrived example where want to submit/schedule 10 instance jobs of $my_function$&#10;    # and will pass in one parameter to $my_function$&#10;    $items$ = [5, 4, 3, 2, 1]&#10;    logging.info(f&quot;Will attempt to submit/schedule '{len($items$)}' instance jobs of $my_function$&quot;)&#10;    results = executor.map($my_function$, $items$)&#10;&#10;    # As the instance jobs are completed i.e.: yielded, access their results&#10;    logging.info(f&quot;Here are the yielded results:&quot;)&#10;    for result in results:&#10;        print(f&quot;Here is the result: '{result}'&quot;)&#10;        logging.info(f&quot;Here is the result: '{result}'&quot;)&#10;&#10;end = time.perf_counter()&#10;print(f&quot;Finished in {round(end-start, 2)} seconds(s)&quot;)&#10;&#10;$END$" description="se concurrent futures ProcessorPoolExecutor over a fixed list of items using map" toReformat="false" toShortenFQNames="true">
+    <variable name="my_function" expression="" defaultValue="&quot;my_function&quot;" alwaysStopAt="true" />
+    <variable name="p1" expression="" defaultValue="&quot;p1&quot;" alwaysStopAt="true" />
+    <variable name="int" expression="" defaultValue="&quot;int&quot;" alwaysStopAt="true" />
+    <variable name="items" expression="" defaultValue="&quot;items&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
 </templateSet>
