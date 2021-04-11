@@ -345,4 +345,11 @@
       <option name="Python" value="true" />
     </context>
   </template>
+  <template name="jj-print-banner" value="import pyfiglet&#10;print(pyfiglet.figlet_format(&quot;$msg$&quot;, font=&quot;$font$&quot;))&#10;$END$" description="Print banner using pyfiglet" toReformat="false" toShortenFQNames="true">
+    <variable name="msg" expression="" defaultValue="&quot;hello&quot;" alwaysStopAt="true" />
+    <variable name="font" expression="" defaultValue="&quot;slant&quot;" alwaysStopAt="true" />
+    <context>
+      <option name="Python" value="true" />
+    </context>
+  </template>
 </templateSet>
