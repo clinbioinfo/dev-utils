@@ -119,10 +119,9 @@ def _execute_cmd(cmd, outdir: str = DEFAULT_OUTDIR, stdout_file=None, stderr_fil
 @click.option('--outdir', help="The default is the current working directory - default is '{DEFAULT_OUTDIR}'")
 @click.option('--verbose', is_flag=True, help=f"Will print more info to STDOUT - default is '{DEFAULT_VERBOSE}'")
 def main(logfile: str, outdir: str, verbose: bool):
-    """Run Close-of-Business scripts"""
+    """Run End of Day scripts"""
 
     print(pyfiglet.figlet_format("End of Day"))
-
 
     error_ctr = 0
 
@@ -148,7 +147,8 @@ def main(logfile: str, outdir: str, verbose: bool):
 
     logging.basicConfig(filename=logfile, format=LOGGING_FORMAT, level=LOG_LEVEL)
 
-    cmd = f"bash {os.path.join(os.getenv('HOME'), 'dev-utils', 'util', 'check_pycharm_live_templates.sh')}"
+    cmd = f"bash {os.path.join(os.getenv('HOME'), 'dev-utils', 'util', 'install_pycharm_live_template.sh')}"
+    print(f"\n\nNow attempting to execute {cmd}")
     _execute_cmd(cmd)
     print("Have a great day!!")
     
