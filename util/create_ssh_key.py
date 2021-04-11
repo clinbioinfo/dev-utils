@@ -9,13 +9,19 @@ import sys
 from colorama import Fore, Style
 from datetime import datetime
 
-DEFAULT_OUTDIR = "/tmp/" + os.path.basename(__file__) + '/' + str(datetime.today().strftime('%Y-%m-%d-%H%M%S'))
+DEFAULT_OUTDIR = os.path.join(
+    "/tmp",
+    os.path.splitext(os.path.basename(__file__))[0],
+    str(datetime.today().strftime("%Y-%m-%d-%H%M%S")),
+)
 
-LOGGING_FORMAT = "%(levelname)s : %(asctime)s : %(pathname)s : %(lineno)d : %(message)s"
+DEFAULT_LOGGING_FORMAT = "%(levelname)s : %(asctime)s : %(pathname)s : %(lineno)d : %(message)s"
 
-LOG_LEVEL = logging.INFO
+DEFAULT_LOG_LEVEL = logging.INFO
 
 DEFAULT_VERBOSE = True
+
+DEFAULT_GITHUB_SETTINGS_KEY_URL = 'https://github.com/settings/keys'
 
 
 def print_red(msg: str = None) -> None:
@@ -115,19 +121,31 @@ def _execute_cmd(cmd, outdir: str = DEFAULT_OUTDIR, stdout_file=None, stderr_fil
 
 
 @click.command()
+@click.option('--email_address', help="The email address to associate with the account")
 @click.option('--logfile', help="The log file")
+@click.option('--name', help="The first and last name to associate with the account - default is environemnt variable GIT_CONFIG_NAME")
 @click.option('--outdir', help="The default is the current working directory - default is '{DEFAULT_OUTDIR}'")
 @click.option('--verbose', is_flag=True, help=f"Will print more info to STDOUT - default is '{DEFAULT_VERBOSE}'")
-def main(logfile: str, outdir: str, verbose: bool):
-    """Run Close-of-Business scripts"""
+def main(email_address: str, logfile: str, name: str, outdir: str, verbose: bool):
+    """Create ssh key by executing ssh-keygen"""
 
-    print(pyfiglet.figlet_format("Close of Business"))
-
+    print(pyfiglet.figlet_format("SSH Keygen"))
 
     error_ctr = 0
 
+    if email_address is None:
+        print_red(f"--email_address was not specified")
+        error_ctr += 1
+
+    if name is None:
+        name = os.getenv('GIT_CONFIG_NAME', None)
+        if name is None:
+            print_red(f"--name was not specified and environment variable GIT_CONFIG_NAME was not defined")
+            error_ctr += 1
+
     if error_ctr > 0:
         sys.exit(1)
+
 
     if outdir is None:
         outdir = DEFAULT_OUTDIR
@@ -146,12 +164,29 @@ def main(logfile: str, outdir: str, verbose: bool):
 
     assert isinstance(logfile, str)
 
-    logging.basicConfig(filename=logfile, format=LOGGING_FORMAT, level=LOG_LEVEL)
+    logging.basicConfig(filename=logfile, format=DEFAULT_LOGGING_FORMAT, level=DEFAULT_LOG_LEVEL)
 
-    cmd = f"bash {os.path.join(os.getenv('HOME'), 'dev-utils', 'util', 'check_pycharm_live_templates.sh')}"
+    basename = email_address
+    basename = basename.split('@')[0].replace('.', '_')
+    privatekey_filepath = os.path.join(os.getenv('HOME'), '.ssh', 'id_ed25519_' + basename)
+
+    cmd = f"ssh-keygen -t ed25519 -C '{email_address}' -f {privatekey_filepath}"
+    print(cmd)
     _execute_cmd(cmd)
-    print("Have a great day!!")
-    
+
+    pubkey_filepath = privatekey_filepath + '.pub'
+    if not os.path.exists(pubkey_filepath):
+        error_msg = f"file '{pubkey_filepath}' does not exist"
+        logging.error(error_msg)
+        raise Exception(error_msg)
+    logging.info(f"Will read file '{pubkey_filepath}'")
+
+    print(f"Please add the new key to your Github account at '{DEFAULT_GITHUB_SETTINGS_KEY_URL}':")
+    with open(pubkey_filepath, 'r') as f:
+        for line in f:
+            line = line.strip()
+            print(line)
+
 
 if __name__ == "__main__":
     main()
