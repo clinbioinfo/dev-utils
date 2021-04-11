@@ -11,7 +11,7 @@ alias fhn="find . -name "
 alias fht="find . -type "
 alias sz="source ~/.zshrc"
 alias show-custom-aliases="cat ${HOME}/dev-utils/doc/aliases.txt | grep '^alias ' | sed 's/^alias //' | sed 's/=\"/ -> /' | sed 's/\"$//'"
-alias cob="bash ${HOME}/dev-utils/util/cob.sh"
+alias eod="bash ${HOME}/dev-utils/util/end_of_day.sh"
 
 ## Git
 source ${HOME}/dev-utils/doc/git_aliases.txt
