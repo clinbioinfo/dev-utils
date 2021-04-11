@@ -147,7 +147,7 @@ def main(logfile: str, outdir: str, verbose: bool):
 
     logging.basicConfig(filename=logfile, format=LOGGING_FORMAT, level=LOG_LEVEL)
 
-    cmd = f"bash {os.path.join(os.getenv('HOME'), 'dev-utils', 'util', 'install_pycharm_live_template.sh')}"
+    cmd = f"bash {os.path.join(os.getenv('HOME'), 'pycharm-utils', 'util', 'install_pycharm_live_template.sh')}"
     print(f"\n\nNow attempting to execute {cmd}")
     _execute_cmd(cmd)
     print("Have a great day!!")
