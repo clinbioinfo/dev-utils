@@ -10,10 +10,10 @@ alias catb="cat ~/.bashrc "
 alias fhn="find . -name "
 alias fht="find . -type "
 alias sz="source ~/.zshrc"
-alias show-custom-aliases="cat ${HOME}/dev-utils/doc/aliases.txt | grep '^alias ' | sed 's/^alias //' | sed 's/=\"/ -> /' | sed 's/\"$//'"
-alias eod="bash ${HOME}/dev-utils/util/end_of_day.sh"
-alias sod="bash ${HOME}/dev-utils/util/start_of_day.sh"
-alias create-ssh-key="bash ${HOME}/dev-utils/util/create_ssh_key.sh"
+alias jj-show-custom-aliases="cat ${HOME}/dev-utils/doc/aliases.txt | grep '^alias ' | sed 's/^alias //' | sed 's/=\"/ -> /' | sed 's/\"$//'"
+alias jj-end-of-day="bash ${HOME}/dev-utils/util/end_of_day.sh"
+alias jj-start-of-day="bash ${HOME}/dev-utils/util/start_of_day.sh"
+alias jj-create-ssh-key="bash ${HOME}/dev-utils/util/create_ssh_key.sh"
 
 ## Pycharm
 source ${HOME}/pycharm-utils/doc/pycharm_aliases.txt
