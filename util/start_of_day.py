@@ -154,6 +154,11 @@ def main(logfile: str, outdir: str, verbose: bool):
     cmd = f"bash {os.path.join(os.getenv('HOME'), 'pycharm-utils', 'util', 'install_pycharm_live_template.sh')}"
     print(f"\n\nNow attempting to execute {cmd}")
     _execute_cmd(cmd)
+
+    cmd = f"bash {os.path.join(os.getenv('HOME'), 'aws-sso-utils', 'get_access_keys.sh')}"
+    print(f"\n\nNow attempting to execute {cmd}")
+    _execute_cmd(cmd)
+
     print("Have a great day!!")
     
 
