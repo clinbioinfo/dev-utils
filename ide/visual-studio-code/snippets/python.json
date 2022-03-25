@@ -3,7 +3,7 @@
 		"prefix": "jj-backup-copy-file",
 		"body": [
 			"bakfile = f\"{${1:infile}}.bak\"",
-            "shutil.copy({${1:infile}}, bakfile)",
+            "shutil.copy(${1:infile}, bakfile)",
             "logging.info(f\"Copied '{${1:infile}}' to '{bakfile}'\")",
             "",
             "$0"
@@ -551,14 +551,16 @@
         ],
         "description": "Declare DEFAULT_OUTDIR constant"
     },
-    "Add a form to the context in the view": {
-        "prefix": "jj-django-add-form-to-context",
+    "Add a Django ManyToManyField": {
+        "prefix": "jj-django-manytomanyfield",
         "body": [
-            "from .forms import ${1:form_name}Form$0",
-            "context['${2:name}_form'] = ${1:form_name}Form()",
-            ""
+            "${1:field} = models.ManyToManyField(",
+            "    '${2:model_name}',",
+            "    blank=True",
+            ")",
+            "$0"
         ],
-        "description": "Add a form to the context in the view"
+        "description": "Add a Django ManyToManyField"
     },
     "Declare a Django admin class": {
         "prefix": "jj-django-admin-class",
@@ -650,6 +652,19 @@
         ],
         "description": "Declare a Django EmailField for the model"
     },
+    "Declare a Django EmailField for the model": {
+        "prefix": "jj-django-model-EmailField",
+        "body": [
+            "${1:email_field} = models.EmailField(",
+            "    null=True,",
+            "    blank=True,",
+            "    max_length=${2:max_length}",
+            ")",
+            "$0"
+        ],
+        "description": "Declare a Django EmailField for the model"
+    },
+
     "Define a Django form class": {
         "prefix": "jj-django-form-class",
         "body": [
@@ -734,13 +749,53 @@
         ],
         "description": "Declare a Django model BooleanField"
     },
-    "Declare a Django model field": {
+    "Declare a Django model charfield": {
         "prefix": "jj-django-model-charfield",
         "body": [
-            "${1:field} = models.CharField(null=True, max_length=${2:max_length})",
+            "${1:field} = models.CharField(",
+            "    null=True,",
+            "    blank=True,",
+            "    max_length=${2:max_length}",
+            ")",
             "$0"
         ],
-        "description": "Declare a Django model field"
+        "description": "Declare a Django model carfield"
+    },
+    "Declare a Django model ImageField": {
+        "prefix": "jj-django-model-imagefield",
+        "body": [
+            "${1:field} = models.ImageField(",
+            "    null=True,",
+            "    blank=True,",
+            "    default=\"default.jpg\"",
+            "    upload_to='${2:location}'",
+            ")",
+            "$0"
+        ],
+        "description": "Declare a Django model ImageField"
+    },
+    "Declare a Django model UUIDField": {
+        "prefix": "jj-django-model-uuid-field",
+        "body": [
+            "import uuid",
+            "",
+            "${1:id} = models.UUIDField(",
+            "    default=uuid.uuid4,",
+            "    unique=True,",
+            "    primary_key=True,",
+            "    editable=False",
+            ")",
+            "$0"
+        ],
+        "description": "Declare a Django model UUIDField"
+    },
+    "Print out steps to execute following Django model updates": {
+        "prefix": "jj-django-model-updates",
+        "body": [
+            "python manage.py makemigrations",
+            "python manage.py migrate"
+        ],
+        "description": "Declare a Django model UUIDField"
     },
     "Define a Django model class": {
         "prefix": "jj-django-model-class",
@@ -781,7 +836,10 @@
     "Create Django field as a foreign key field": {
         "prefix": "jj-django-model-foreignkey-field",
         "body": [
-            "${1:field} = models.ForeignKey(${2:model}, on_delete=models.CASCADE)",
+            "${1:field} = models.ForeignKey(",
+            "    ${2:model},",
+            "    on_delete=models.CASCADE",
+            ")",
             "$0"
         ],
         "description": "Create Django field as a foreign key field"
@@ -789,7 +847,11 @@
     "Declare a Django model field of type Integer": {
         "prefix": "jj-django-model-integerfield",
         "body": [
-            "${1:field} = models.IntegerField()",
+            "${1:field} = models.IntegerField(",
+            "    default=0,",
+            "    null=True,",
+            "    blank=True",
+            ")",
             "$0"
         ],
         "description": "Declare a Django model field of type Integer"
@@ -807,13 +869,17 @@
         "body": [
             "from django.core.validators import MinLengthValidator",
             "",
-            "${1:name} = models.TextField(validators=[MinLengthValidator(${2:min_length})])",
+            "${1:name} = models.TextField(",
+            "    null=True,",
+            "    blank=True,",
+            "    validators=[MinLengthValidator(${2:min_length})]",
+            ")",
             "$0"
         ],
         "description": "Declare a Django model TextField"
     },
     "Declare a Django model DateTimeField": {
-        "prefix": "jj-django-models-datetimefield",
+        "prefix": "jj-django-model-datetimefield",
         "body": [
             "${1:field_name} = models.DateTimeField(auto_now_add=True)",
             "$0"
@@ -847,7 +913,8 @@
         "prefix": "jj-django-views-method",
         "body": [
             "def ${1:method_name}(request):",
-            "    return render(request, '${2:template_name}.html', {})",
+            "    context = {}",
+            "    return render(request, '${2:template_name}.html', context)",
             "$0"
         ],
         "description": "Declare Django views method"
@@ -1650,5 +1717,301 @@
 			"$0"
 		],
 		"description": "write provenance info to the output file"
-	}
+	},
+    "jj-def-str-function" : {
+		"prefix": "jj-def-str-function",
+		"body": [
+			"def __str__(self):",
+			"    return self.${1:title}",
+			"$0"
+		],
+		"description": "Declare __str__ function"
+	},
+    "Display all Django model objects methods": {
+        "prefix": "jj-django-display-model-objects-methods",
+        "body": [
+            "${1:item}s = ${2:ModelName}.objects.all()",
+            "${1:item} = ${2:ModelName}.objects.get(${3:attribute}='value')",
+            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__startswith}='value')",
+            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__contains}='value')",
+            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__icontains}='value') # ignore case",
+            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__gt}='value')",
+            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__gte}='value')",
+            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__lt}='value')",
+            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__lte}='value')",
+            "${1:item}s = ${2:ModelName}.objects.exclude(${3:attribute}='value')",
+            "$0"
+        ],
+        "description": "Display all Django model objects methods"
+    },
+    "Create HTML template for Django project": {
+        "prefix": "jj-django-create-html-template",
+        "body": [
+            "{% extends '${1:main.html}' %}",
+            "{% block content %}",
+            "",
+            "$0",
+            "",
+            "{% endblock %}"
+        ],
+        "description": "Create HTML template for Django project"
+    },
+    "Create Django form model class that inherits from ModelForm": {
+        "prefix": "jj-django-create-form-model-class",
+        "body": [
+            "# Add this to ${2:app_name}/forms.py",
+            "",
+            "from django.forms import ModelForm",            
+            "from django import forms",
+            "from .models import ${1:ModelName}",
+            "",
+            "class ${1:ModelName}Form(ModelForm):",
+            "    class Meta:",
+            "        model = ${1:ModelName}",
+            "        fields = '__all__'",
+            "        #fields = [] # i.e.: list all fields to be included",
+            "        widgets = {",
+            "            'tags': forms.CheckboxSelectMultiple(),",
+            "        }",
+            "    def __init__(self, *args, **kwargs):",
+            "        super(${1:ModelName}Form, self).__init__(*args, **kwargs)",
+            "        self.fields['title'].widget.attrs.update(",
+            "            {",
+            "                'class': 'input',",
+            "                'placeholder': 'Add Title'",
+            "            }",
+            "        )",
+            "        for name, field in self.fields.items():",
+            "            field.widget.attrs.update({'class': 'input'})",
+            "",
+            "",
+            "# Add this to ${2:app_name}/views.py",
+            "",
+            "from .forms import ${1:ModelName}Form",
+            "",
+            "def displayCreate${1:ModelName}Form(request):",
+            "    form = ProjectForm()",
+            "",
+            "    if request.method == 'POST':",
+            "        form = ProjectForm(request.POST, request.FILES)",
+            "        #print(request.POST)",
+            "        if form.is_valid():",
+            "            form.save()",
+            "            return redirect('${3:some_url}')",
+            "        else:",
+            "            print(form.errors)",
+            "            return HttpResponse(form.errors.values())",
+            "",
+            "    context = {'form': form}",
+            "    return render(request, '${2:app_name}/create_${2:app_name}_form.html', context)",
+            "",
+            "",
+            "def displayUpdate${1:ModelName}Form(request, pk):",
+            "    ${4:object} = ${1:ModelName}.objects.get(id=pk)",
+            "    form = ProjectForm(instance=${4:object})",
+            "",
+            "    if request.method == 'POST':",
+            "        form = ProjectForm(request.POST, request.FILES, instance=${4:object})",
+            "        #print(request.POST)",
+            "        if form.is_valid():",
+            "            form.save()",
+            "            return redirect('${3:some_url}')",
+            "        else:",
+            "            print(form.errors)",
+            "            return HttpResponse(form.errors.values())",
+            "",
+            "    context = {'form': form}",
+            "    return render(request, '${2:app_name}/create_${2:app_name}_form.html', context)",
+            "",
+            "",
+            "def displayDelete${1:ModelName}Form(request, pk):",
+            "    ${4:object} = ${1:ModelName}.objects.get(id=pk)",
+            "    if request.method == 'POST':",
+            "        ${4:object}.delete()",
+            "        return redirect('projects')",
+            "    context = {'object': ${4:object}}",
+            "    return render(request, '${4:app_name}/delete_template.html', context)",
+            "",
+            "",
+            "# Add this to ${2:app_name}/create_${2:app_name}_form.html",
+            "",
+            "path('create-${2:app_name}/', views.displayCreate${1:ModelName}Form, name='create-${2:app_name}'),",
+            "path('update-${2:app_name}/<str:pk>', views.displayUpdate${1:ModelName}Form, name='update-${2:app_name}'),",
+            "path('delete-${2:app_name}/<str:pk>', views.displayDelete${1:ModelName}Form, name='delete-${2:app_name}'),",
+            "",
+            "# Add this to ${2:app_name}/templates/${2:app_name}/create_${2:app_name}_form.html",
+            "{% extends 'main.html' %}",
+            "{% block content %}",
+            "",
+            "",
+            "<h1>${1:ModelName} Form</h1>",
+            "",
+            "<form action='' method='POST'>",
+            "    {% csrf_token %}",
+            "",
+            "    {% for field in form %}",
+            "    {{ field.label }}: {{ field }}",
+            "    <br>",
+            "    {% endfor %}",
+            "",
+            "    <input type='submit'>",
+            "</form>",
+            "{% endblock %}",
+            "",
+            "",
+            "# Add this to whatever .html template in ${2:app_name} you need to update an instance of ${1:ModelName}",
+            "<a href=\"{% url 'update-${4:object}' ${4:object}.id %}\">Edit</a>",
+            "# Add this to whatever .html template in ${2:app_name} you need to delete an instance of ${1:ModelName}",
+            "<a href=\"{% url 'delete-${4:object}' ${4:object}.id %}\">Delete</a>",
+            "",
+            "",
+            "# Add this to ${2:app_name}/template/${2:app_name}/delete_template.html",
+            "",
+            "{% extends 'main.html' %}",
+            "{% block content %}",
+            "",
+            "<form action='' method='POST'>",
+            "    {% csrf_token %}",
+            "    <p>Are you sure you want to delete \"{{ object.title }}\"?</p>",
+            "",    
+            "    <a href=\"{% url 'project' %}\">Go Back</a>",
+            "    <input type='submit' value='Confirm'/>",
+            "</form>",
+            "{% endblock content %}",
+            "$0"
+        ],
+        "description": "Create Django form model class that inherits from ModelForm"
+    },
+    "Import User from django.contrib.auth.models": {
+        "prefix": "jj-django-contrib-auth-models-import-user",
+        "body": [
+            "from django.contrib.auth.models import User",
+            "$0"
+        ],
+        "description": "Import User from django.contrib.auth.models"
+    },
+    "Django on delete models cascade": {
+        "prefix": "jj-django-on-delete-models-cascade",
+        "body": [
+            "on_delete=models.CASCADE$0"
+        ],
+        "description": "Django on delete models cascade"
+    },
+    "Django null=True blank=True": {
+        "prefix": "jj-django-null-true-blank-true",
+        "body": [
+            "null=True, blank=True",
+            "$0"
+        ],
+        "description": "Django null=True blank=True"
+    },
+    "Django import UserCreationForm": {
+        "prefix": "jj-django-import-UserCreationForm",
+        "body": [
+            "from django.contrib.auth.forms import UserCreationForm",
+            "$0"
+        ],
+        "description": "Django import UserCreationForm"
+    },
+    "Django if request.method == POST": {
+        "prefix": "jj-django-if-request-method-post",
+        "body": [
+            "if request.method == 'POST':",
+            "    $0"
+        ],
+        "description": "Django if request.method == POST"
+    },
+    "Django import Paginator": {
+        "prefix": "jj-django-import-paginator",
+        "body": [
+            "from django.core.paginator import Paginator$0"
+        ],
+        "description": "Django import Paginator"
+    },
+    "Django EmailBackend": {
+        "prefix": "jj-django-import-paginator",
+        "body": [
+            "# Add this to the settings.py file:",
+            "EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'",
+            "EMAIL_HOST = 'smtp.gmail.com'",
+            "EMAIL_HOST = 'smtp.gmail.com'",
+            "EMAIL_PORT = 587",
+            "EMAIL_USE_TLS = True",
+            "EMAIL_HOST_USER = '@gmail.com'",
+            "EMAIL_HOST_PASSWORD = 'TBD'",
+            "",
+            "# Add the following to the signals.py file:",
+            "from django.core.mail import send_mail",
+            "from django.conf import settings",
+            "",
+            "",
+            "# Add the following to the signals.py file:",
+            "subject = 'Welcome to DevSearch'",
+            "message = 'We are glad you are here!'",
+            "",
+            "send_mail(",
+            "    subject,",
+            "    message,",
+            "    settings.EMAIL_HOST_USER,",
+            "    [profile.email],",
+            "    fail_silently=False",
+            ")",
+            "$0"
+        ],
+        "description": "Django EmailBackend"
+    },
+    "Django import JsonResponse": {
+        "prefix": "jj-django-import-json-response",
+        "body": [
+            "from django.http import JsonResponse$0"
+        ],
+        "description": "Django import JsonResponse"
+    },
+    "Django model serializer": {
+        "prefix": "jj-django-model-serializer",
+        "body": [
+            "from rest_framework import serializers",
+            "from ${1:project}.models import ${2:Project}",
+            "",            
+            "",
+            "class ${2:Project}Serializer(serializers.ModelSerializer):",
+            "    class Meta:",
+            "        model = ${2:Project}",
+            "        fields = '__all__'",
+            "        #fields = []",
+            "$0"
+        ],
+        "description": "Django model serializer"
+    },
+    "total run time including sleeps": {
+        "prefix": "jj-runtime",
+        "body": [
+            "import time",
+            "",
+            "start_time = time.perf_counter()",            
+            "",
+            "print(f\"Total run time was '{time.perf_counter() - start_time}' seconds\")",
+            "# This includes any sleeps",
+            "$0"
+        ],
+        "description": "total run time including sleeps"
+    },
+    "insert profiling": {
+        "prefix": "jj-insert-profiling",
+        "body": [
+            "import cProfile",
+            "import pstats",
+            "",
+            "# In the main function, wrap the core logic with the following:",            
+            "with cProfile.Profile() as pr:",
+            "    # core logic here",
+            "",
+            "stats = pstats.Stats(pr)",
+            "stats.sort_stats(pstats.SortKey.TIME)",
+            "#stats.print_stats()",
+            "stats.dump_stats(filename=f\"{os.path.basename(__file__).replace('.py', '_profiling.prof')}\")",
+            "$0"
+        ],
+        "description": "insert profiling"
+    }
 }
