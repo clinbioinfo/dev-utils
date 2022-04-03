@@ -2032,5 +2032,66 @@
             "$0"
         ],
         "description": "Flask app"
+    },
+    "setup logger": {
+        "prefix": "jj-setup-logger",
+        "body": [
+            "import logging",
+            "import logging.handler",
+            "",
+            "LOGFILE_MAX_BYTES = 50_000",
+            "LOGFILE_BACKUP_COUNT = 10",
+            "",
+            "# Set the root logger",
+            "logging.basicConfig(",
+            "    format=\"%(levelname)-7s : %(message)s\",",
+            "    level=logging.INFO",
+            ")",
+            "",
+            "logger = logging.getLogger(__name__)",
+            "",
+            "",            
+            "def setup_filehandler_logger(logfile: str = None):",
+            "",
+            "    # Create handlers",
+            "    # c_handler = logging.StreamHandler()",
+            "    f_handler = logging.handlers.RotatingFileHandler(",
+            "        filename=logfile,",
+            "        # maxBytes=LOGFILE_MAX_BYTES,",
+            "        # backupCount=LOGFILE_BACKUP_COUNT",
+            "    )",
+            "",
+            "    # c_handler.setLevel(logging.INFO)",
+            "    f_handler.setLevel(logging.INFO)",
+            "",            
+            "    # Create formatters and add it to handlers",
+            "    f_format = logging.Formatter(\"%(levelname)-7s : %(asctime)s : %(pathname)s : L%(lineno)d : %(message)s\")",
+            "    # c_format = logging.Formatter(\"%(levelname)-7s : %(asctime)s : %(message)s\")",
+            "",                
+            "    # c_handler.setFormatter(c_format)",
+            "    f_handler.setFormatter(f_format)",
+            "",            
+            "    # Add handlers to the logger",
+            "    # logger.addHandler(c_handler)",
+            "    logger.addHandler(f_handler)",
+            "",
+            "",
+            "setup_filehandler_logger(logfile)",
+            "",
+            "$0"
+        ],
+        "description": "Flask app"
+    },
+    "dotenv": {
+        "prefix": "jj-dotenv",
+        "body": [
+            "from dotenv load_dotenv",
+            "",
+            "load_dotenv()",
+            "",
+            "${1:variable} = os.getenv(\"${2:ENVIRONMENT_VARIABLE_NAME}\", None)",
+            "$0"
+        ],
+        "description": "dotenv"
     }
 }
