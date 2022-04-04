@@ -1,0 +1,38 @@
+{
+    "workbench.editorAssociations": {
+        "*.ipynb": "jupyter-notebook"
+    },
+    "editor.mouseWheelZoom": true,
+    "todo-tree.general.tags": [
+        "BUG",
+        "HACK",
+        "FIXME",
+        "TODO",
+        "XXX",
+        "[ ]",
+        "[x]",
+        "test-tag"
+    ],
+    "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
+    "notebook.cellToolbarLocation": {
+        "default": "right",
+        "jupyter-notebook": "left"
+    },
+    "bracket-pair-colorizer-2.depreciation-notice": false,
+    "workbench.colorTheme": "Darcula Pycharm with Dark GUI",
+    "emmet.includeLanguages": {
+        "django-html": "html"
+    },
+    "editor.renderWhitespace": "none",
+    "editor.minimap.enabled": false,
+    "window.menuBarVisibility": "compact",
+    "python.analysis.typeCheckingMode": "strict",
+    "editor.formatOnSaveMode": "file",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    },
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.formatting.provider": "black"    
+}
