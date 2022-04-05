@@ -34,5 +34,9 @@
     },
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
-    "python.formatting.provider": "black"    
+    "python.formatting.provider": "black",
+    "workbench.colorCustomizations": {
+        "tab.activeBackground": "#406e94",
+        "tab.unfocusedActiveBackground": "#000000"
+    }    
 }
