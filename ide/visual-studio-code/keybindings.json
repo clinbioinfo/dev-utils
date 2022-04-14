@@ -1,0 +1,14 @@
+// Place your key bindings in this file to override the defaults
+// Reference: https://stackoverflow.com/questions/48511956/toggle-between-fullscreen-editor-and-terminal-in-vs-code
+[
+    {
+        "key": "ctrl+alt+m",  // you could use     "key": "ctrl+`",  if you wish
+        "command": "workbench.action.closePanel",
+        "when": "terminalFocus"
+      },
+      {
+        "key": "ctrl+alt+m",
+        "command": "workbench.action.toggleMaximizedPanel",
+        "when": "!terminalFocus"
+      },
+]
