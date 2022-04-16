@@ -2117,5 +2117,37 @@
             "$0"
         ],
         "description": "Define custom Exception class"
+    },
+    "pdb debugger": {
+        "prefix": "jj-pdb-debug",
+        "body": [
+            "import pdb",
+            "pdb.set_trace()",
+            "# type help for commands",
+            "# n: next",
+            "# s: step into function",
+            "# p: print e.g.: p x",
+            "# whatis: display type of the variable e.g.: whatis x",
+            "$0"
+        ],
+        "description": "pdb debugger"
+    },
+    "Selenium initialization": {
+        "prefix": "jj-selenium-initialization",
+        "body": [
+            "from selenium import webdriver",
+            "from selenium.common.exceptions import TimeoutException",
+            "from selenium.webdriver.chrome.options import Options",
+            "from selenium.webdriver.common.by import By",
+            "from selenium.webdriver.common.keys import Keys",
+            "from selenium.webdriver.support import expected_conditions as EC",
+            "from selenium.webdriver.support.ui import Select, WebDriverWait",
+            "driver = webdriver.Chrome()",
+            "wait = WebDriverWait(driver, 5)",
+            "url ='${1:yoururl}'",
+            "driver.get(url)",
+            "$0"
+        ],
+        "description": "Selenium initialization"
     }
 }
