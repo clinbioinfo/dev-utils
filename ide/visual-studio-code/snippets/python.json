@@ -2118,11 +2118,11 @@
         ],
         "description": "Define custom Exception class"
     },
-    "pdb debugger": {
-        "prefix": "jj-pdb-debug",
+    "ipdb debugger": {
+        "prefix": "jj-ipdb-debug",
         "body": [
-            "import pdb",
-            "pdb.set_trace()",
+            "import ipdb",
+            "ipdb.set_trace()",
             "# type help for commands",
             "# n: next",
             "# s: step into function",
@@ -2130,7 +2130,7 @@
             "# whatis: display type of the variable e.g.: whatis x",
             "$0"
         ],
-        "description": "pdb debugger"
+        "description": "ipdb debugger"
     },
     "Selenium initialization": {
         "prefix": "jj-selenium-initialization",
@@ -2149,5 +2149,16 @@
             "$0"
         ],
         "description": "Selenium initialization"
+    },
+    "read YAML file into dictionary": {
+        "prefix": "jj-read-yaml-into-dict",
+        "body": [
+            "# pip install PyYAML",
+            "import yaml",
+            "",
+            "${1:config} = yaml.safe_load(Path(${2:infile}.yaml).read_text())",
+            "$0"
+        ],
+        "description": "read YAML file into dictionary"
     }
 }
