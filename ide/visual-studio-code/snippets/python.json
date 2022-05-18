@@ -214,31 +214,41 @@
     "Check status of the input file": {
         "prefix": "jj-def-check-infile-status-method",
         "body": [
-            "def check_infile_status(self, infile: str = None) -> bool:",
-            "    \"\"\"Check if the file exists, if it is a regular file and whether it has content",
-            "    :param infile: {str} the file to be checked",
-            "    :param is_valid: {bool} True if all checks pass, False if not",
+            "import os",
+            "import logging",
+            "",
+            "def check_infile_status(infile: str) -> bool:",
+            "    \"\"\"Check if the file exists, if it is a regular file and whether it has content.",
+            "",
+            "    Args:",
+            "        infile (str): the file to be checked",
+            "",
+            "    Returns:",
+            "        is_valid (bool): True if all checks pass, False if not",
+            "",
+            "    Raises:",
+            "        None",
             "    \"\"\"",
             "    ",
             "    error_ctr = 0",
             "    ",
             "    if infile is None or infile == '':",
-            "        logging.error(\"'{infile}' is not defined\")",
+            "        logging.error(f\"'{infile}' is not defined\")",
             "        error_ctr += 1",
             "    else:",
             "        if not os.path.exists(infile):",
             "            error_ctr += 1",
-            "            logging.error(\"'{infile}' does not exist\")",
+            "            logging.error(f\"'{infile}' does not exist\")",
             "        else:",
             "            if not os.path.isfile(infile):",
             "                error_ctr += 1",
-            "                logging.error(\"'{infile}' is not a regular file\") ",
+            "                logging.error(f\"'{infile}' is not a regular file\") ",
             "            if os.stat(infile).st_size == 0:",
-            "                logging.error(\"'{infile}' has no content\")",
+            "                logging.error(f\"'{infile}' has no content\")",
             "                error_ctr += 1",
             "",
             "    if error_ctr > 0:",
-            "        logging.error(\"Detected problems with input file '{infile}'\")",
+            "        logging.error(f\"Detected problems with input file '{infile}'\")",
             "        return False",
             "    return True",
             "$0"
@@ -2150,9 +2160,12 @@
         "prefix": "jj-read-yaml-into-dict",
         "body": [
             "# pip install PyYAML",
+            "# echo 'PyYAML' >> requirements.txt"
             "import yaml",
+            "from pathlib import Path",
             "",
-            "${1:config} = yaml.safe_load(Path(${2:infile}.yaml).read_text())",
+            "logging.info(f\"Will load contents of config file '${2:infile}'\")",
+            "${1:config} = yaml.safe_load(Path(${2:infile}).read_text())",
             "$0"
         ],
         "description": "read YAML file into dictionary"
@@ -2221,33 +2234,30 @@
         ],
         "description": "MySQL insert many records into a table"
     },
-    "MySQL select records from table(s)": {
-        "prefix": "jj-mysql-select-records",
+    "get current date": {
+        "prefix": "jj-get-current-date-YYYY-MM-DD",
         "body": [
-            "# pip install mysql-connector-python",
-            "import logging",
-            "",
-            "def get_${1:function_name}(conn, database: str) -> List:",
-            "    cursor = conn.cursor()",
-            "    for record in records:",
-            "        data = (record,)",
-            "        cursor.execute(query, data)",
-            "    conn.commit()",
-            "$0",
-            "",
-            "",
-            "def insert_records_into_(${1:table_name}(conn, database: str, records: List) -> None:",
-            "    \"\"\"Insert many records into table ${1:table_name}.",
-            "",
-            "    Args:",
-            "        conn (MySQL connector): MySQL connector",
-            "        database (str): target database",
-            "        records (List): array of records to be inserted into the target table ${1:table_name}",
-            "    \"\"\"",
-            "    query = f\"INSERT INTO `{database}`.`${1:table_name}` (${2:comma-separated-list-of-fields}) VALUES(%s)",
-            "    insert_records(conn, query, records)",
+            "from datetime import datetime",
+            "datetime.today().strftime('%Y-%m-%d')",
             "$0"
         ],
-        "description": "MySQL insert many records into a table"
-    }
+        "description": "get current date YYYY-MM-DD"
+    },
+    "if __name__ == '__main__'": {
+        "prefix": "jj-if-name-main",
+        "body": [
+            "if __name__ == \"__main__\":",
+            "    main()",
+            "",
+            "$0"
+        ],
+        "description": "if __name__ == '__main__'"
+    },
+    "print(f\"\")" {
+        "prefix": "jj-print-f",
+        "body": [
+            "print(f\"$0\")"
+        ],
+        "description": "print(f'')"
+    },
 }
