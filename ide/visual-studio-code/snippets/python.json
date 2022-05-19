@@ -2296,4 +2296,28 @@
         ],
         "description": "Establish database connection and then execute update statement with parameters"
     },
+    "init AWS Glue job" {
+        "prefix": "jj-init-aws-glue-job-init",
+        "body": [
+            "from awsglue.context import GlueContext",
+            "from awsglue.dynamicframe import DynamicFrame",
+            "from awsglue.job import Job",
+            "from awsglue.transformers import *",
+            "from awsglue.utils import getResolvedOptions",
+            "from pyspark.context import SparkContext",
+            "from pyspark.sql.types import *",
+            "",
+            "args = getResolvedOptions(sys.argv, ['${1:arg1}', '${2:args2', '${3:arg3}'])",
+            "",
+            "sc = SparkContext()",
+            "gc = GlueContext(sc)",
+            "logger = gc.get_logger()",
+            "spark = gc.spark_session",
+            "job = Job(gc)",
+            "job.init(strr(args['${1:arg1}']) + str(args['${2:arg2}']) + str(args['${2:arg2}']), args)",
+            "$0"
+        ],
+        "description": "Init AWS Glue job"
+    },
+
 }
