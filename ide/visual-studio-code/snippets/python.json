@@ -2319,5 +2319,16 @@
         ],
         "description": "Init AWS Glue job"
     },
+    "Collect records from Spark RDD" {
+        "prefix": "jj-read-spark-read-rdd-collect",
+        "body": [
+            "JDBC_DRIVER = 'com.mysql.jdbc.Driver'",
+            "query = ''",
+            "df = spark.read.format('jdbc').option('url', db_creds.url).option('driver', JDBC_DRIVER).option('dbtable', query).option('user', db_creds.username).option('password', db_creds.password).load()",
+            "data = df.rdd.collect()",
+            "$0"
+        ],
+        "description": "Collect records from Spark RDD"
+    },
 
 }
