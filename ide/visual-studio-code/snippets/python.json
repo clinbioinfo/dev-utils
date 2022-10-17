@@ -901,13 +901,21 @@
 		],
 		"description": "Declare a Django model TextField"
 	},
-	"Declare a Django model DateTimeField": {
-		"prefix": "jj-django-model-datetimefield",
+	"Declare a Django model DateTimeField for date created": {
+		"prefix": "jj-django-model-datetimefield-date-created",
 		"body": [
-			"${1:field_name} = models.DateTimeField(\"${2:verbose_name}\", auto_now_add=True)",
+			"${1:date_created} = models.DateTimeField(\"${2:verbose_name}\", auto_now_add=True)",
 			"$0"
 		],
-		"description": "Declare a Django model DateTimeField"
+		"description": "Declare a Django model DateTimeField for date created"
+	},
+	"Declare a Django model DateTimeField for date updated": {
+		"prefix": "jj-django-model-datetimefield-date-updated",
+		"body": [
+			"${1:date_updated} = models.DateTimeField(\"${2:verbose_name}\", auto_now=True)",
+			"$0"
+		],
+		"description": "Declare a Django model DateTimeField for date updated"
 	},
 	"Register the Django model in the admin site": {
 		"prefix": "jj-django-register-model",
