@@ -664,7 +664,7 @@
 	"Declare a Django EmailField for the model": {
 		"prefix": "jj-django-emailfield",
 		"body": [
-			"user_email = models.EmailField()",
+			"user_email = models.EmailField(\"${1:verbose_name}\")",
 			"$0"
 		],
 		"description": "Declare a Django EmailField for the model"
@@ -673,6 +673,7 @@
 		"prefix": "jj-django-model-EmailField",
 		"body": [
 			"${1:email_field} = models.EmailField(",
+			"    \"${2:verbose_name}\"",
 			"    null=True,",
 			"    blank=True,",
 			"    max_length=${2:max_length}",
@@ -760,7 +761,7 @@
 	"Declare a Django model BooleanField": {
 		"prefix": "jj-django-model-booleanfield",
 		"body": [
-			"${1:field} = models.BooleanField(default=False)",
+			"${1:field} = models.BooleanField(\"${2:verbose_name}\", default=False)",
 			"$0"
 		],
 		"description": "Declare a Django model BooleanField"
@@ -769,6 +770,7 @@
 		"prefix": "jj-django-model-charfield",
 		"body": [
 			"${1:field} = models.CharField(",
+			"    \"${2:verbose_name}\"",
 			"    null=True,",
 			"    blank=True,",
 			"    max_length=${2:max_length}",
@@ -781,6 +783,7 @@
 		"prefix": "jj-django-model-imagefield",
 		"body": [
 			"${1:field} = models.ImageField(",
+			"    \"${2:verbose_name}\"",
 			"    null=True,",
 			"    blank=True,",
 			"    default=\"default.jpg\"",
@@ -796,6 +799,7 @@
 			"import uuid",
 			"",
 			"${1:id} = models.UUIDField(",
+			"    \"${2:verbose_name}\"",
 			"    default=uuid.uuid4,",
 			"    unique=True,",
 			"    primary_key=True,",
@@ -822,6 +826,7 @@
 			"   ",
 			"class ${1:myclass}(models.Model):",
 			"    slug = models.SlugField(",
+			"        \"${2:verbose_name}\"",
 			"        default='', ",
 			"        editable=False,",
 			"        null=False, ",
@@ -844,7 +849,7 @@
 	"Declare Django model DateField": {
 		"prefix": "jj-django-model-datefield",
 		"body": [
-			"date = models.DateField(auto_now=True)",
+			"${1:date} = models.DateField(\"${2:verbose_name}\", auto_now=True)",
 			"$0"
 		],
 		"description": "Declare Django model DateField"
@@ -864,6 +869,7 @@
 		"prefix": "jj-django-model-integerfield",
 		"body": [
 			"${1:field} = models.IntegerField(",
+			"    \"${2:verbose_name}\"",
 			"    default=0,",
 			"    null=True,",
 			"    blank=True",
@@ -875,7 +881,7 @@
 	"Declare a Django SlugField": {
 		"prefix": "jj-django-model-slugfield",
 		"body": [
-			"slug = models.SlugField(unique=True, db_index=True)",
+			"slug = models.SlugField(\"${1:verbose_name}\", unique=True, db_index=True)",
 			"$0"
 		],
 		"description": "Declare a Django SlugField"
@@ -886,9 +892,10 @@
 			"from django.core.validators import MinLengthValidator",
 			"",
 			"${1:name} = models.TextField(",
+			"    \"${2:verbose_name}\"",
 			"    null=True,",
 			"    blank=True,",
-			"    validators=[MinLengthValidator(${2:min_length})]",
+			"    validators=[MinLengthValidator(${3:min_length})]",
 			")",
 			"$0"
 		],
@@ -897,7 +904,7 @@
 	"Declare a Django model DateTimeField": {
 		"prefix": "jj-django-model-datetimefield",
 		"body": [
-			"${1:field_name} = models.DateTimeField(auto_now_add=True)",
+			"${1:field_name} = models.DateTimeField(\"${2:verbose_name}\", auto_now_add=True)",
 			"$0"
 		],
 		"description": "Declare a Django model DateTimeField"
@@ -1358,7 +1365,7 @@
 		"description": "definition of main CLI program"
 	},
 	"Declare a Meta class within a Django model class": {
-		"prefix": "jj-django-meta-class",
+		"prefix": "jj-django-meta-class-verbose-name-plural",
 		"body": [
 			"class Meta:",
 			"    verbose_name_plural = \"${1:name}\"",
