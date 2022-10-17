@@ -3,1645 +3,1654 @@
 		"prefix": "jj-backup-copy-file",
 		"body": [
 			"bakfile = f\"{${1:infile}}.bak\"",
-            "shutil.copy(${1:infile}, bakfile)",
-            "logging.info(f\"Copied '{${1:infile}}' to '{bakfile}'\")",
-            "",
-            "$0"
-        ],
-        "description": "Create a backup copy of the file"
-    },
-    "Declare a class": {
-        "prefix": "jj-class",
-        "body": [
-            "class ${1}(${2}):",
-            "    \"\"\"${3}\"\"\"",
-            "    ",
-            "    def __init__(self, ${4}, **kwargs):",
-            "        \"\"\"Constructor for ${1}\"\"\"",
-            "",
-            "$0"
-        ],
-        "description": "Declare a class"
-    },
-    "Use concurrent futures ProcessorPoolExecutor": {
-        "prefix": "jj-concurrent-futures-processor-pool-executor",
-        "body": [
-            "# Reference: https://stackoverflow.com/questions/20776189/concurrent-futures-vs-multiprocessing-in-python-3",
-            "",
-            "import os",
-            "import time",
-            "import concurrent.futures",
-            "",
-            "start = time.perf_counter()",
-            "",
-            "",
-            "def ${1:my_function}(${2:p1}: ${3:int} = 1):",
-            "    pid = os.getpid()",
-            "    time.sleep(1)",
-            "    # TODO: enter some useful code",
-            "    return f\"Done something with parameter '{${2:p1}}' process ID '{pid}'!\"",
-            "",
-            "",
-            "with concurrent.futures.ProcessPoolExecutor() as executor:",
-            "    ",
-            "    # f1 = executor.submit(${1:my_function}, 1)",
-            "    # print(f1.result())",
-            "",
-            "    # Contrived example where want to submit/schedule 10 instance jobs of ${1:my_function}",
-            "    # and will pass in one parameter to ${1:my_function}",
-            "    ${4:param_1} = 1",
-            "    logging.info(f\"Will attempt to submit/schedule '{${5:count}}' instance jobs of ${1:my_function}\")",
-            "    results = [executor.submit(${1:my_function}, ${4:param_1}) for _ in range(${5:count})]",
-            "",
-            "    # As the instance jobs are completed i.e.: yielded, access their results",
-            "    logging.info(f\"Here are the yielded results:\")",
-            "    for f in concurrent.futures.as_completed(results):",
-            "        print(f.result())",
-            "        logging.info(f.result())",
-            "",
-            "end = time.perf_counter()",
-            "print(f\"Finished in {round(end-start, 2)} seconds(s)\")",
-            "",
-            "$0"
-        ],
-        "description": "Use concurrent futures ProcessorPoolExecutor"
-    },
-    "Use concurrent futures ProcessorPoolExecutor over a fixed list of items": {
-        "prefix": "jj-concurrent-futures-processor-pool-executor-over-list-of-items",
-        "body": [
-            "# Reference: https://stackoverflow.com/questions/20776189/concurrent-futures-vs-multiprocessing-in-python-3",
-            "",
-            "import os",
-            "import time",
-            "import concurrent.futures",
-            "",
-            "start = time.perf_counter()",
-            "",
-            "",
-            "def ${1:my_function}(${2:p1}: ${3:int} = 1):",
-            "    pid = os.getpid()",
-            "    time.sleep(1)",
-            "    # TODO: enter some useful code",
-            "    return f\"Done something with parameter '{${2:p1}}' process ID '{pid}'!\"",
-            "",
-            "",
-            "with concurrent.futures.ProcessPoolExecutor() as executor:",
-            "    ",
-            "    # Contrived example where want to submit/schedule 10 instance jobs of ${1:my_function}",
-            "    # and will pass in one parameter to ${1:my_function}",
-            "    ${4:items} = [5, 4, 3, 2, 1]",
-            "    logging.info(f\"Will attempt to submit/schedule '{len(${4:items})}' instance jobs of ${1:my_function}\")",
-            "    results = [executor.submit(${1:my_function}, ${5:item}) for ${5:item} in ${4:items}]",
-            "",
-            "    # As the instance jobs are completed i.e.: yielded, access their results",
-            "    logging.info(f\"Here are the yielded results:\")",
-            "    for f in concurrent.futures.as_completed(results):",
-            "        print(f.result())",
-            "        logging.info(f.result())",
-            "",
-            "end = time.perf_counter()",
-            "print(f\"Finished in {round(end-start, 2)} seconds(s)\")",
-            "",
-            "$0"
-        ],
-        "description": "Use concurrent futures ProcessorPoolExecutor over a fixed list of items"
-    },
-    "Use concurrent futures ProcessorPoolExecutor over a fixed list of items using map": {
-        "prefix": "jj-concurrent-futures-processor-pool-executor-over-list-of-items-using-map",
-        "body": [
-            "# Reference: https://stackoverflow.com/questions/20776189/concurrent-futures-vs-multiprocessing-in-python-3",
-            "",
-            "import os",
-            "import logging",
-            "import time",
-            "import concurrent.futures",
-            "",
-            "",
-            "start = time.perf_counter()",
-            "",
-            "",
-            "def ${1:my_function}(${2:p1}: ${3:int} = 1):",
-            "    pid = os.getpid()",
-            "    time.sleep(1)",
-            "    # TODO: enter some useful code",
-            "    return f\"Done something with parameter '{${2:p1}}' process ID '{pid}'!\"",
-            "",
-            "",
-            "with concurrent.futures.ProcessPoolExecutor() as executor:",
-            "    ",
-            "    # Contrived example where want to submit/schedule 10 instance jobs of ${1:my_function}",
-            "    # and will pass in one parameter to ${1:my_function}",
-            "    ${4:items} = [5, 4, 3, 2, 1]",
-            "    logging.info(f\"Will attempt to submit/schedule '{len(${4:items})}' instance jobs of ${1:my_function}\")",
-            "    results = executor.map(${1:my_function}, ${4:items})",
-            "",
-            "    # As the instance jobs are completed i.e.: yielded, access their results",
-            "    logging.info(f\"Here are the yielded results:\")",
-            "    for result in results:",
-            "        print(f\"Here is the result: '{result}'\")",
-            "        logging.info(f\"Here is the result: '{result}'\")",
-            "",
-            "end = time.perf_counter()",
-            "print(f\"Finished in {round(end-start, 2)} seconds(s)\")",
-            "",
-            "$0"
-        ],
-        "description": "Use concurrent futures ProcessorPoolExecutor over a fixed list of items using map"
-    },
-    "Declare a constant": {
-        "prefix": "jj-declare-constant",
-        "body": [
-            "# ${1:description}",
-            "DEFAULT_CONSTANT_${2:name} = ${3:value}",
-            "",
-            "$0"
-        ],
-        "description": "Declare a constant"
-    },
-    "Create backup copy of a file if it exists": {
-        "prefix": "jj-def-backup-file",
-        "body": [
-            "import logging",
-            "import shutil",
-            "import time",
-            "",
-            "def _backup_file(self, infile):",
-            "    \"\"\"Backup file",
-            "    :param infile: {str} - file to be backed-up",
-            "    \"\"\"",
-            "    if os.path.exists(infile):",
-            "        bakfile = os.path.abspath(infile) + time.strftime(\"%Y-%m-%d-%H%M\") + '.bak'",
-            "        shutil.copy(infile, bakfile)",
-            "        logging.info(\"Copied '{infile}' to '{bakfile}'\")",
-            "    else:",
-            "        logging.info(\"File '{infile}' does not exist, so nothing to backup\")",
-            "",
-            "$0",
-            ""
-        ],
-        "description": "Create backup copy of a file if it exists"
-    },
-    "Check status of input directory": {
-        "prefix": "jj-def-check-indir-status-method",
-        "body": [
-            "import logging",
-            "import os",
-            "import sys",
-            "",
-            "def check_indir_status(self, ${1:indir}):",
-            "    \"\"\"Check whether directory exists, is a regular directory and whether has content\"\"\"",
-            "    ",
-            "    error_ctr = 0",
-            "",
-            "    if not os.path.exists(${1:indir}):",
-            "        error_ctr += 1",
-            "        logging.error(f\"'{${1:indir}}' does not exist\")",
-            "    else:",
-            "        if not os.path.isdir(${1:indir}):",
-            "            error_ctr += 1",
-            "            logging.error(f\"'{${1:indir}}' is not a regular directory\")",
-            "        if len(os.listdir(${1:indir})) == 0:",
-            "            error_ctr += 1",
-            "            logging.error(f\"'{${1:indir}}' has no content\")",
-            "",
-            "    if error_ctr > 0:",
-            "        logging.error(f\"Detected problems with input directory '{${1:indir}}'\")",
-            "        sys.exit(1)",
-            "$0"
-        ],
-        "description": "Check status of input directory"
-    },
-    "Check status of the input file": {
-        "prefix": "jj-def-check-infile-status-method",
-        "body": [
-            "import os",
-            "import logging",
-            "",
-            "def check_infile_status(infile: str) -> bool:",
-            "    \"\"\"Check if the file exists, if it is a regular file and whether it has content.",
-            "",
-            "    Args:",
-            "        infile (str): the file to be checked",
-            "",
-            "    Returns:",
-            "        is_valid (bool): True if all checks pass, False if not",
-            "",
-            "    Raises:",
-            "        None",
-            "    \"\"\"",
-            "    ",
-            "    error_ctr = 0",
-            "    ",
-            "    if infile is None or infile == '':",
-            "        logging.error(f\"'{infile}' is not defined\")",
-            "        error_ctr += 1",
-            "    else:",
-            "        if not os.path.exists(infile):",
-            "            error_ctr += 1",
-            "            logging.error(f\"'{infile}' does not exist\")",
-            "        else:",
-            "            if not os.path.isfile(infile):",
-            "                error_ctr += 1",
-            "                logging.error(f\"'{infile}' is not a regular file\") ",
-            "            if os.stat(infile).st_size == 0:",
-            "                logging.error(f\"'{infile}' has no content\")",
-            "                error_ctr += 1",
-            "",
-            "    if error_ctr > 0:",
-            "        logging.error(f\"Detected problems with input file '{infile}'\")",
-            "        return False",
-            "    return True",
-            "$0"
-        ],
-        "description": "Check status of the input file"
-    },
-    "Function to copy a file": {
-        "prefix": "jj-def-copy-file",
-        "body": [
-            "def copy_file(self, infile: str = None, target: str = None):",
-            "    \"\"\"Copy file to target",
-            "    :param infile: {str} - file to be copied",
-            "    :param target: {str} - the target file or directory",
-            "    \"\"\"",
-            "    if not os.path.exists(infile):",
-            "        logging.error(f\"file '{infile}' does not exist\")",
-            "        raise Exception(f\"file '{infile}' does not exist\")",
-            "    if os.path.exists(target):",
-            "        if os.path.isfile(target):",
-            "            self.backup_file(target)",
-            "            shutil.copy(infile, target)",
-            "            logging.info(f\"Copied '{infile}' to '{target}'\")",
-            "        else:",
-            "            target_file = f\"{target}/{os.path.basename(infile)}\"",
-            "            if os.path.exists(target_file):",
-            "                self.backup_file(target_file)",
-            "            shutil.copy(infile, target_file)",
-            "            logging.info(f\"Copied '{infile}' to '{target_file}'\") ",
-            "",
-            "$0"
-        ],
-        "description": "Function to copy a file"
-    },
-    "Function to create a symlink": {
-        "prefix": "jj-def-create-symlink",
-        "body": [
-            "import logging",
-            "import os",
-            "",
-            "def create_symlink(self, source: str = None, dest: str = None, force: bool = False):",
-            "    \"\"\"Create a symlink",
-            "    :param source: {str} the source",
-            "    :param dest: {str} the dest",
-            "    :param force: {bool} if True, will delete the destination if already exists",
-            "    \"\"\"",
-            "    if not os.path.exists(source):",
-            "        error_msg = f\"The source '{source}' does not exist\"",
-            "        logging.error(error_msg)",
-            "        raise Exception(error_msg)",
-            "",
-            "    if os.path.exists(dest):",
-            "        if force:",
-            "            logging.info(f\"Will delete the destination '{dest}'\")",
-            "            os.unlink(dest)",
-            "            os.symlink(source, dest)",
-            "            logging.info(f\"Created symlink for '{source}' at '{dest}'\")",
-            "        else:",
-            "            logging.warning(f\"The destination '{dest}' already exists\")",
-            "    else:",
-            "        os.symlink(source, dest)",
-            "        logging.info(f\"Created symlink for '{source}' at '{dest}'\")",
-            "",
-            "$0"
-        ],
-        "description": "Function to create a symlink"
-    },
-    "Execute a command via system call using subprocess": {
-        "prefix": "jj-def-execute-command",
-        "body": [
-            "import logging",
-            "import os",
-            "import re",
-            "import subprocess",
-            "",
-            "def _execute_cmd(self, ${1:cmd}, ${2:args_string}, ${3:outdir}: str = DEFAULT_OUTDIR, ${4:stdout_file}: str =None, ${5:stderr_file}: str =None):",
-            "    \"\"\"Execute a command via system call using the subprocess module",
-            "    :param ${1:cmd}: {str} - the executable to be invoked",
-            "    :param ${2:args_string}: {str} - the arguments to be specified when the executable is invoked",
-            "    :param ${3:outdir}: {str} - the output directory where STDOUT, STDERR and the shell script should be written to",
-            "    :param ${4:stdout_file}: {str} - the file to which STDOUT will be captured in",
-            "    :param ${5:stderr_file}: {str} - the file to which STDERR will be captured in",
-            "    \"\"\"",
-            "    if ${1:cmd} is None:",
-            "        raise Exception(\"${1:cmd} was not specified\")",
-            "",
-            "    if not os.path.exists(${1:cmd}):",
-            "        raise Exception(f\"cmd '{${1:cmd}}' does not exist\")",
-            "",
-            "    logging.info(f\"Will attempt to execute '{${1:cmd}}' with arguments '{${2:args_string}}'\")",
-            "",
-            "    if ${3:outdir} is None:",
-            "        ${3:outdir} = '/tmp'",
-            "        logging.info(f\"outdir was not defined and therefore was set to default '{${3:outdir}}'\")",
-            "        ",
-            "    if ${4:stdout_file} is None:",
-            "        ${4:stdout_file} = os.path.join(${3:outdir}, os.path.basename(${1:cmd}) + '.stdout')",
-            "        logging.info(f\"${4:stdout_file} was not specified and therefore was set to '{${4:stdout_file}}'\")",
-            "",
-            "    if ${5:stderr_file} is None:",
-            "        ${5:stderr_file} = os.path.join(${3:outdir}, os.path.basename(${1:cmd}) + '.stderr')",
-            "        logging.info(f\"${5:stderr_file} was not specified and therefore was set to '{${5:stderr_file}}'\")",
-            "",
-            "    if os.path.exists(${4:stdout_file}):",
-            "        logging.info(f\"STDOUT file '{${4:stdout_file}}' already exists so will delete it now\")",
-            "        os.remove(${4:stdout_file})",
-            "",
-            "    if os.path.exists(${5:stderr_file}):",
-            "        logging.info(f\"STDERR file '{${5:stderr_file}}' already exists so will delete it now\")",
-            "        os.remove(${5:stderr_file})",
-            "",
-            "    self._write_shell_script(${1:cmd}, ${2:args_string}, ${3:outdir}, ${4:stdout_file}, ${5:stderr_file})",
-            "",
-            "    consolidated_cmd = ${1:cmd} + ' ' + ${2:args_string}",
-            "    p = subprocess.Popen(consolidated_cmd, shell=True)",
-            "",
-            "    (stdout, stderr) = p.communicate()",
-            "",
-            "    pid = p.pid",
-            "",
-            "    logging.info(f\"The child process ID is '{pid}'\")",
-            "",
-            "    p_status = p.wait()",
-            "",
-            "    p_returncode = p.returncode",
-            "",
-            "    if p_returncode is not None:",
-            "        logging.info(f\"The return code was '{p_returncode}'\")",
-            "    else:",
-            "        logging.info(\"There was no return code\")",
-            "",
-            "    if p_status == 0:",
-            "        logging.info(f\"Execution of cmd '{${1:cmd}}' has completed\")",
-            "    else:",
-            "        raise Exception(f\"Received status '{p_status}'\")",
-            "",
-            "    if stdout is not None:",
-            "        logging.info(\"stdout is: \" + stdout)",
-            "",
-            "    if stderr is not None:",
-            "        logging.info(\"stderr is: \" + stderr)",
-            "",
-            "    return stdout_file",
-            "",
-            "def _write_shell_script(self, ${1:cmd}, ${2:args_string}, ${3:outdir}, ${4:stdout_file}, ${5:stderr_file}):",
-            "    \"\"\"Write the command and argsuments to a shell script file so can be manually executed later",
-            "",
-            "    :param ${1:cmd}: {str} - the command-line executable",
-            "    :param ${2:args_string}: {str} - the command-line arguments",
-            "    :param ${3:outdir}: {str} - the output directory in which the shell script should be written in",
-            "    :param ${4:stdout_file}: {str} - the file to which the STDOUT will be directed into",
-            "    :param ${5:stderr_file}: {str} - the file to which the STDERR will be directed into",
-            "    \"\"\"",
-            "    outfile = os.path.join(outdir, os.path.basename(${1:cmd}) + '.sh')",
-            "    formatted_args = re.sub(\" --\", \" \\\\\\n--\", ${2:args_string})",
-            "    with open(outfile, 'w') as of:",
-            "        of.write(\"#!/bin/sh\\n\")",
-            "        of.write(\"# method-created: \" + os.path.abspath(__file__) + \"\\n\")",
-            "        of.write(\"# date-created: \" + str(currentDT.strftime(\"%Y-%m-%d-%H%M%S\")) + \"\\n\")",
-            "        of.write(${1:cmd} + ' \\\\' + \"\\n\")",
-            "        of.write(formatted_args + ' \\\\' + \"\\n\")",
-            "        of.write('1>' + ${4:stdout_file} + ' \\\\' + \"\\n\")",
-            "        of.write('2>' + ${5:stderr_file})",
-            "",
-            "    logging.info(f\"Wrote shell script '{outfile}'\")",
-            "",
-            "$0"
-        ],
-        "description": "Execute a command via system call using subprocess"
-    },
-    "Define a function": {
-        "prefix": "jj-def-function",
-        "body": [
-            "def ${1:name}($0) -> ${2:return_type}:",
-            "    \"\"\"${3:description}",
-            "    \"\"\"",
-            ""
-        ],
-        "description": "Define a function"
-    },
-    "Function for deriving the md5sum for a file": {
-        "prefix": "jj-def-get-checksum",
-        "body": [
-            "import hashlib",
-            "import logging",
-            "",
-            "def get_checksum(self, infile: str = None) -> str:",
-            "    \"\"\"Derive the md5checksum for the content of the specified file.",
-            "    :param infile: {str} the file for which the md5checksum will be derived",
-            "    :returns checksum: {str} the md5checksum based on the contents of the file",
-            "    \"\"\"",
-            "    with open(infile, \"rb\") as f:",
-            "        file_hash = hashlib.md5()",
-            "        chunk = f.read(8192)",
-            "        while chunk:",
-            "            file_hash.update(chunk)",
-            "            chunk = f.read(8192)",
-            "",
-            "    checksum = file_hash.hexdigest()",
-            "    logging.info(f\"checksum for file '{infile}' is '{checksum}'\")",
-            "    return checksum",
-            "$0"
-        ],
-        "description": "Function for deriving the md5sum for a file"
-    },
-    "Get val from config.ini file for a given param and section": {
-        "prefix": "jj-def-get-val-from-config-ini",
-        "body": [
-            "def get_val_from_config(self, section, param):",
-            "    \"\"\"Attempt to retrieve the value for a param in a give section of the configuration INI file",
-            "    :param section: {str} - the name of the section",
-            "    :param param: {str} - the name of the param",
-            "    \"\"\"",
-            "    if self._config is None:",
-            "        raise Exception(\"config is not defined\")        ",
-            "",
-            "    if section not in self._config:",
-            "        raise Exception(f\"section '{section}' does not exist in the config\")",
-            "    ",
-            "    if param not in self._config:",
-            "        raise Exception(\"param '{param}' does not exist in section '{section}'\")",
-            "",
-            "    return self._config[section][param]",
-            "",
-            "$0",
-            ""
-        ],
-        "description": "Get val from config.ini file for a given param and section"
-    },
-    "Define lambda handler function": {
-        "prefix": "jj-def-lambda-event-handler",
-        "body": [
-            "def lambda_handler(event, _) -> dict:",
-            "    \"\"\"Event handler",
-            "    :param event: {dict}    ",
-            "    :returns response: {dict}",
-            "    \"\"\"",
-            "    response = {}",
-            "    $0",
-            "",
-            "    return {'statusCode': 200,",
-            "            'body': response",
-            "            }",
-            "",
-            "",
-            "if __name__ == \"__main__\":",
-            "    lambda_handler('', '')",
-            "    "
-        ],
-        "description": "Define lambda handler function"
-    },
-    "Define function for printing text to STDOUT in green": {
-        "prefix": "jj-def-print-green-text",
-        "body": [
-            "def print_green(msg: str = None) -> None:",
-            "    \"\"\"Print message to STDOUT in green text.",
-            "    :param msg: {str} - the message to be printed",
-            "    \"\"\"",
-            "    if msg is None:",
-            "        raise Exception(\"msg was not defined\")",
-            "    ",
-            "    print(Fore.GREEN + msg + Style.RESET_ALL)",
-            "",
-            "$0"
-        ],
-        "description": "Define function for printing text to STDOUT in green"
-    },
-    "Define function for printing text to STDOUT in red": {
-        "prefix": "jj-def-print-red-text",
-        "body": [
-            "def print_red(msg: str = None) -> None:",
-            "    \"\"\"Print message to STDOUT in red text.",
-            "    :param msg: {str} - the message to be printed",
-            "    \"\"\"",
-            "    if msg is None:",
-            "        raise Exception(\"msg was not defined\")",
-            "    ",
-            "    print(Fore.RED + msg + Style.RESET_ALL)",
-            "",
-            "$0"
-        ],
-        "description": "Define function for printing text to STDOUT in red"
-    },
-    "Define function for printing text to STDOUT in yellow": {
-        "prefix": "jj-def-print-yellow-text",
-        "body": [
-            "def print_yellow(msg: str = None) -> None:",
-            "    \"\"\"Print message to STDOUT in yellow text.",
-            "    :param msg: {str} - the message to be printed",
-            "    \"\"\"",
-            "    if msg is None:",
-            "        raise Exception(\"msg was not defined\")",
-            "    ",
-            "    print(Fore.YELLOW + msg + Style.RESET_ALL)",
-            "",
-            "$0"
-        ],
-        "description": "Define function for printing text to STDOUT in yellow"
-    },
-    "Declare DEFAULT_OUTDIR constant": {
-        "prefix": "jj-default-outdir",
-        "body": [
-            "DEFAULT_OUTDIR = os.path.join(",
-            "    '/tmp',",
-            "    os.path.splitext(os.path.basename(__file__))[0],",
-            "    str(datetime.today().strftime('%Y-%m-%d-%H%M%S')),",
-            ")"
-        ],
-        "description": "Declare DEFAULT_OUTDIR constant"
-    },
-    "Add a Django ManyToManyField": {
-        "prefix": "jj-django-manytomanyfield",
-        "body": [
-            "${1:field} = models.ManyToManyField(",
-            "    '${2:model_name}',",
-            "    blank=True",
-            ")",
-            "$0"
-        ],
-        "description": "Add a Django ManyToManyField"
-    },
-    "Declare a Django admin class": {
-        "prefix": "jj-django-admin-class",
-        "body": [
-            "class ${1:myclass}Admin(admin.ModelAdmin):",
-            "    # The prepopulated field 'slug' depends on the fields list in the tuple",
-            "    prepopulated_fields = {'slug': ('title',)}",
-            "    # The following fields will be filterable in the admin portal",
-            "    list_filter = ('author', 'rating')",
-            "    # The following controls which fields are displayed in the primary table for this model in the admin section",
-            "    list_display('title', 'author')"
-        ],
-        "description": "Declare a Django admin class"
-    },
-    "Declare a Django class that inherits from DetailView": {
-        "prefix": "jj-django-class-detailview",
-        "body": [
-            "from django.views.generic import DetailView",
-            "",
-            "class ${1:name}View(DetailView):",
-            "    template_name = '${2:dir}/${3:template_file}.html'",
-            "    model = ${4:model}",
-            "    ",
-            "    def get_context_data(self, **kwargs):",
-            "        context = super().get_context_data(**kwargs)",
-            "        #context['posts_tags'] = self.object.tags.all()",
-            "        context['${5:element}'] = self.object.${6:database_field}.all()",
-            "",
-            "        return context",
-            "",
-            "$0    ",
-            ""
-        ],
-        "description": "Declare a Django class that inherits from DetailView"
-    },
-    "Declare a class that inherits from ListView": {
-        "prefix": "jj-django-class-listview",
-        "body": [
-            "from django.views.generic import ListView",
-            "",
-            "class ${1:name}View(ListView):",
-            "    template_name = \"${2:dir}/${3:template_file}.html\"",
-            "    model = ${4:model}",
-            "    ordering = ['-date']",
-            "    context_object_name = \"${5:context_name}\"",
-            "",
-            "    def get_queryset(self):",
-            "        queryset = super().get_queryset()",
-            "        data = queryset[:3]",
-            "        return data",
-            "$0"
-        ],
-        "description": "Declare a class that inherits from ListView"
-    },
-    "Declare a Django form class based on a model": {
-        "prefix": "jj-django-declare-form-based-on-model",
-        "body": [
-            "from django import forms",
-            "from .models import ${1:model}",
-            "",
-            "class ${1:model}Form(forms.ModelForm):",
-            "    class Meta:",
-            "        model = ${1:model}",
-            "        # comma-separated list of fields to exclude",
-            "        exclude = ['${2:field}']",
-            "        # labels is for specifying the labels to display in the UI corresponding with the table field names",
-            "        labels = {",
-            "            'user_name': 'Your Name',",
-            "            'user_email': 'Your Comment'",
-            "        }",
-            "$0"
-        ],
-        "description": "Declare a Django form class based on a model"
-    },
-    "Define Django get_context_data function": {
-        "prefix": "jj-django-def-get-context-data",
-        "body": [
-            "def get_context_data(self, **kwargs):",
-            "    return super().get_context_data(**kwargs)",
-            "$0"
-        ],
-        "description": "Define Django get_context_data function"
-    },
-    "Declare a Django EmailField for the model": {
-        "prefix": "jj-django-emailfield",
-        "body": [
-            "user_email = models.EmailField()",
-            "$0"
-        ],
-        "description": "Declare a Django EmailField for the model"
-    },
-    "Declare a Django EmailField for the model": {
-        "prefix": "jj-django-model-EmailField",
-        "body": [
-            "${1:email_field} = models.EmailField(",
-            "    null=True,",
-            "    blank=True,",
-            "    max_length=${2:max_length}",
-            ")",
-            "$0"
-        ],
-        "description": "Declare a Django EmailField for the model"
-    },
-
-    "Define a Django form class": {
-        "prefix": "jj-django-form-class",
-        "body": [
-            "from django import forms",
-            "",
-            "class ${1:form_name}Form(forms.Form):",
-            "    ${2:field_name} = forms.CharField(",
-            "        label=\"${3:label}\",",
-            "        required=True,",
-            "        max_length=${4:max_length},",
-            "        error_messages={",
-            "            \"required\": \"${5:required_error_msg}\",",
-            "            \"max_length\": \"${6:max_length_error_msg}\"",
-            "        })",
-            "",
-            "$0",
-            ""
-        ],
-        "description": "Define a Django form class"
-    },
-    "Import the Django Http404 module": {
-        "prefix": "jj-django-import-http404",
-        "body": [
-            "from django.http import Http404",
-            "$0"
-        ],
-        "description": "Import the Django Http404 module"
-    },
-    "Import the HttpResponseRedirect": {
-        "prefix": "jj-django-import-httpresponseredirect",
-        "body": [
-            "from django.http import HttpResponseRedirect",
-            "$0"
-        ],
-        "description": "Import the HttpResponseRedirect"
-    },
-    "Import Django ListView": {
-        "prefix": "jj-django-import-listview",
-        "body": [
-            "from django.views.generic import ListView",
-            "$0"
-        ],
-        "description": "Import Django ListView"
-    },
-    "Import reverse from django.urls": {
-        "prefix": "jj-django-import-reverse",
-        "body": [
-            "from django.urls import reverse",
-            "$0"
-        ],
-        "description": "Import reverse from django.urls"
-    },
-    "Import the Django TemplateView": {
-        "prefix": "jj-django-import-template-view",
-        "body": [
-            "from django.views.generic.base import TemplateView",
-            "$0"
-        ],
-        "description": "Import the Django TemplateView"
-    },
-    "Import Django core validators": {
-        "prefix": "jj-django-import-validators",
-        "body": [
-            "from django.core.validators import MinValueValidator, MaxValueValidator",
-            "$0"
-        ],
-        "description": "Import Django core validators"
-    },
-    "Import View from django.views": {
-        "prefix": "jj-django-import-view",
-        "body": [
-            "from django.views import View",
-            "$0"
-        ],
-        "description": "Import View from django.views"
-    },
-    "Declare a Django model BooleanField": {
-        "prefix": "jj-django-model-booleanfield",
-        "body": [
-            "${1:field} = models.BooleanField(default=False)",
-            "$0"
-        ],
-        "description": "Declare a Django model BooleanField"
-    },
-    "Declare a Django model charfield": {
-        "prefix": "jj-django-model-charfield",
-        "body": [
-            "${1:field} = models.CharField(",
-            "    null=True,",
-            "    blank=True,",
-            "    max_length=${2:max_length}",
-            ")",
-            "$0"
-        ],
-        "description": "Declare a Django model carfield"
-    },
-    "Declare a Django model ImageField": {
-        "prefix": "jj-django-model-imagefield",
-        "body": [
-            "${1:field} = models.ImageField(",
-            "    null=True,",
-            "    blank=True,",
-            "    default=\"default.jpg\"",
-            "    upload_to='${2:location}'",
-            ")",
-            "$0"
-        ],
-        "description": "Declare a Django model ImageField"
-    },
-    "Declare a Django model UUIDField": {
-        "prefix": "jj-django-model-uuid-field",
-        "body": [
-            "import uuid",
-            "",
-            "${1:id} = models.UUIDField(",
-            "    default=uuid.uuid4,",
-            "    unique=True,",
-            "    primary_key=True,",
-            "    editable=False",
-            ")",
-            "$0"
-        ],
-        "description": "Declare a Django model UUIDField"
-    },
-    "Print out steps to execute following Django model updates": {
-        "prefix": "jj-django-model-updates",
-        "body": [
-            "python manage.py makemigrations",
-            "python manage.py migrate"
-        ],
-        "description": "Declare a Django model UUIDField"
-    },
-    "Define a Django model class": {
-        "prefix": "jj-django-model-class",
-        "body": [
-            "from django.urls import reverse",
-            "from django.utils.text import slugify",
-            "",
-            "   ",
-            "class ${1:myclass}(models.Model):",
-            "    slug = models.SlugField(",
-            "        default='', ",
-            "        editable=False,",
-            "        null=False, ",
-            "        db_index=True)",
-            "    $0",
-            "    pass",
-            "",
-            "    def get_absolute_url(self):",
-            "        return reverse('${name}', args=[self.id])",
-            "",
-            "    def save(self, *args, **kwargs):",
-            "        self.slug = slugify(self.title)",
-            "        super().save(*args, **kwargs)",
-            "",
-            "    def __str__(self):",
-            "        return ''"
-        ],
-        "description": "Define a Django model class"
-    },
-    "Declare Django model DateField": {
-        "prefix": "jj-django-model-datefield",
-        "body": [
-            "date = models.DateField(auto_now=True)",
-            "$0"
-        ],
-        "description": "Declare Django model DateField"
-    },
-    "Create Django field as a foreign key field": {
-        "prefix": "jj-django-model-foreignkey-field",
-        "body": [
-            "${1:field} = models.ForeignKey(",
-            "    ${2:model},",
-            "    on_delete=models.CASCADE",
-            ")",
-            "$0"
-        ],
-        "description": "Create Django field as a foreign key field"
-    },
-    "Declare a Django model field of type Integer": {
-        "prefix": "jj-django-model-integerfield",
-        "body": [
-            "${1:field} = models.IntegerField(",
-            "    default=0,",
-            "    null=True,",
-            "    blank=True",
-            ")",
-            "$0"
-        ],
-        "description": "Declare a Django model field of type Integer"
-    },
-    "Declare a Django SlugField": {
-        "prefix": "jj-django-model-slugfield",
-        "body": [
-            "slug = models.SlugField(unique=True, db_index=True)",
-            "$0"
-        ],
-        "description": "Declare a Django SlugField"
-    },
-    "Declare a Django model TextField": {
-        "prefix": "jj-django-model-textfield",
-        "body": [
-            "from django.core.validators import MinLengthValidator",
-            "",
-            "${1:name} = models.TextField(",
-            "    null=True,",
-            "    blank=True,",
-            "    validators=[MinLengthValidator(${2:min_length})]",
-            ")",
-            "$0"
-        ],
-        "description": "Declare a Django model TextField"
-    },
-    "Declare a Django model DateTimeField": {
-        "prefix": "jj-django-model-datetimefield",
-        "body": [
-            "${1:field_name} = models.DateTimeField(auto_now_add=True)",
-            "$0"
-        ],
-        "description": "Declare a Django model DateTimeField"
-    },
-    "Register the Django model in the admin site": {
-        "prefix": "jj-django-register-model",
-        "body": [
-            "from .models import ${1:my_model}",
-            "",
-            "admin.site.register(${1:my_model})",
-            "$0"
-        ],
-        "description": "Register the Django model in the admin site"
-    },
-    "Create Django urls.py file content": {
-        "prefix": "jj-django-urlspatterns",
-        "body": [
-            "from django.urls import path",
-            "from . import views",
-            "",
-            "urlpatterns = [",
-            "    path('', views.${1:method_name}, name='${2:name}')",
-            "]",
-            "$0"
-        ],
-        "description": "Create Django urls.py file content"
-    },
-    "Declare Django views method": {
-        "prefix": "jj-django-views-method",
-        "body": [
-            "def ${1:method_name}(request):",
-            "    context = {}",
-            "    return render(request, '${2:template_name}.html', context)",
-            "$0"
-        ],
-        "description": "Declare Django views method"
-    },
-    "Iterate over elements in hash": {
-        "prefix": "jj-for-loop-hash",
-        "body": [
-            "${1:ctr} = 0",
-            "for ${2:key} in ${3:hashref}:",
-            "    ${1:ctr} += 1",
-            "    ${4:val} = ${3:hashref}[${2:key}]",
-            "    if ${4:val}:",
-            "        continue",
-            "",
-            "logging.info(f\"Processed '{${1:ctr}}' items in ${3:hashref}\")",
-            "",
-            "$0"
-        ],
-        "description": "Iterate over elements in hash"
-    },
-    "Iterate over elements in an array": {
-        "prefix": "jj-for-loop-list",
-        "body": [
-            "${1:ctr} = 0",
-            "for ${2:variable} in ${3:array_list}:",
-            "    ${1:ctr} += 1",
-            "    if ${4:condition}:",
-            "        continue",
-            "",
-            "logging.info(\"fProcessed '{${1:ctr}}' items\")",
-            "",
-            "$0"
-        ],
-        "description": "Iterate over elements in an array"
-    },
-    "Get environment variable": {
-        "prefix": "jj-get-env-var",
-        "body": [
-            "import logging",
-            "import os",
-            "",
-            "${1:var} = os.getenv('${2:envvar}', ${3:default})",
-            "",
-            "if ${1:var} is None or ${1:var} == '':",
-            "    logging.error(f\"environment variable '${2:envvar}' is not defined\")",
-            "    raise Exception(f\"environment variable '${2:envvar}' is not defined\")",
-            "",
-            "$0"
-        ],
-        "description": "Get environment variable"
-    },
-    "Get a file list from a file": {
-        "prefix": "jj-get-file-list-from-file",
-        "body": [
-            "import logging",
-            "",
-            "def get_file_list(infile: str - None, verbose) -> list:",
-            "    if infile is None:",
-            "        logging.error(\"infile was not defined\")",
-            "        return []",
-            "",
-            "    logging.info(f\"Will read file '{infile}'\")",
-            "    line_ctr = 0",
-            "    file_list = []",
-            "    with open(infile, 'r') as f:",
-            "        for line in f:",
-            "            line_ctr += 1",
-            "            line = line.strip()",
-            "            file_list.append(line)",
-            "",
-            "    if line_ctr > 0:",
-            "        logging.info(f\"Read '{line_ctr}' lines from file '{infile}'\")",
-            "    else:",
-            "        logging.info(\"Did not read any lines from file '{infile}'\")",
-            "    return file_list",
-            "",
-        ],
-        "description": "Get a file list from a file"
-    },
-    "Get the list of files in a directory": {
-        "prefix": "jj-get-file-list-from-indir",
-        "body": [
-            "import logging",
-            "import os",
-            "",
-            "def get_file_list(indir: str = None, extension: str = None) -> list:",
-            "    \"\"\"Get the list of files in the specified directory",
-            "    :param indir: {str} - the directory to search for files",
-            "    :param extension: {str} - the file extension to filter on",
-            "    :returns file_list: {list} - the list of files found in the directory",
-            "    \"\"\"",
-            "    if extension is None:",
-            "        logging.info(f\"Going to search for files in directory '{indir}'\")",
-            "    else:",
-            "        logging.info(f\"Going to search for files with extension '{extension}' in directory '{indir}'\")",
-            "",
-            "    file_list = []",
-            "    for dirpath, dirnames, filenames in os.walk(indir):",
-            "        if 'venv' in dirpath:",
-            "            logging.info(f\"Going to ignore files in directory '{dirpath}'\")",
-            "            continue",
-            "        for name in filenames:",
-            "            path = os.path.normpath(os.path.join(dirpath, name))",
-            "            if os.path.isfile(path):",
-            "                if extension is not None:",
-            "                    if os.path.endswith('.{extension}'):",
-            "                        file_list.append(path)",
-            "                else:",
-            "                    file_list.append(path)",
-            "",
-            "    return file_list",
-            "",
-            "$0"
-        ],
-        "description": "Get the list of files in a directory"
-    },
-    "Get the logger": {
-        "prefix": "jj-get-logger",
-        "body": [
-            "logger = logging.getLogger()",
-            "logger.setLevel(logging.INFO)",
-            "",
-            "$0"
-        ],
-        "description": "Get the logger"
-    },
-    "If directory does not exist created it": {
-        "prefix": "jj-if-dir-not-exists",
-        "body": [
-            "import logging",
-            "import os",
-            "",
-            "if not os.path.exists(${1:outdir}):",
-            "    pathlib.Path(${1:outdir}).mkdir(parents=True, exist_ok=True)",
-            "    print_yellow(f\"Created directory '{${1:outdir}}'\")",
-            "",
-            "$0"
-        ],
-        "description": "If directory does not exist created it"
-    },
-    "Check if file does not exist": {
-        "prefix": "jj-if-file-not-exists",
-        "body": [
-            "import logging",
-            "import os",
-            "import sys",
-            "",
-            "if not os.path.exists(${1:infile}):",
-            "    error_msg = f\"file '{${1:infile}}' does not exist\"",
-            "    logging.error(error_msg)",
-            "    raise Exception(error_msg)",
-            "    #sys.exit(1)",
-            "$0"
-        ],
-        "description": "Check if file does not exist"
-    },
-    "Unpack kwargs lookup": {
-        "prefix": "jj-if-kwargs",
-        "body": [
-            "if '${1:key}' in kwargs.keys():",
-            "    self.${1:key} = kwargs['${1:key}']",
-            "    ",
-            "$0"
-        ],
-        "description": "Unpack kwargs lookup"
-    },
-    "Raise exception if variable is None": {
-        "prefix": "jj-if-not-defined-raise-exception",
-        "body": [
-            "import logging",
-            "import sys",
-            "",
-            "if ${1:var} is None:",
-            "    error_msg = f'${1:var} is not defined'",
-            "    logging.fatal(error_msg)",
-            "    raise Exception(error_msg)",
-            "    #sys.exit(1)",
-            "$0"
-        ],
-        "description": "Raise exception if variable is None"
-    },
-    "Create a directory if does not exist": {
-        "prefix": "jj-if-not-exists-dir-create",
-        "body": [
-            "import logging",
-            "import os",
-            "",
-            "from pathlib import Path",
-            "",
-            "if not os.path.exists(${1:DIR}):",
-            "    Path(${1:DIR}).mkdir(parents=True, exist_ok=True)",
-            "    logging.info(f\"Created directory '{${1:DIR}}'\")",
-            "",
-            "$0"
-        ],
-        "description": "Create a directory if does not exist"
-    },
-    "Check if key exists in hash": {
-        "prefix": "jj-if-key-in-hash",
-        "body": [
-            "import logging",
-            "import os",
-            "import sys",
-            "",
-            "if ${1:key} not in ${2:hash}:",
-            "    logging.${3:log_level}(\"${1:key} does not exist in ${2:hash}\")",
-            "    sys.exit(1)",
-            "    continue",
-            " ",
-            " $0"
-        ],
-        "description": "Check if key exists in hash"
-    },
-    "Regular expression match": {
-        "prefix": "jj-if-regex-match",
-        "body": [
-            "import logging",
-            "import re",
-            "",
-            "if re.match(r'^${1:expression}$', str(${2:var})):",
-            "    logging.info(f\"Found match in '{${2:var}}'\"))",
-            "else:",
-            "    logging.info(f\"Did not find match for '{${2:var}}'\")",
-            "    ",
-            "$0"
-        ],
-        "description": "Regular expression match"
-    },
-    "Initialize configparser": {
-        "prefix": "jj-initialize-configparser",
-        "body": [
-            "import configparser",
-            "import logging",
-            "import os",
-            "import sys",
-            "",
-            "if not os.path.exists(config_file):",
-            "    logging.fatal(f\"config_file '{config_file}' does not exist\")",
-            "    sys.exit(1)",
-            "",
-            "# initialize configparser",
-            "config = configparser.ConfigParser()",
-            "config.read(config_file)",
-            "",
-            "$0"
-        ],
-        "description": "Initialize configparser"
-    },
-    "Log to log file at INFO level": {
-        "prefix": "jj-log-info",
-        "body": [
-            "logging.info(f\"{${1:msg}}\")$0"
-        ],
-        "description": "Log to log file at INFO level"
-    },
-    "Log to log file at WARN level": {
-        "prefix": "jj-log-warning",
-        "body": [
-            "logging.warning(f\"{${1:msg}}\")$0"
-        ],
-        "description": "Log to log file at WARN level"
-    },
-    "Log to log file at ERROR level": {
-        "prefix": "jj-log-error",
-        "body": [
-            "logging.error(f\"{${1:msg}}\")$0"
-        ],
-        "description": "Log to log file at ERROR level"
-    },
-    "Set up the logging in an executable": {
-        "prefix": "jj-logging-setup-executable",
-        "body": [
-            "import logging",
-            "",
-            "DEFAULT_LOGGING_FORMAT = \"%(levelname)s : %(asctime)s : %(pathname)s : %(lineno)d : %(message)s\"",
-            "",
-            "DEFAULT_LOG_LEVEL = logging.INFO",
-            "",
-            "logging.basicConfig(",
-            "    filename=logfile, ",
-            "    format=DEFAULT_LOGGING_FORMAT, ",
-            "    level=DEFAULT_LOG_LEVEL",
-            ")",
-            "",
-            "$0"
-        ],
-        "description": "Set up the logging in an executable"
-    },
-    "definition of main CLI program": {
-        "prefix": "jj-main-cli",
-        "body": [
-            "import os",
-            "import sys",
-            "import click",
-            "import pathlib",
-            "import json",
-            "import logging",
-            "import calendar",
-            "import time",
-            "import pathlib",
-            "from colorama import Fore, Style",
-            "from datetime import datetime",
-            "",
-            "DEFAULT_OUTDIR = os.path.join(",
-            "    '/tmp/', ",
-            "    os.path.basename(__file__), ",
-            "    str(datetime.today().strftime('%Y-%m-%d-%H%M%S'))",
-            ")",
-            "",
-            "DEFAULT_CONFIG_FILE = os.path.dirname(os.path.abspath(__file__)) + '/conf/config.json'",
-            "",
-            "CONFIG = {}",
-            "",
-            "LOGGING_FORMAT = \"%(levelname)s : %(asctime)s : %(pathname)s : %(lineno)d : %(message)s\"",
-            "",
-            "LOG_LEVEL = logging.INFO",
-            "",
-            "DEFAULT_VERBOSE = True",
-            "",
-            "",
-            "def print_red(msg: str = None) -> None:",
-            "    \"\"\"Print message to STDOUT in yellow text.",
-            "    :param msg: {str} - the message to be printed",
-            "    \"\"\"",
-            "    if msg is None:",
-            "        raise Exception(\"msg was not defined\")",
-            "",
-            "    print(Fore.RED + msg + Style.RESET_ALL)",
-            "",
-            "",
-            "def print_green(msg: str = None) -> None:",
-            "    \"\"\"Print message to STDOUT in yellow text.",
-            "    :param msg: {str} - the message to be printed",
-            "    \"\"\"",
-            "    if msg is None:",
-            "        raise Exception(\"msg was not defined\")",
-            "",
-            "    print(Fore.GREEN + msg + Style.RESET_ALL)",
-            "",
-            "",
-            "def print_yellow(msg: str = None) -> None:",
-            "    \"\"\"Print message to STDOUT in yellow text.",
-            "    :param msg: {str} - the message to be printed",
-            "    \"\"\"",
-            "    if msg is None:",
-            "        raise Exception(\"msg was not defined\")",
-            "",
-            "    print(Fore.YELLOW + msg + Style.RESET_ALL)",
-            "",
-            "",
-            "@click.command()",
-            "@click.option('--verbose', is_flag=True, help=f\"Will print more info to STDOUT - default is '{DEFAULT_VERBOSE}'\")",
-            "@click.option('--outdir', help=\"The default is the current working directory - default is '{DEFAULT_OUTDIR}'\")",
-            "@click.option('--config_file', type=click.Path(exists=True), help=f\"The configuration file for this project - default is '{DEFAULT_CONFIG_FILE}'\")",
-            "@click.option('--logfile', help=\"The log file\")",
-            "@click.option('--outfile', help=\"The output final report file\")",
-            "@click.option('--infile', help=\"The primary input file\")",
-            "def main(verbose: bool, outdir: str, config_file: str, logfile: str, outfile: str, infile: str):",
-            "    \"\"\"Template command-line executable",
-            "    \"\"\"",
-            "",
-            "    error_ctr = 0",
-            "",
-            "    if infile is None:",
-            "        print_red(\"--infile was not specified\")",
-            "        error_ctr += 1",
-            "",
-            "    if error_ctr > 0:",
-            "        sys.exit(1)",
-            "",
-            "    assert isinstance(infile, str)",
-            "",
-            "    if config_file is None:",
-            "        config_file = DEFAULT_CONFIG_FILE",
-            "        print_yellow(f\"--config_file was not specified and therefore was set to '{config_file}'\")",
-            "",
-            "    assert isinstance(config_file, str)",
-            "",
-            "    if outdir is None:",
-            "        outdir = DEFAULT_OUTDIR",
-            "        print_yellow(f\"--outdir was not specified and therefore was set to '{outdir}'\")",
-            "",
-            "    assert isinstance(outdir, str)",
-            "",
-            "    if not os.path.exists(outdir):",
-            "        pathlib.Path(outdir).mkdir(parents=True, exist_ok=True)",
-            "",
-            "        print_yellow(f\"Created output directory '{outdir}'\")",
-            "",
-            "    if logfile is None:",
-            "        logfile = os.path.join(",
-            "            outdir,",
-            "            os.path.basename(__file__) + '.log'",
-            "        )",
-            "        print_yellow(f\"--logfile was not specified and therefore was set to '{logfile}'\")",
-            "",
-            "    assert isinstance(logfile, str)",
-            "",
-            "    logging.basicConfig(filename=logfile, format=LOGGING_FORMAT, level=LOG_LEVEL)",
-            "",
-            "    if not os.path.isfile(infile):",
-            "        print(f\"'{infile}' is not a file\")",
-            "        logging.error(f\"'{infile}' is not a file\")",
-            "        sys.exit(1)",
-            "",
-            "    if verbose:",
-            "        print(f\"The input file is '{infile}'\")",
-            "",
-            "    logging.info(f\"The input file is '{infile}'\")",
-            "",
-            "    # Read the configuration from the JSON file and",
-            "    # load into dictionary.",
-            "    logging.info(f\"Loading configuration from '{config_file}'\")",
-            "",
-            "    CONFIG = json.loads(open(config_file).read())",
-            "",
-            "    logging.info(\"Time to do something interesting\")",
-            "",
-            "",
-            "if __name__ == \"__main__\":",
-            "    main()",
-            "",
-            "$0"
-        ],
-        "description": "definition of main CLI program"
-    },
-    "Declare a Meta class within a Django model class": {
-        "prefix": "jj-django-meta-class",
-        "body": [
-            "class Meta:",
-            "    verbose_name_plural = \"${1:name}\"",
-            "$0"
-        ],
-        "description": "Declare a Meta class within a Django model class"
-    },
-    "Open and read comma-separated file": {
-        "prefix": "jj-open-read-csv-file",
-        "body": [
-            "import csv",
-            "import logging",
-            "import os",
-            "",
-            "if not os.path.exists(${1:infile}):",
-            "    raise Exception(f\"file '{${1:infile}}' does not exist\")",
-            "",
-            "header_to_position_lookup = {}",
-            "record_list = []",
-            "record_ctr = 0",
-            "    ",
-            "with open(${1:infile}) as f:",
-            "    reader = csv.reader(f)",
-            "    row_ctr = 0",
-            "    for row in reader:",
-            "        row_ctr += 1",
-            "        if row_ctr == 1:",
-            "            field_ctr = 0",
-            "            for field in row:",
-            "                header_to_position_lookup[field] = field_ctr",
-            "                field_ctr += 1",
-            "            logging.info(\"Processed the header of csv file '{${1:infile}}'\")",
-            "        else:",
-            "            record_lookup = {}",
-            "            field_ctr = 0",
-            "            for field in row:",
-            "                record_lookup[field] = header_to_position_lookup[field]",
-            "                field_ctr += 1",
-            "            record_list.append(record_lookup)",
-            "            record_ctr += 1",
-            "    logging.info(\"Processed '{record_ctr}' records in csv file '{${1:infile}}'\")",
-            "",
-            "$0"
-        ],
-        "description": "Open and read comma-separated file"
-    },
-    "Open and read a json file": {
-        "prefix": "jj-open-read-json-file",
-        "body": [
-            "import json",
-            "import logging",
-            "import os",
-            "",
-            "if not os.path.exists(${1:infile}):",
-            "    raise Exception(f\"json file '{${1:infile}}' does not exist\")",
-            "",
-            "with open(${1:infile}, 'r') as json_file:",
-            "    text = json_file.read()",
-            "    json_data = json.loads(text)",
-            "",
-            "    for ${2:key}, ${3:val} in json_data.items():",
-            "        logging.info(f\"${2:key} '{${2:key}}' ${3:val} '{${3:val}}'\")",
-            "",
-            "$0"
-        ],
-        "description": "Open and read a json file"
-    },
-    "Open and read a plain text file line-by-line": {
-        "prefix": "jj-open-read-plain-text-file-line-by-line",
-        "body": [
-            "import logging",
-            "",
-            "logging.info(f\"Will read file '{${1:infile}}'\")",
-            "line_ctr = 0",
-            "with open(${1:infile}, 'r') as f:",
-            "    for line in f:",
-            "        line_ctr += 1",
-            "        line = line.strip()",
-            "        print(line)",
-            "",
-            "if line_ctr > 0:",
-            "    logging.info(f\"Read '{line_ctr}' lines from file '{${1:infile}}'\")",
-            "else:",
-            "    logging.info(\"Did not read any lines from file '{${1:infile}}'\")",
-            "",
-            "$0"
-        ],
-        "description": "Open and read a plain text file line-by-line"
-    },
-    "Open and read tab-delimited text file": {
-        "prefix": "jj-open-read-tab-delimited-file",
-        "body": [
-            "import csv",
-            "import logging",
-            "import os",
-            "",
-            "if not os.path.exists(${1:infile}):",
-            "    raise Exception(f\"file '{${1:infile}}' does not exist\")",
-            "",
-            "header_to_position_lookup = {}",
-            "record_list = []",
-            "record_ctr = 0",
-            "    ",
-            "with open(${1:infile}) as f:",
-            "    reader = csv.reader(f, delimiter='\\t')",
-            "    row_ctr = 0",
-            "    for row in reader:",
-            "        row_ctr += 1",
-            "        if row_ctr == 1:",
-            "            field_ctr = 0",
-            "            for field in row:",
-            "                header_to_position_lookup[field] = field_ctr",
-            "                field_ctr += 1",
-            "            logging.info(f\"Processed the header of csv file '{${1:infile}}'\")",
-            "        else:",
-            "            record_lookup = {}",
-            "            field_ctr = 0",
-            "            for field in row:",
-            "                record_lookup[field] = header_to_position_lookup[field]",
-            "                field_ctr += 1",
-            "            record_list.append(record_lookup)",
-            "            record_ctr += 1",
-            "    logging.info(f\"Processed '{record_ctr}' records in csv file '{${1:infile}}'\")",
-            "",
-            "$0"
-        ],
-        "description": "Open and read tab-delimited text file"
-    },
-    "Open file in write mode": {
-        "prefix": "jj-open-write-file",
-        "body": [
-            "import logging",
-            "",
-            "with open(${1:outfile}, 'w') as of:",
-            "    of.write(f\"{${2:line}}\\n\")",
-            "    $0",
-            "",
-            "logging.info(f\"Wrote file '{${1:outfile}}'\")",
-            "if verbose: ",
-            "    print(f\"Wrote file '{${1:outfile}}'\")",
-            ""
-        ],
-        "description": "Open file in write mode"
-    },
-    "Description of param in docstring of method": {
-        "prefix": "jj-param-docstring-method",
-        "body": [
-            ":param ${1:variable}: ${2:datatype} - ${3:description}",
-            "$0"
-        ],
-        "description": "Description of param in docstring of method"
-    },
-    "Prepare to execute a command": {
-        "prefix": "jj-prepare-execute-command",
-        "body": [
-            "import os",
-            "",
-            "${1:outdir} = self.get_outdir()",
-            "basename = os.path.basename(${2:cmd})",
-            "stdout_file = os.path.join(${1:outdir}, basename, '.stdout') ",
-            "stderr_file = os.path.join(${1:outdir}, basename, '.stderr') ",
-            "logfile = os.path.join(${1:outdir}, basename, '.log')",
-            "",
-            "${3:args} += \" --logfile \" + logfile",
-            "",
-            "self.execute_command(${2:cmd}, ${3:args}, stdout_file, stderr_file)",
-            "",
-            "$0"
-        ],
-        "description": "Prepare to execute a command"
-    },
-    "Print banner using pyfiglet": {
-        "prefix": "jj-print-banner",
-        "body": [
-            "import pyfiglet",
-            "print(pyfiglet.figlet_format(\"${1:msg}\", font=\"${2:font}\"))",
-            "$0"
-        ],
-        "description": "Print banner using pyfiglet"
-    },
-    "Print statement in bold red": {
-        "prefix": "jj-print-bold-red",
-        "body": [
-            "from colorama import Fore, Style",
-            "",
-            "print(Fore.RED + \"${1:message}\", end='')",
-            "print(Style.RESET_ALL + '', end='')",
-            "",
-            "$0"
-        ],
-        "description": "Print statement in bold red"
-    },
-    "Print statement in bold green": {
-        "prefix": "jj-print-bold-green",
-        "body": [
-            "from colorama import Fore, Style",
-            "",
-            "print(Fore.GREEN + \"${1:message}\", end='')",
-            "print(Style.RESET_ALL + '', end='')",
-            "",
-            "$0"
-        ],
-        "description": "Print statement in bold green"
-    },
-    "Print statement in bold yellow": {
-        "prefix": "jj-print-bold-yellow",
-        "body": [
-            "from colorama import Fore, Style",
-            "",
-            "print(Fore.YELLOW + \"${1:message}\", end='')",
-            "print(Style.RESET_ALL + '', end='')",
-            "",
-            "$0"
-        ],
-        "description": "Print statement in bold yellow"
-    },
-    "Print execution completed": {
-        "prefix": "jj-print-execution-completed",
-        "body": [
-            "print_green(f\"{os.path.abspath(__file__)} execution completed\")",
-            "print(f\"The log file is '{logfile}'\")",
-            "print(f\"The output file is '{outfile}'\")",
-            "sys.exit(0)",
-            "",
-            "$0"
-        ],
-        "description": "Print execution completed"
-    },
-    "Regular expression for matching some pattern": {
-        "prefix": "jj-regex-match",
-        "body": [
-            "match_obj = re.match(\"(${1:exp})\", ${2:text})",
-            "if match_obj:",
-            "    print(f\"Found '{match_obj[1]}' in '{${2:text}}'\")",
-            "$0"
-        ],
-        "description": "Regular expression for matching some pattern"
-    },
-    "Perform regex substitution": {
-        "prefix": "jj-regex-substitution",
-        "body": [
-            "import logging",
-            "import re",
-            "",
-            "# Will replace ${1:regex} with ${2:replacement_text}",
-            "${4:changed} = re.sub(\"${1:regex}\", \"${2:replacement_text}\", ${3:source})",
-            "logging.info(f\"Derived '{${4:changed}}' from '{${3:source}}' by replacing '${1:regex}' with '${2:replacement_text}'\")",
-            "",
-            "$0"
-        ],
-        "description": "Perform regex substitution"
-    },
-    "Singleton decorator support": {
-        "prefix": "jj-singleton-decorator",
-        "body": [
-            "from singleton_decorator import singleton",
-            "@singleton$0",
-            ""
-        ],
-        "description": "Singleton decorator support"
-    },
-    "sys.exit(1)": {
-        "prefix": "jj-sys-exit",
-        "body": [
-            "import sys",
-            "",
-            "sys.exit(${1:1})",
-            "$0"
-        ],
-        "description": "sys.exit(1)"
-    },
-    "jj-try-catch-block": {
-        "prefix": "try-catch-block",
-        "body": [
-            "import logging",
-            "",
-            "try:",
-            "    ${1:do_something}",
-            "except ${2:Error} as e:",
-            "    logging.fatal(f\"${3:except_message} : '{e}'\")",
-            "else:",
-            "    logging.info(\"${4:else_message}\")",
-            "    ${5:do_something_else}",
-            "finally:",
-            "    logging.info(\"${6:finally_message}\")",
-            "    ${7:do_something_finally}",
-            "",
-            "$0"
-        ],
-        "description": "jj-try-catch-block"
-    },
-    "jj-check-indir-exists" : {
+			"shutil.copy(${1:infile}, bakfile)",
+			"logging.info(f\"Copied '{${1:infile}}' to '{bakfile}'\")",
+			"",
+			"$0"
+		],
+		"description": "Create a backup copy of the file"
+	},
+	"Declare a class": {
+		"prefix": "jj-class",
+		"body": [
+			"class ${1}(${2}):",
+			"    \"\"\"${3}\"\"\"",
+			"    ",
+			"    def __init__(self, ${4}, **kwargs):",
+			"        \"\"\"Constructor for ${1}\"\"\"",
+			"",
+			"$0"
+		],
+		"description": "Declare a class"
+	},
+	"Use concurrent futures ProcessorPoolExecutor": {
+		"prefix": "jj-concurrent-futures-processor-pool-executor",
+		"body": [
+			"# Reference: https://stackoverflow.com/questions/20776189/concurrent-futures-vs-multiprocessing-in-python-3",
+			"",
+			"import os",
+			"import time",
+			"import concurrent.futures",
+			"",
+			"start = time.perf_counter()",
+			"",
+			"",
+			"def ${1:my_function}(${2:p1}: ${3:int} = 1):",
+			"    pid = os.getpid()",
+			"    time.sleep(1)",
+			"    # TODO: enter some useful code",
+			"    return f\"Done something with parameter '{${2:p1}}' process ID '{pid}'!\"",
+			"",
+			"",
+			"with concurrent.futures.ProcessPoolExecutor() as executor:",
+			"    ",
+			"    # f1 = executor.submit(${1:my_function}, 1)",
+			"    # print(f1.result())",
+			"",
+			"    # Contrived example where want to submit/schedule 10 instance jobs of ${1:my_function}",
+			"    # and will pass in one parameter to ${1:my_function}",
+			"    ${4:param_1} = 1",
+			"    logging.info(f\"Will attempt to submit/schedule '{${5:count}}' instance jobs of ${1:my_function}\")",
+			"    results = [executor.submit(${1:my_function}, ${4:param_1}) for _ in range(${5:count})]",
+			"",
+			"    # As the instance jobs are completed i.e.: yielded, access their results",
+			"    logging.info(f\"Here are the yielded results:\")",
+			"    for f in concurrent.futures.as_completed(results):",
+			"        print(f.result())",
+			"        logging.info(f.result())",
+			"",
+			"end = time.perf_counter()",
+			"print(f\"Finished in {round(end-start, 2)} seconds(s)\")",
+			"",
+			"$0"
+		],
+		"description": "Use concurrent futures ProcessorPoolExecutor"
+	},
+	"Use concurrent futures ProcessorPoolExecutor over a fixed list of items": {
+		"prefix": "jj-concurrent-futures-processor-pool-executor-over-list-of-items",
+		"body": [
+			"# Reference: https://stackoverflow.com/questions/20776189/concurrent-futures-vs-multiprocessing-in-python-3",
+			"",
+			"import os",
+			"import time",
+			"import concurrent.futures",
+			"",
+			"start = time.perf_counter()",
+			"",
+			"",
+			"def ${1:my_function}(${2:p1}: ${3:int} = 1):",
+			"    pid = os.getpid()",
+			"    time.sleep(1)",
+			"    # TODO: enter some useful code",
+			"    return f\"Done something with parameter '{${2:p1}}' process ID '{pid}'!\"",
+			"",
+			"",
+			"with concurrent.futures.ProcessPoolExecutor() as executor:",
+			"    ",
+			"    # Contrived example where want to submit/schedule 10 instance jobs of ${1:my_function}",
+			"    # and will pass in one parameter to ${1:my_function}",
+			"    ${4:items} = [5, 4, 3, 2, 1]",
+			"    logging.info(f\"Will attempt to submit/schedule '{len(${4:items})}' instance jobs of ${1:my_function}\")",
+			"    results = [executor.submit(${1:my_function}, ${5:item}) for ${5:item} in ${4:items}]",
+			"",
+			"    # As the instance jobs are completed i.e.: yielded, access their results",
+			"    logging.info(f\"Here are the yielded results:\")",
+			"    for f in concurrent.futures.as_completed(results):",
+			"        print(f.result())",
+			"        logging.info(f.result())",
+			"",
+			"end = time.perf_counter()",
+			"print(f\"Finished in {round(end-start, 2)} seconds(s)\")",
+			"",
+			"$0"
+		],
+		"description": "Use concurrent futures ProcessorPoolExecutor over a fixed list of items"
+	},
+	"Use concurrent futures ProcessorPoolExecutor over a fixed list of items using map": {
+		"prefix": "jj-concurrent-futures-processor-pool-executor-over-list-of-items-using-map",
+		"body": [
+			"# Reference: https://stackoverflow.com/questions/20776189/concurrent-futures-vs-multiprocessing-in-python-3",
+			"",
+			"import os",
+			"import logging",
+			"import time",
+			"import concurrent.futures",
+			"",
+			"",
+			"start = time.perf_counter()",
+			"",
+			"",
+			"def ${1:my_function}(${2:p1}: ${3:int} = 1):",
+			"    pid = os.getpid()",
+			"    time.sleep(1)",
+			"    # TODO: enter some useful code",
+			"    return f\"Done something with parameter '{${2:p1}}' process ID '{pid}'!\"",
+			"",
+			"",
+			"with concurrent.futures.ProcessPoolExecutor() as executor:",
+			"    ",
+			"    # Contrived example where want to submit/schedule 10 instance jobs of ${1:my_function}",
+			"    # and will pass in one parameter to ${1:my_function}",
+			"    ${4:items} = [5, 4, 3, 2, 1]",
+			"    logging.info(f\"Will attempt to submit/schedule '{len(${4:items})}' instance jobs of ${1:my_function}\")",
+			"    results = executor.map(${1:my_function}, ${4:items})",
+			"",
+			"    # As the instance jobs are completed i.e.: yielded, access their results",
+			"    logging.info(f\"Here are the yielded results:\")",
+			"    for result in results:",
+			"        print(f\"Here is the result: '{result}'\")",
+			"        logging.info(f\"Here is the result: '{result}'\")",
+			"",
+			"end = time.perf_counter()",
+			"print(f\"Finished in {round(end-start, 2)} seconds(s)\")",
+			"",
+			"$0"
+		],
+		"description": "Use concurrent futures ProcessorPoolExecutor over a fixed list of items using map"
+	},
+	"Declare a constant": {
+		"prefix": "jj-declare-constant",
+		"body": [
+			"# ${1:description}",
+			"DEFAULT_CONSTANT_${2:name} = ${3:value}",
+			"",
+			"$0"
+		],
+		"description": "Declare a constant"
+	},
+	"Create backup copy of a file if it exists": {
+		"prefix": "jj-def-backup-file",
+		"body": [
+			"import logging",
+			"import shutil",
+			"import time",
+			"",
+			"def _backup_file(self, infile):",
+			"    \"\"\"Backup file",
+			"    :param infile: {str} - file to be backed-up",
+			"    \"\"\"",
+			"    if os.path.exists(infile):",
+			"        bakfile = os.path.abspath(infile) + time.strftime(\"%Y-%m-%d-%H%M\") + '.bak'",
+			"        shutil.copy(infile, bakfile)",
+			"        logging.info(\"Copied '{infile}' to '{bakfile}'\")",
+			"    else:",
+			"        logging.info(\"File '{infile}' does not exist, so nothing to backup\")",
+			"",
+			"$0",
+			""
+		],
+		"description": "Create backup copy of a file if it exists"
+	},
+	"Check status of input directory": {
+		"prefix": "jj-def-check-indir-status-method",
+		"body": [
+			"import logging",
+			"import os",
+			"import sys",
+			"",
+			"def check_indir_status(self, ${1:indir}):",
+			"    \"\"\"Check whether directory exists, is a regular directory and whether has content\"\"\"",
+			"    ",
+			"    error_ctr = 0",
+			"",
+			"    if not os.path.exists(${1:indir}):",
+			"        error_ctr += 1",
+			"        logging.error(f\"'{${1:indir}}' does not exist\")",
+			"    else:",
+			"        if not os.path.isdir(${1:indir}):",
+			"            error_ctr += 1",
+			"            logging.error(f\"'{${1:indir}}' is not a regular directory\")",
+			"        if len(os.listdir(${1:indir})) == 0:",
+			"            error_ctr += 1",
+			"            logging.error(f\"'{${1:indir}}' has no content\")",
+			"",
+			"    if error_ctr > 0:",
+			"        logging.error(f\"Detected problems with input directory '{${1:indir}}'\")",
+			"        sys.exit(1)",
+			"$0"
+		],
+		"description": "Check status of input directory"
+	},
+	"Check status of the input file": {
+		"prefix": "jj-def-check-infile-status-method",
+		"body": [
+			"import os",
+			"import logging",
+			"",
+			"def check_infile_status(infile: str) -> bool:",
+			"    \"\"\"Check if the file exists, if it is a regular file and whether it has content.",
+			"",
+			"    Args:",
+			"        infile (str): the file to be checked",
+			"",
+			"    Returns:",
+			"        is_valid (bool): True if all checks pass, False if not",
+			"",
+			"    Raises:",
+			"        None",
+			"    \"\"\"",
+			"    ",
+			"    error_ctr = 0",
+			"    ",
+			"    if infile is None or infile == '':",
+			"        logging.error(f\"'{infile}' is not defined\")",
+			"        error_ctr += 1",
+			"    else:",
+			"        if not os.path.exists(infile):",
+			"            error_ctr += 1",
+			"            logging.error(f\"'{infile}' does not exist\")",
+			"        else:",
+			"            if not os.path.isfile(infile):",
+			"                error_ctr += 1",
+			"                logging.error(f\"'{infile}' is not a regular file\") ",
+			"            if os.stat(infile).st_size == 0:",
+			"                logging.error(f\"'{infile}' has no content\")",
+			"                error_ctr += 1",
+			"",
+			"    if error_ctr > 0:",
+			"        logging.error(f\"Detected problems with input file '{infile}'\")",
+			"        return False",
+			"    return True",
+			"$0"
+		],
+		"description": "Check status of the input file"
+	},
+	"Function to copy a file": {
+		"prefix": "jj-def-copy-file",
+		"body": [
+			"def copy_file(self, infile: str = None, target: str = None):",
+			"    \"\"\"Copy file to target",
+			"    :param infile: {str} - file to be copied",
+			"    :param target: {str} - the target file or directory",
+			"    \"\"\"",
+			"    if not os.path.exists(infile):",
+			"        logging.error(f\"file '{infile}' does not exist\")",
+			"        raise Exception(f\"file '{infile}' does not exist\")",
+			"    if os.path.exists(target):",
+			"        if os.path.isfile(target):",
+			"            self.backup_file(target)",
+			"            shutil.copy(infile, target)",
+			"            logging.info(f\"Copied '{infile}' to '{target}'\")",
+			"        else:",
+			"            target_file = f\"{target}/{os.path.basename(infile)}\"",
+			"            if os.path.exists(target_file):",
+			"                self.backup_file(target_file)",
+			"            shutil.copy(infile, target_file)",
+			"            logging.info(f\"Copied '{infile}' to '{target_file}'\") ",
+			"",
+			"$0"
+		],
+		"description": "Function to copy a file"
+	},
+	"Function to create a symlink": {
+		"prefix": "jj-def-create-symlink",
+		"body": [
+			"import logging",
+			"import os",
+			"",
+			"def create_symlink(self, source: str = None, dest: str = None, force: bool = False):",
+			"    \"\"\"Create a symlink",
+			"    :param source: {str} the source",
+			"    :param dest: {str} the dest",
+			"    :param force: {bool} if True, will delete the destination if already exists",
+			"    \"\"\"",
+			"    if not os.path.exists(source):",
+			"        error_msg = f\"The source '{source}' does not exist\"",
+			"        logging.error(error_msg)",
+			"        raise Exception(error_msg)",
+			"",
+			"    if os.path.exists(dest):",
+			"        if force:",
+			"            logging.info(f\"Will delete the destination '{dest}'\")",
+			"            os.unlink(dest)",
+			"            os.symlink(source, dest)",
+			"            logging.info(f\"Created symlink for '{source}' at '{dest}'\")",
+			"        else:",
+			"            logging.warning(f\"The destination '{dest}' already exists\")",
+			"    else:",
+			"        os.symlink(source, dest)",
+			"        logging.info(f\"Created symlink for '{source}' at '{dest}'\")",
+			"",
+			"$0"
+		],
+		"description": "Function to create a symlink"
+	},
+	"Execute a command via system call using subprocess": {
+		"prefix": "jj-def-execute-command",
+		"body": [
+			"import logging",
+			"import os",
+			"import re",
+			"import subprocess",
+			"",
+			"def _execute_cmd(self, ${1:cmd}, ${2:args_string}, ${3:outdir}: str = DEFAULT_OUTDIR, ${4:stdout_file}: str =None, ${5:stderr_file}: str =None):",
+			"    \"\"\"Execute a command via system call using the subprocess module",
+			"    :param ${1:cmd}: {str} - the executable to be invoked",
+			"    :param ${2:args_string}: {str} - the arguments to be specified when the executable is invoked",
+			"    :param ${3:outdir}: {str} - the output directory where STDOUT, STDERR and the shell script should be written to",
+			"    :param ${4:stdout_file}: {str} - the file to which STDOUT will be captured in",
+			"    :param ${5:stderr_file}: {str} - the file to which STDERR will be captured in",
+			"    \"\"\"",
+			"    if ${1:cmd} is None:",
+			"        raise Exception(\"${1:cmd} was not specified\")",
+			"",
+			"    if not os.path.exists(${1:cmd}):",
+			"        raise Exception(f\"cmd '{${1:cmd}}' does not exist\")",
+			"",
+			"    logging.info(f\"Will attempt to execute '{${1:cmd}}' with arguments '{${2:args_string}}'\")",
+			"",
+			"    if ${3:outdir} is None:",
+			"        ${3:outdir} = '/tmp'",
+			"        logging.info(f\"outdir was not defined and therefore was set to default '{${3:outdir}}'\")",
+			"        ",
+			"    if ${4:stdout_file} is None:",
+			"        ${4:stdout_file} = os.path.join(${3:outdir}, os.path.basename(${1:cmd}) + '.stdout')",
+			"        logging.info(f\"${4:stdout_file} was not specified and therefore was set to '{${4:stdout_file}}'\")",
+			"",
+			"    if ${5:stderr_file} is None:",
+			"        ${5:stderr_file} = os.path.join(${3:outdir}, os.path.basename(${1:cmd}) + '.stderr')",
+			"        logging.info(f\"${5:stderr_file} was not specified and therefore was set to '{${5:stderr_file}}'\")",
+			"",
+			"    if os.path.exists(${4:stdout_file}):",
+			"        logging.info(f\"STDOUT file '{${4:stdout_file}}' already exists so will delete it now\")",
+			"        os.remove(${4:stdout_file})",
+			"",
+			"    if os.path.exists(${5:stderr_file}):",
+			"        logging.info(f\"STDERR file '{${5:stderr_file}}' already exists so will delete it now\")",
+			"        os.remove(${5:stderr_file})",
+			"",
+			"    self._write_shell_script(${1:cmd}, ${2:args_string}, ${3:outdir}, ${4:stdout_file}, ${5:stderr_file})",
+			"",
+			"    consolidated_cmd = ${1:cmd} + ' ' + ${2:args_string}",
+			"    p = subprocess.Popen(consolidated_cmd, shell=True)",
+			"",
+			"    (stdout, stderr) = p.communicate()",
+			"",
+			"    pid = p.pid",
+			"",
+			"    logging.info(f\"The child process ID is '{pid}'\")",
+			"",
+			"    p_status = p.wait()",
+			"",
+			"    p_returncode = p.returncode",
+			"",
+			"    if p_returncode is not None:",
+			"        logging.info(f\"The return code was '{p_returncode}'\")",
+			"    else:",
+			"        logging.info(\"There was no return code\")",
+			"",
+			"    if p_status == 0:",
+			"        logging.info(f\"Execution of cmd '{${1:cmd}}' has completed\")",
+			"    else:",
+			"        raise Exception(f\"Received status '{p_status}'\")",
+			"",
+			"    if stdout is not None:",
+			"        logging.info(\"stdout is: \" + stdout)",
+			"",
+			"    if stderr is not None:",
+			"        logging.info(\"stderr is: \" + stderr)",
+			"",
+			"    return stdout_file",
+			"",
+			"def _write_shell_script(self, ${1:cmd}, ${2:args_string}, ${3:outdir}, ${4:stdout_file}, ${5:stderr_file}):",
+			"    \"\"\"Write the command and argsuments to a shell script file so can be manually executed later",
+			"",
+			"    :param ${1:cmd}: {str} - the command-line executable",
+			"    :param ${2:args_string}: {str} - the command-line arguments",
+			"    :param ${3:outdir}: {str} - the output directory in which the shell script should be written in",
+			"    :param ${4:stdout_file}: {str} - the file to which the STDOUT will be directed into",
+			"    :param ${5:stderr_file}: {str} - the file to which the STDERR will be directed into",
+			"    \"\"\"",
+			"    outfile = os.path.join(outdir, os.path.basename(${1:cmd}) + '.sh')",
+			"    formatted_args = re.sub(\" --\", \" \\\\\\n--\", ${2:args_string})",
+			"    with open(outfile, 'w') as of:",
+			"        of.write(\"#!/bin/sh\\n\")",
+			"        of.write(\"# method-created: \" + os.path.abspath(__file__) + \"\\n\")",
+			"        of.write(\"# date-created: \" + str(currentDT.strftime(\"%Y-%m-%d-%H%M%S\")) + \"\\n\")",
+			"        of.write(${1:cmd} + ' \\\\' + \"\\n\")",
+			"        of.write(formatted_args + ' \\\\' + \"\\n\")",
+			"        of.write('1>' + ${4:stdout_file} + ' \\\\' + \"\\n\")",
+			"        of.write('2>' + ${5:stderr_file})",
+			"",
+			"    logging.info(f\"Wrote shell script '{outfile}'\")",
+			"",
+			"$0"
+		],
+		"description": "Execute a command via system call using subprocess"
+	},
+	"Define a function": {
+		"prefix": "jj-def-function",
+		"body": [
+			"def ${1:name}($0) -> ${2:return_type}:",
+			"    \"\"\"${3:description}",
+			"    \"\"\"",
+			""
+		],
+		"description": "Define a function"
+	},
+	"Function for deriving the md5sum for a file": {
+		"prefix": "jj-def-get-checksum",
+		"body": [
+			"import hashlib",
+			"import logging",
+			"",
+			"def get_checksum(self, infile: str = None) -> str:",
+			"    \"\"\"Derive the md5checksum for the content of the specified file.",
+			"    :param infile: {str} the file for which the md5checksum will be derived",
+			"    :returns checksum: {str} the md5checksum based on the contents of the file",
+			"    \"\"\"",
+			"    with open(infile, \"rb\") as f:",
+			"        file_hash = hashlib.md5()",
+			"        chunk = f.read(8192)",
+			"        while chunk:",
+			"            file_hash.update(chunk)",
+			"            chunk = f.read(8192)",
+			"",
+			"    checksum = file_hash.hexdigest()",
+			"    logging.info(f\"checksum for file '{infile}' is '{checksum}'\")",
+			"    return checksum",
+			"$0"
+		],
+		"description": "Function for deriving the md5sum for a file"
+	},
+	"Get val from config.ini file for a given param and section": {
+		"prefix": "jj-def-get-val-from-config-ini",
+		"body": [
+			"def get_val_from_config(self, section, param):",
+			"    \"\"\"Attempt to retrieve the value for a param in a give section of the configuration INI file",
+			"    :param section: {str} - the name of the section",
+			"    :param param: {str} - the name of the param",
+			"    \"\"\"",
+			"    if self._config is None:",
+			"        raise Exception(\"config is not defined\")        ",
+			"",
+			"    if section not in self._config:",
+			"        raise Exception(f\"section '{section}' does not exist in the config\")",
+			"    ",
+			"    if param not in self._config:",
+			"        raise Exception(\"param '{param}' does not exist in section '{section}'\")",
+			"",
+			"    return self._config[section][param]",
+			"",
+			"$0",
+			""
+		],
+		"description": "Get val from config.ini file for a given param and section"
+	},
+	"Define lambda handler function": {
+		"prefix": "jj-def-lambda-event-handler",
+		"body": [
+			"def lambda_handler(event, _) -> dict:",
+			"    \"\"\"Event handler",
+			"    :param event: {dict}    ",
+			"    :returns response: {dict}",
+			"    \"\"\"",
+			"    response = {}",
+			"    $0",
+			"",
+			"    return {'statusCode': 200,",
+			"            'body': response",
+			"            }",
+			"",
+			"",
+			"if __name__ == \"__main__\":",
+			"    lambda_handler('', '')",
+			"    "
+		],
+		"description": "Define lambda handler function"
+	},
+	"Define function for printing text to STDOUT in green": {
+		"prefix": "jj-def-print-green-text",
+		"body": [
+			"def print_green(msg: str = None) -> None:",
+			"    \"\"\"Print message to STDOUT in green text.",
+			"    :param msg: {str} - the message to be printed",
+			"    \"\"\"",
+			"    if msg is None:",
+			"        raise Exception(\"msg was not defined\")",
+			"    ",
+			"    print(Fore.GREEN + msg + Style.RESET_ALL)",
+			"",
+			"$0"
+		],
+		"description": "Define function for printing text to STDOUT in green"
+	},
+	"Define function for printing text to STDOUT in red": {
+		"prefix": "jj-def-print-red-text",
+		"body": [
+			"def print_red(msg: str = None) -> None:",
+			"    \"\"\"Print message to STDOUT in red text.",
+			"    :param msg: {str} - the message to be printed",
+			"    \"\"\"",
+			"    if msg is None:",
+			"        raise Exception(\"msg was not defined\")",
+			"    ",
+			"    print(Fore.RED + msg + Style.RESET_ALL)",
+			"",
+			"$0"
+		],
+		"description": "Define function for printing text to STDOUT in red"
+	},
+	"Define function for printing text to STDOUT in yellow": {
+		"prefix": "jj-def-print-yellow-text",
+		"body": [
+			"def print_yellow(msg: str = None) -> None:",
+			"    \"\"\"Print message to STDOUT in yellow text.",
+			"    :param msg: {str} - the message to be printed",
+			"    \"\"\"",
+			"    if msg is None:",
+			"        raise Exception(\"msg was not defined\")",
+			"    ",
+			"    print(Fore.YELLOW + msg + Style.RESET_ALL)",
+			"",
+			"$0"
+		],
+		"description": "Define function for printing text to STDOUT in yellow"
+	},
+	"Declare DEFAULT_OUTDIR constant": {
+		"prefix": "jj-default-outdir",
+		"body": [
+			"DEFAULT_OUTDIR = os.path.join(",
+			"    '/tmp',",
+			"    os.path.splitext(os.path.basename(__file__))[0],",
+			"    str(datetime.today().strftime('%Y-%m-%d-%H%M%S')),",
+			")"
+		],
+		"description": "Declare DEFAULT_OUTDIR constant"
+	},
+	"Add a Django ManyToManyField": {
+		"prefix": "jj-django-manytomanyfield",
+		"body": [
+			"${1:field} = models.ManyToManyField(",
+			"    '${2:model_name}',",
+			"    blank=True",
+			")",
+			"$0"
+		],
+		"description": "Add a Django ManyToManyField"
+	},
+	"Declare a Django admin class": {
+		"prefix": "jj-django-admin-class",
+		"body": [
+			"class ${1:myclass}Admin(admin.ModelAdmin):",
+			"    # The prepopulated field 'slug' depends on the fields list in the tuple",
+			"    prepopulated_fields = {'slug': ('title',)}",
+			"    # The following fields will be filterable in the admin portal",
+			"    list_filter = ('author', 'rating')",
+			"    # The following controls which fields are displayed in the primary table for this model in the admin section",
+			"    list_display('title', 'author')"
+		],
+		"description": "Declare a Django admin class"
+	},
+	"Register a class/model in the admin.py file": {
+		"prefix": "jj-django-admin-register-class-model",
+		"body": [
+			"from .models import ${1:field}",
+			"",
+			"admin.site.register(${1:field})",
+			"$0"
+		],
+		"description": "Register a class/model in the admin.py file"
+	},
+	"Declare a Django class that inherits from DetailView": {
+		"prefix": "jj-django-class-detailview",
+		"body": [
+			"from django.views.generic import DetailView",
+			"",
+			"class ${1:name}View(DetailView):",
+			"    template_name = '${2:dir}/${3:template_file}.html'",
+			"    model = ${4:model}",
+			"    ",
+			"    def get_context_data(self, **kwargs):",
+			"        context = super().get_context_data(**kwargs)",
+			"        #context['posts_tags'] = self.object.tags.all()",
+			"        context['${5:element}'] = self.object.${6:database_field}.all()",
+			"",
+			"        return context",
+			"",
+			"$0    ",
+			""
+		],
+		"description": "Declare a Django class that inherits from DetailView"
+	},
+	"Declare a class that inherits from ListView": {
+		"prefix": "jj-django-class-listview",
+		"body": [
+			"from django.views.generic import ListView",
+			"",
+			"class ${1:name}View(ListView):",
+			"    template_name = \"${2:dir}/${3:template_file}.html\"",
+			"    model = ${4:model}",
+			"    ordering = ['-date']",
+			"    context_object_name = \"${5:context_name}\"",
+			"",
+			"    def get_queryset(self):",
+			"        queryset = super().get_queryset()",
+			"        data = queryset[:3]",
+			"        return data",
+			"$0"
+		],
+		"description": "Declare a class that inherits from ListView"
+	},
+	"Declare a Django form class based on a model": {
+		"prefix": "jj-django-declare-form-based-on-model",
+		"body": [
+			"from django import forms",
+			"from .models import ${1:model}",
+			"",
+			"class ${1:model}Form(forms.ModelForm):",
+			"    class Meta:",
+			"        model = ${1:model}",
+			"        # comma-separated list of fields to exclude",
+			"        exclude = ['${2:field}']",
+			"        # labels is for specifying the labels to display in the UI corresponding with the table field names",
+			"        labels = {",
+			"            'user_name': 'Your Name',",
+			"            'user_email': 'Your Comment'",
+			"        }",
+			"$0"
+		],
+		"description": "Declare a Django form class based on a model"
+	},
+	"Define Django get_context_data function": {
+		"prefix": "jj-django-def-get-context-data",
+		"body": [
+			"def get_context_data(self, **kwargs):",
+			"    return super().get_context_data(**kwargs)",
+			"$0"
+		],
+		"description": "Define Django get_context_data function"
+	},
+	"Declare a Django EmailField for the model": {
+		"prefix": "jj-django-emailfield",
+		"body": [
+			"user_email = models.EmailField()",
+			"$0"
+		],
+		"description": "Declare a Django EmailField for the model"
+	},
+	"Declare a Django EmailField for the model": {
+		"prefix": "jj-django-model-EmailField",
+		"body": [
+			"${1:email_field} = models.EmailField(",
+			"    null=True,",
+			"    blank=True,",
+			"    max_length=${2:max_length}",
+			")",
+			"$0"
+		],
+		"description": "Declare a Django EmailField for the model"
+	},
+	"Define a Django form class": {
+		"prefix": "jj-django-form-class",
+		"body": [
+			"from django import forms",
+			"",
+			"class ${1:form_name}Form(forms.Form):",
+			"    ${2:field_name} = forms.CharField(",
+			"        label=\"${3:label}\",",
+			"        required=True,",
+			"        max_length=${4:max_length},",
+			"        error_messages={",
+			"            \"required\": \"${5:required_error_msg}\",",
+			"            \"max_length\": \"${6:max_length_error_msg}\"",
+			"        })",
+			"",
+			"$0",
+			""
+		],
+		"description": "Define a Django form class"
+	},
+	"Import the Django Http404 module": {
+		"prefix": "jj-django-import-http404",
+		"body": [
+			"from django.http import Http404",
+			"$0"
+		],
+		"description": "Import the Django Http404 module"
+	},
+	"Import the HttpResponseRedirect": {
+		"prefix": "jj-django-import-httpresponseredirect",
+		"body": [
+			"from django.http import HttpResponseRedirect",
+			"$0"
+		],
+		"description": "Import the HttpResponseRedirect"
+	},
+	"Import Django ListView": {
+		"prefix": "jj-django-import-listview",
+		"body": [
+			"from django.views.generic import ListView",
+			"$0"
+		],
+		"description": "Import Django ListView"
+	},
+	"Import reverse from django.urls": {
+		"prefix": "jj-django-import-reverse",
+		"body": [
+			"from django.urls import reverse",
+			"$0"
+		],
+		"description": "Import reverse from django.urls"
+	},
+	"Import the Django TemplateView": {
+		"prefix": "jj-django-import-template-view",
+		"body": [
+			"from django.views.generic.base import TemplateView",
+			"$0"
+		],
+		"description": "Import the Django TemplateView"
+	},
+	"Import Django core validators": {
+		"prefix": "jj-django-import-validators",
+		"body": [
+			"from django.core.validators import MinValueValidator, MaxValueValidator",
+			"$0"
+		],
+		"description": "Import Django core validators"
+	},
+	"Import View from django.views": {
+		"prefix": "jj-django-import-view",
+		"body": [
+			"from django.views import View",
+			"$0"
+		],
+		"description": "Import View from django.views"
+	},
+	"Declare a Django model BooleanField": {
+		"prefix": "jj-django-model-booleanfield",
+		"body": [
+			"${1:field} = models.BooleanField(default=False)",
+			"$0"
+		],
+		"description": "Declare a Django model BooleanField"
+	},
+	"Declare a Django model charfield": {
+		"prefix": "jj-django-model-charfield",
+		"body": [
+			"${1:field} = models.CharField(",
+			"    null=True,",
+			"    blank=True,",
+			"    max_length=${2:max_length}",
+			")",
+			"$0"
+		],
+		"description": "Declare a Django model carfield"
+	},
+	"Declare a Django model ImageField": {
+		"prefix": "jj-django-model-imagefield",
+		"body": [
+			"${1:field} = models.ImageField(",
+			"    null=True,",
+			"    blank=True,",
+			"    default=\"default.jpg\"",
+			"    upload_to='${2:location}'",
+			")",
+			"$0"
+		],
+		"description": "Declare a Django model ImageField"
+	},
+	"Declare a Django model UUIDField": {
+		"prefix": "jj-django-model-uuid-field",
+		"body": [
+			"import uuid",
+			"",
+			"${1:id} = models.UUIDField(",
+			"    default=uuid.uuid4,",
+			"    unique=True,",
+			"    primary_key=True,",
+			"    editable=False",
+			")",
+			"$0"
+		],
+		"description": "Declare a Django model UUIDField"
+	},
+	"Print out steps to execute following Django model updates": {
+		"prefix": "jj-django-model-updates",
+		"body": [
+			"python manage.py makemigrations",
+			"python manage.py migrate"
+		],
+		"description": "Declare a Django model UUIDField"
+	},
+	"Define a Django model class": {
+		"prefix": "jj-django-model-class",
+		"body": [
+			"from django.urls import reverse",
+			"from django.utils.text import slugify",
+			"",
+			"   ",
+			"class ${1:myclass}(models.Model):",
+			"    slug = models.SlugField(",
+			"        default='', ",
+			"        editable=False,",
+			"        null=False, ",
+			"        db_index=True)",
+			"    $0",
+			"    pass",
+			"",
+			"    def get_absolute_url(self):",
+			"        return reverse('${name}', args=[self.id])",
+			"",
+			"    def save(self, *args, **kwargs):",
+			"        self.slug = slugify(self.title)",
+			"        super().save(*args, **kwargs)",
+			"",
+			"    def __str__(self):",
+			"        return ''"
+		],
+		"description": "Define a Django model class"
+	},
+	"Declare Django model DateField": {
+		"prefix": "jj-django-model-datefield",
+		"body": [
+			"date = models.DateField(auto_now=True)",
+			"$0"
+		],
+		"description": "Declare Django model DateField"
+	},
+	"Create Django field as a foreign key field": {
+		"prefix": "jj-django-model-foreignkey-field",
+		"body": [
+			"${1:field} = models.ForeignKey(",
+			"    ${2:model},",
+			"    on_delete=models.CASCADE",
+			")",
+			"$0"
+		],
+		"description": "Create Django field as a foreign key field"
+	},
+	"Declare a Django model field of type Integer": {
+		"prefix": "jj-django-model-integerfield",
+		"body": [
+			"${1:field} = models.IntegerField(",
+			"    default=0,",
+			"    null=True,",
+			"    blank=True",
+			")",
+			"$0"
+		],
+		"description": "Declare a Django model field of type Integer"
+	},
+	"Declare a Django SlugField": {
+		"prefix": "jj-django-model-slugfield",
+		"body": [
+			"slug = models.SlugField(unique=True, db_index=True)",
+			"$0"
+		],
+		"description": "Declare a Django SlugField"
+	},
+	"Declare a Django model TextField": {
+		"prefix": "jj-django-model-textfield",
+		"body": [
+			"from django.core.validators import MinLengthValidator",
+			"",
+			"${1:name} = models.TextField(",
+			"    null=True,",
+			"    blank=True,",
+			"    validators=[MinLengthValidator(${2:min_length})]",
+			")",
+			"$0"
+		],
+		"description": "Declare a Django model TextField"
+	},
+	"Declare a Django model DateTimeField": {
+		"prefix": "jj-django-model-datetimefield",
+		"body": [
+			"${1:field_name} = models.DateTimeField(auto_now_add=True)",
+			"$0"
+		],
+		"description": "Declare a Django model DateTimeField"
+	},
+	"Register the Django model in the admin site": {
+		"prefix": "jj-django-register-model",
+		"body": [
+			"from .models import ${1:my_model}",
+			"",
+			"admin.site.register(${1:my_model})",
+			"$0"
+		],
+		"description": "Register the Django model in the admin site"
+	},
+	"Create Django urls.py file content": {
+		"prefix": "jj-django-urlspatterns",
+		"body": [
+			"from django.urls import path",
+			"from . import views",
+			"",
+			"urlpatterns = [",
+			"    path('', views.${1:method_name}, name='${2:name}')",
+			"]",
+			"$0"
+		],
+		"description": "Create Django urls.py file content"
+	},
+	"Declare Django views method": {
+		"prefix": "jj-django-views-method",
+		"body": [
+			"def ${1:method_name}(request):",
+			"    context = {}",
+			"    return render(request, '${2:template_name}.html', context)",
+			"$0"
+		],
+		"description": "Declare Django views method"
+	},
+	"Iterate over elements in hash": {
+		"prefix": "jj-for-loop-hash",
+		"body": [
+			"${1:ctr} = 0",
+			"for ${2:key} in ${3:hashref}:",
+			"    ${1:ctr} += 1",
+			"    ${4:val} = ${3:hashref}[${2:key}]",
+			"    if ${4:val}:",
+			"        continue",
+			"",
+			"logging.info(f\"Processed '{${1:ctr}}' items in ${3:hashref}\")",
+			"",
+			"$0"
+		],
+		"description": "Iterate over elements in hash"
+	},
+	"Iterate over elements in an array": {
+		"prefix": "jj-for-loop-list",
+		"body": [
+			"${1:ctr} = 0",
+			"for ${2:variable} in ${3:array_list}:",
+			"    ${1:ctr} += 1",
+			"    if ${4:condition}:",
+			"        continue",
+			"",
+			"logging.info(\"fProcessed '{${1:ctr}}' items\")",
+			"",
+			"$0"
+		],
+		"description": "Iterate over elements in an array"
+	},
+	"Get environment variable": {
+		"prefix": "jj-get-env-var",
+		"body": [
+			"import logging",
+			"import os",
+			"",
+			"${1:var} = os.getenv('${2:envvar}', ${3:default})",
+			"",
+			"if ${1:var} is None or ${1:var} == '':",
+			"    logging.error(f\"environment variable '${2:envvar}' is not defined\")",
+			"    raise Exception(f\"environment variable '${2:envvar}' is not defined\")",
+			"",
+			"$0"
+		],
+		"description": "Get environment variable"
+	},
+	"Get a file list from a file": {
+		"prefix": "jj-get-file-list-from-file",
+		"body": [
+			"import logging",
+			"",
+			"def get_file_list(infile: str - None, verbose) -> list:",
+			"    if infile is None:",
+			"        logging.error(\"infile was not defined\")",
+			"        return []",
+			"",
+			"    logging.info(f\"Will read file '{infile}'\")",
+			"    line_ctr = 0",
+			"    file_list = []",
+			"    with open(infile, 'r') as f:",
+			"        for line in f:",
+			"            line_ctr += 1",
+			"            line = line.strip()",
+			"            file_list.append(line)",
+			"",
+			"    if line_ctr > 0:",
+			"        logging.info(f\"Read '{line_ctr}' lines from file '{infile}'\")",
+			"    else:",
+			"        logging.info(\"Did not read any lines from file '{infile}'\")",
+			"    return file_list",
+			"",
+		],
+		"description": "Get a file list from a file"
+	},
+	"Get the list of files in a directory": {
+		"prefix": "jj-get-file-list-from-indir",
+		"body": [
+			"import logging",
+			"import os",
+			"",
+			"def get_file_list(indir: str = None, extension: str = None) -> list:",
+			"    \"\"\"Get the list of files in the specified directory",
+			"    :param indir: {str} - the directory to search for files",
+			"    :param extension: {str} - the file extension to filter on",
+			"    :returns file_list: {list} - the list of files found in the directory",
+			"    \"\"\"",
+			"    if extension is None:",
+			"        logging.info(f\"Going to search for files in directory '{indir}'\")",
+			"    else:",
+			"        logging.info(f\"Going to search for files with extension '{extension}' in directory '{indir}'\")",
+			"",
+			"    file_list = []",
+			"    for dirpath, dirnames, filenames in os.walk(indir):",
+			"        if 'venv' in dirpath:",
+			"            logging.info(f\"Going to ignore files in directory '{dirpath}'\")",
+			"            continue",
+			"        for name in filenames:",
+			"            path = os.path.normpath(os.path.join(dirpath, name))",
+			"            if os.path.isfile(path):",
+			"                if extension is not None:",
+			"                    if os.path.endswith('.{extension}'):",
+			"                        file_list.append(path)",
+			"                else:",
+			"                    file_list.append(path)",
+			"",
+			"    return file_list",
+			"",
+			"$0"
+		],
+		"description": "Get the list of files in a directory"
+	},
+	"Get the logger": {
+		"prefix": "jj-get-logger",
+		"body": [
+			"logger = logging.getLogger()",
+			"logger.setLevel(logging.INFO)",
+			"",
+			"$0"
+		],
+		"description": "Get the logger"
+	},
+	"If directory does not exist created it": {
+		"prefix": "jj-if-dir-not-exists",
+		"body": [
+			"import logging",
+			"import os",
+			"",
+			"if not os.path.exists(${1:outdir}):",
+			"    pathlib.Path(${1:outdir}).mkdir(parents=True, exist_ok=True)",
+			"    print_yellow(f\"Created directory '{${1:outdir}}'\")",
+			"",
+			"$0"
+		],
+		"description": "If directory does not exist created it"
+	},
+	"Check if file does not exist": {
+		"prefix": "jj-if-file-not-exists",
+		"body": [
+			"import logging",
+			"import os",
+			"import sys",
+			"",
+			"if not os.path.exists(${1:infile}):",
+			"    error_msg = f\"file '{${1:infile}}' does not exist\"",
+			"    logging.error(error_msg)",
+			"    raise Exception(error_msg)",
+			"    #sys.exit(1)",
+			"$0"
+		],
+		"description": "Check if file does not exist"
+	},
+	"Unpack kwargs lookup": {
+		"prefix": "jj-if-kwargs",
+		"body": [
+			"if '${1:key}' in kwargs.keys():",
+			"    self.${1:key} = kwargs['${1:key}']",
+			"    ",
+			"$0"
+		],
+		"description": "Unpack kwargs lookup"
+	},
+	"Raise exception if variable is None": {
+		"prefix": "jj-if-not-defined-raise-exception",
+		"body": [
+			"import logging",
+			"import sys",
+			"",
+			"if ${1:var} is None:",
+			"    error_msg = f'${1:var} is not defined'",
+			"    logging.fatal(error_msg)",
+			"    raise Exception(error_msg)",
+			"    #sys.exit(1)",
+			"$0"
+		],
+		"description": "Raise exception if variable is None"
+	},
+	"Create a directory if does not exist": {
+		"prefix": "jj-if-not-exists-dir-create",
+		"body": [
+			"import logging",
+			"import os",
+			"",
+			"from pathlib import Path",
+			"",
+			"if not os.path.exists(${1:DIR}):",
+			"    Path(${1:DIR}).mkdir(parents=True, exist_ok=True)",
+			"    logging.info(f\"Created directory '{${1:DIR}}'\")",
+			"",
+			"$0"
+		],
+		"description": "Create a directory if does not exist"
+	},
+	"Check if key exists in hash": {
+		"prefix": "jj-if-key-in-hash",
+		"body": [
+			"import logging",
+			"import os",
+			"import sys",
+			"",
+			"if ${1:key} not in ${2:hash}:",
+			"    logging.${3:log_level}(\"${1:key} does not exist in ${2:hash}\")",
+			"    sys.exit(1)",
+			"    continue",
+			" ",
+			" $0"
+		],
+		"description": "Check if key exists in hash"
+	},
+	"Regular expression match": {
+		"prefix": "jj-if-regex-match",
+		"body": [
+			"import logging",
+			"import re",
+			"",
+			"if re.match(r'^${1:expression}$', str(${2:var})):",
+			"    logging.info(f\"Found match in '{${2:var}}'\"))",
+			"else:",
+			"    logging.info(f\"Did not find match for '{${2:var}}'\")",
+			"    ",
+			"$0"
+		],
+		"description": "Regular expression match"
+	},
+	"Initialize configparser": {
+		"prefix": "jj-initialize-configparser",
+		"body": [
+			"import configparser",
+			"import logging",
+			"import os",
+			"import sys",
+			"",
+			"if not os.path.exists(config_file):",
+			"    logging.fatal(f\"config_file '{config_file}' does not exist\")",
+			"    sys.exit(1)",
+			"",
+			"# initialize configparser",
+			"config = configparser.ConfigParser()",
+			"config.read(config_file)",
+			"",
+			"$0"
+		],
+		"description": "Initialize configparser"
+	},
+	"Log to log file at INFO level": {
+		"prefix": "jj-log-info",
+		"body": [
+			"logging.info(f\"{${1:msg}}\")$0"
+		],
+		"description": "Log to log file at INFO level"
+	},
+	"Log to log file at WARN level": {
+		"prefix": "jj-log-warning",
+		"body": [
+			"logging.warning(f\"{${1:msg}}\")$0"
+		],
+		"description": "Log to log file at WARN level"
+	},
+	"Log to log file at ERROR level": {
+		"prefix": "jj-log-error",
+		"body": [
+			"logging.error(f\"{${1:msg}}\")$0"
+		],
+		"description": "Log to log file at ERROR level"
+	},
+	"Set up the logging in an executable": {
+		"prefix": "jj-logging-setup-executable",
+		"body": [
+			"import logging",
+			"",
+			"DEFAULT_LOGGING_FORMAT = \"%(levelname)s : %(asctime)s : %(pathname)s : %(lineno)d : %(message)s\"",
+			"",
+			"DEFAULT_LOG_LEVEL = logging.INFO",
+			"",
+			"logging.basicConfig(",
+			"    filename=logfile, ",
+			"    format=DEFAULT_LOGGING_FORMAT, ",
+			"    level=DEFAULT_LOG_LEVEL",
+			")",
+			"",
+			"$0"
+		],
+		"description": "Set up the logging in an executable"
+	},
+	"definition of main CLI program": {
+		"prefix": "jj-main-cli",
+		"body": [
+			"import os",
+			"import sys",
+			"import click",
+			"import pathlib",
+			"import json",
+			"import logging",
+			"import calendar",
+			"import time",
+			"import pathlib",
+			"from colorama import Fore, Style",
+			"from datetime import datetime",
+			"",
+			"DEFAULT_OUTDIR = os.path.join(",
+			"    '/tmp/', ",
+			"    os.path.basename(__file__), ",
+			"    str(datetime.today().strftime('%Y-%m-%d-%H%M%S'))",
+			")",
+			"",
+			"DEFAULT_CONFIG_FILE = os.path.dirname(os.path.abspath(__file__)) + '/conf/config.json'",
+			"",
+			"CONFIG = {}",
+			"",
+			"LOGGING_FORMAT = \"%(levelname)s : %(asctime)s : %(pathname)s : %(lineno)d : %(message)s\"",
+			"",
+			"LOG_LEVEL = logging.INFO",
+			"",
+			"DEFAULT_VERBOSE = True",
+			"",
+			"",
+			"def print_red(msg: str = None) -> None:",
+			"    \"\"\"Print message to STDOUT in yellow text.",
+			"    :param msg: {str} - the message to be printed",
+			"    \"\"\"",
+			"    if msg is None:",
+			"        raise Exception(\"msg was not defined\")",
+			"",
+			"    print(Fore.RED + msg + Style.RESET_ALL)",
+			"",
+			"",
+			"def print_green(msg: str = None) -> None:",
+			"    \"\"\"Print message to STDOUT in yellow text.",
+			"    :param msg: {str} - the message to be printed",
+			"    \"\"\"",
+			"    if msg is None:",
+			"        raise Exception(\"msg was not defined\")",
+			"",
+			"    print(Fore.GREEN + msg + Style.RESET_ALL)",
+			"",
+			"",
+			"def print_yellow(msg: str = None) -> None:",
+			"    \"\"\"Print message to STDOUT in yellow text.",
+			"    :param msg: {str} - the message to be printed",
+			"    \"\"\"",
+			"    if msg is None:",
+			"        raise Exception(\"msg was not defined\")",
+			"",
+			"    print(Fore.YELLOW + msg + Style.RESET_ALL)",
+			"",
+			"",
+			"@click.command()",
+			"@click.option('--verbose', is_flag=True, help=f\"Will print more info to STDOUT - default is '{DEFAULT_VERBOSE}'\")",
+			"@click.option('--outdir', help=\"The default is the current working directory - default is '{DEFAULT_OUTDIR}'\")",
+			"@click.option('--config_file', type=click.Path(exists=True), help=f\"The configuration file for this project - default is '{DEFAULT_CONFIG_FILE}'\")",
+			"@click.option('--logfile', help=\"The log file\")",
+			"@click.option('--outfile', help=\"The output final report file\")",
+			"@click.option('--infile', help=\"The primary input file\")",
+			"def main(verbose: bool, outdir: str, config_file: str, logfile: str, outfile: str, infile: str):",
+			"    \"\"\"Template command-line executable",
+			"    \"\"\"",
+			"",
+			"    error_ctr = 0",
+			"",
+			"    if infile is None:",
+			"        print_red(\"--infile was not specified\")",
+			"        error_ctr += 1",
+			"",
+			"    if error_ctr > 0:",
+			"        sys.exit(1)",
+			"",
+			"    assert isinstance(infile, str)",
+			"",
+			"    if config_file is None:",
+			"        config_file = DEFAULT_CONFIG_FILE",
+			"        print_yellow(f\"--config_file was not specified and therefore was set to '{config_file}'\")",
+			"",
+			"    assert isinstance(config_file, str)",
+			"",
+			"    if outdir is None:",
+			"        outdir = DEFAULT_OUTDIR",
+			"        print_yellow(f\"--outdir was not specified and therefore was set to '{outdir}'\")",
+			"",
+			"    assert isinstance(outdir, str)",
+			"",
+			"    if not os.path.exists(outdir):",
+			"        pathlib.Path(outdir).mkdir(parents=True, exist_ok=True)",
+			"",
+			"        print_yellow(f\"Created output directory '{outdir}'\")",
+			"",
+			"    if logfile is None:",
+			"        logfile = os.path.join(",
+			"            outdir,",
+			"            os.path.basename(__file__) + '.log'",
+			"        )",
+			"        print_yellow(f\"--logfile was not specified and therefore was set to '{logfile}'\")",
+			"",
+			"    assert isinstance(logfile, str)",
+			"",
+			"    logging.basicConfig(filename=logfile, format=LOGGING_FORMAT, level=LOG_LEVEL)",
+			"",
+			"    if not os.path.isfile(infile):",
+			"        print(f\"'{infile}' is not a file\")",
+			"        logging.error(f\"'{infile}' is not a file\")",
+			"        sys.exit(1)",
+			"",
+			"    if verbose:",
+			"        print(f\"The input file is '{infile}'\")",
+			"",
+			"    logging.info(f\"The input file is '{infile}'\")",
+			"",
+			"    # Read the configuration from the JSON file and",
+			"    # load into dictionary.",
+			"    logging.info(f\"Loading configuration from '{config_file}'\")",
+			"",
+			"    CONFIG = json.loads(open(config_file).read())",
+			"",
+			"    logging.info(\"Time to do something interesting\")",
+			"",
+			"",
+			"if __name__ == \"__main__\":",
+			"    main()",
+			"",
+			"$0"
+		],
+		"description": "definition of main CLI program"
+	},
+	"Declare a Meta class within a Django model class": {
+		"prefix": "jj-django-meta-class",
+		"body": [
+			"class Meta:",
+			"    verbose_name_plural = \"${1:name}\"",
+			"$0"
+		],
+		"description": "Declare a Meta class within a Django model class"
+	},
+	"Open and read comma-separated file": {
+		"prefix": "jj-open-read-csv-file",
+		"body": [
+			"import csv",
+			"import logging",
+			"import os",
+			"",
+			"if not os.path.exists(${1:infile}):",
+			"    raise Exception(f\"file '{${1:infile}}' does not exist\")",
+			"",
+			"header_to_position_lookup = {}",
+			"record_list = []",
+			"record_ctr = 0",
+			"    ",
+			"with open(${1:infile}) as f:",
+			"    reader = csv.reader(f)",
+			"    row_ctr = 0",
+			"    for row in reader:",
+			"        row_ctr += 1",
+			"        if row_ctr == 1:",
+			"            field_ctr = 0",
+			"            for field in row:",
+			"                header_to_position_lookup[field] = field_ctr",
+			"                field_ctr += 1",
+			"            logging.info(\"Processed the header of csv file '{${1:infile}}'\")",
+			"        else:",
+			"            record_lookup = {}",
+			"            field_ctr = 0",
+			"            for field in row:",
+			"                record_lookup[field] = header_to_position_lookup[field]",
+			"                field_ctr += 1",
+			"            record_list.append(record_lookup)",
+			"            record_ctr += 1",
+			"    logging.info(\"Processed '{record_ctr}' records in csv file '{${1:infile}}'\")",
+			"",
+			"$0"
+		],
+		"description": "Open and read comma-separated file"
+	},
+	"Open and read a json file": {
+		"prefix": "jj-open-read-json-file",
+		"body": [
+			"import json",
+			"import logging",
+			"import os",
+			"",
+			"if not os.path.exists(${1:infile}):",
+			"    raise Exception(f\"json file '{${1:infile}}' does not exist\")",
+			"",
+			"with open(${1:infile}, 'r') as json_file:",
+			"    text = json_file.read()",
+			"    json_data = json.loads(text)",
+			"",
+			"    for ${2:key}, ${3:val} in json_data.items():",
+			"        logging.info(f\"${2:key} '{${2:key}}' ${3:val} '{${3:val}}'\")",
+			"",
+			"$0"
+		],
+		"description": "Open and read a json file"
+	},
+	"Open and read a plain text file line-by-line": {
+		"prefix": "jj-open-read-plain-text-file-line-by-line",
+		"body": [
+			"import logging",
+			"",
+			"logging.info(f\"Will read file '{${1:infile}}'\")",
+			"line_ctr = 0",
+			"with open(${1:infile}, 'r') as f:",
+			"    for line in f:",
+			"        line_ctr += 1",
+			"        line = line.strip()",
+			"        print(line)",
+			"",
+			"if line_ctr > 0:",
+			"    logging.info(f\"Read '{line_ctr}' lines from file '{${1:infile}}'\")",
+			"else:",
+			"    logging.info(\"Did not read any lines from file '{${1:infile}}'\")",
+			"",
+			"$0"
+		],
+		"description": "Open and read a plain text file line-by-line"
+	},
+	"Open and read tab-delimited text file": {
+		"prefix": "jj-open-read-tab-delimited-file",
+		"body": [
+			"import csv",
+			"import logging",
+			"import os",
+			"",
+			"if not os.path.exists(${1:infile}):",
+			"    raise Exception(f\"file '{${1:infile}}' does not exist\")",
+			"",
+			"header_to_position_lookup = {}",
+			"record_list = []",
+			"record_ctr = 0",
+			"    ",
+			"with open(${1:infile}) as f:",
+			"    reader = csv.reader(f, delimiter='\\t')",
+			"    row_ctr = 0",
+			"    for row in reader:",
+			"        row_ctr += 1",
+			"        if row_ctr == 1:",
+			"            field_ctr = 0",
+			"            for field in row:",
+			"                header_to_position_lookup[field] = field_ctr",
+			"                field_ctr += 1",
+			"            logging.info(f\"Processed the header of csv file '{${1:infile}}'\")",
+			"        else:",
+			"            record_lookup = {}",
+			"            field_ctr = 0",
+			"            for field in row:",
+			"                record_lookup[field] = header_to_position_lookup[field]",
+			"                field_ctr += 1",
+			"            record_list.append(record_lookup)",
+			"            record_ctr += 1",
+			"    logging.info(f\"Processed '{record_ctr}' records in csv file '{${1:infile}}'\")",
+			"",
+			"$0"
+		],
+		"description": "Open and read tab-delimited text file"
+	},
+	"Open file in write mode": {
+		"prefix": "jj-open-write-file",
+		"body": [
+			"import logging",
+			"",
+			"with open(${1:outfile}, 'w') as of:",
+			"    of.write(f\"{${2:line}}\\n\")",
+			"    $0",
+			"",
+			"logging.info(f\"Wrote file '{${1:outfile}}'\")",
+			"if verbose: ",
+			"    print(f\"Wrote file '{${1:outfile}}'\")",
+			""
+		],
+		"description": "Open file in write mode"
+	},
+	"Description of param in docstring of method": {
+		"prefix": "jj-param-docstring-method",
+		"body": [
+			":param ${1:variable}: ${2:datatype} - ${3:description}",
+			"$0"
+		],
+		"description": "Description of param in docstring of method"
+	},
+	"Prepare to execute a command": {
+		"prefix": "jj-prepare-execute-command",
+		"body": [
+			"import os",
+			"",
+			"${1:outdir} = self.get_outdir()",
+			"basename = os.path.basename(${2:cmd})",
+			"stdout_file = os.path.join(${1:outdir}, basename, '.stdout') ",
+			"stderr_file = os.path.join(${1:outdir}, basename, '.stderr') ",
+			"logfile = os.path.join(${1:outdir}, basename, '.log')",
+			"",
+			"${3:args} += \" --logfile \" + logfile",
+			"",
+			"self.execute_command(${2:cmd}, ${3:args}, stdout_file, stderr_file)",
+			"",
+			"$0"
+		],
+		"description": "Prepare to execute a command"
+	},
+	"Print banner using pyfiglet": {
+		"prefix": "jj-print-banner",
+		"body": [
+			"import pyfiglet",
+			"print(pyfiglet.figlet_format(\"${1:msg}\", font=\"${2:font}\"))",
+			"$0"
+		],
+		"description": "Print banner using pyfiglet"
+	},
+	"Print statement in bold red": {
+		"prefix": "jj-print-bold-red",
+		"body": [
+			"from colorama import Fore, Style",
+			"",
+			"print(Fore.RED + \"${1:message}\", end='')",
+			"print(Style.RESET_ALL + '', end='')",
+			"",
+			"$0"
+		],
+		"description": "Print statement in bold red"
+	},
+	"Print statement in bold green": {
+		"prefix": "jj-print-bold-green",
+		"body": [
+			"from colorama import Fore, Style",
+			"",
+			"print(Fore.GREEN + \"${1:message}\", end='')",
+			"print(Style.RESET_ALL + '', end='')",
+			"",
+			"$0"
+		],
+		"description": "Print statement in bold green"
+	},
+	"Print statement in bold yellow": {
+		"prefix": "jj-print-bold-yellow",
+		"body": [
+			"from colorama import Fore, Style",
+			"",
+			"print(Fore.YELLOW + \"${1:message}\", end='')",
+			"print(Style.RESET_ALL + '', end='')",
+			"",
+			"$0"
+		],
+		"description": "Print statement in bold yellow"
+	},
+	"Print execution completed": {
+		"prefix": "jj-print-execution-completed",
+		"body": [
+			"print_green(f\"{os.path.abspath(__file__)} execution completed\")",
+			"print(f\"The log file is '{logfile}'\")",
+			"print(f\"The output file is '{outfile}'\")",
+			"sys.exit(0)",
+			"",
+			"$0"
+		],
+		"description": "Print execution completed"
+	},
+	"Regular expression for matching some pattern": {
+		"prefix": "jj-regex-match",
+		"body": [
+			"match_obj = re.match(\"(${1:exp})\", ${2:text})",
+			"if match_obj:",
+			"    print(f\"Found '{match_obj[1]}' in '{${2:text}}'\")",
+			"$0"
+		],
+		"description": "Regular expression for matching some pattern"
+	},
+	"Perform regex substitution": {
+		"prefix": "jj-regex-substitution",
+		"body": [
+			"import logging",
+			"import re",
+			"",
+			"# Will replace ${1:regex} with ${2:replacement_text}",
+			"${4:changed} = re.sub(\"${1:regex}\", \"${2:replacement_text}\", ${3:source})",
+			"logging.info(f\"Derived '{${4:changed}}' from '{${3:source}}' by replacing '${1:regex}' with '${2:replacement_text}'\")",
+			"",
+			"$0"
+		],
+		"description": "Perform regex substitution"
+	},
+	"Singleton decorator support": {
+		"prefix": "jj-singleton-decorator",
+		"body": [
+			"from singleton_decorator import singleton",
+			"@singleton$0",
+			""
+		],
+		"description": "Singleton decorator support"
+	},
+	"sys.exit(1)": {
+		"prefix": "jj-sys-exit",
+		"body": [
+			"import sys",
+			"",
+			"sys.exit(${1:1})",
+			"$0"
+		],
+		"description": "sys.exit(1)"
+	},
+	"jj-try-catch-block": {
+		"prefix": "try-catch-block",
+		"body": [
+			"import logging",
+			"",
+			"try:",
+			"    ${1:do_something}",
+			"except ${2:Error} as e:",
+			"    logging.fatal(f\"${3:except_message} : '{e}'\")",
+			"else:",
+			"    logging.info(\"${4:else_message}\")",
+			"    ${5:do_something_else}",
+			"finally:",
+			"    logging.info(\"${6:finally_message}\")",
+			"    ${7:do_something_finally}",
+			"",
+			"$0"
+		],
+		"description": "jj-try-catch-block"
+	},
+	"jj-check-indir-exists": {
 		"prefix": "jjj-check-indir-exists",
 		"body": [
 			"if not os.path.exists(${1:indir}):",
@@ -1653,12 +1662,12 @@
 		],
 		"description": "check if directory exists"
 	},
-    "jj-parse-xml-file" : {
+	"jj-parse-xml-file": {
 		"prefix": "jj-parse-xml-file",
 		"body": [
 			"import ET",
-            "",
-            "def get_${1:element_type}_list(infile: str = None) -> list:",
+			"",
+			"def get_${1:element_type}_list(infile: str = None) -> list:",
 			"    '''",
 			"    '''",
 			"",
@@ -1668,13 +1677,13 @@
 			"    ${1:element_type}_list = []",
 			"    for ${1:element_type} in root.iter('${1:element_type}'):",
 			"        ${1:element_type}_list.append(${1:element_type})",
-			"",		
-			"    return ${1:element_type}_list",		
+			"",
+			"    return ${1:element_type}_list",
 			"$0"
 		],
 		"description": "for each file in directory"
 	},
-    "jj-regex-content-has-text" : {
+	"jj-regex-content-has-text": {
 		"prefix": "jj-regex-has-text",
 		"body": [
 			"# import re",
@@ -1691,7 +1700,7 @@
 		],
 		"description": "check whether the text is present in the content using regex"
 	},
-    "jj-regex-find-matches" : {
+	"jj-regex-find-matches": {
 		"prefix": "jj-regex-find-matches",
 		"body": [
 			"# import re",
@@ -1709,7 +1718,7 @@
 		],
 		"description": "find matches in content using regex"
 	},
-    "jj-write-provenance-to-outfile" : {
+	"jj-write-provenance-to-outfile": {
 		"prefix": "jj-write-provenance-to-outfile",
 		"body": [
 			"fh.write(f\"## method-created: {os.path.abspath(__file__)}\\n\")",
@@ -1721,7 +1730,7 @@
 		],
 		"description": "write provenance info to the output file"
 	},
-    "jj-def-str-function" : {
+	"jj-def-str-function": {
 		"prefix": "jj-def-str-function",
 		"body": [
 			"def __str__(self):",
@@ -1730,605 +1739,603 @@
 		],
 		"description": "Declare __str__ function"
 	},
-    "Display all Django model objects methods": {
-        "prefix": "jj-django-display-model-objects-methods",
-        "body": [
-            "${1:item}s = ${2:ModelName}.objects.all()",
-            "${1:item} = ${2:ModelName}.objects.get(${3:attribute}='value')",
-            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__startswith}='value')",
-            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__contains}='value')",
-            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__icontains}='value') # ignore case",
-            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__gt}='value')",
-            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__gte}='value')",
-            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__lt}='value')",
-            "${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__lte}='value')",
-            "${1:item}s = ${2:ModelName}.objects.exclude(${3:attribute}='value')",
-            "$0"
-        ],
-        "description": "Display all Django model objects methods"
-    },
-    "Create HTML template for Django project": {
-        "prefix": "jj-django-create-html-template",
-        "body": [
-            "{% extends '${1:main.html}' %}",
-            "{% block content %}",
-            "",
-            "$0",
-            "",
-            "{% endblock %}"
-        ],
-        "description": "Create HTML template for Django project"
-    },
-    "Create Django form model class that inherits from ModelForm": {
-        "prefix": "jj-django-create-form-model-class",
-        "body": [
-            "# Add this to ${2:app_name}/forms.py",
-            "",
-            "from django.forms import ModelForm",            
-            "from django import forms",
-            "from .models import ${1:ModelName}",
-            "",
-            "class ${1:ModelName}Form(ModelForm):",
-            "    class Meta:",
-            "        model = ${1:ModelName}",
-            "        fields = '__all__'",
-            "        #fields = [] # i.e.: list all fields to be included",
-            "        widgets = {",
-            "            'tags': forms.CheckboxSelectMultiple(),",
-            "        }",
-            "    def __init__(self, *args, **kwargs):",
-            "        super(${1:ModelName}Form, self).__init__(*args, **kwargs)",
-            "        self.fields['title'].widget.attrs.update(",
-            "            {",
-            "                'class': 'input',",
-            "                'placeholder': 'Add Title'",
-            "            }",
-            "        )",
-            "        for name, field in self.fields.items():",
-            "            field.widget.attrs.update({'class': 'input'})",
-            "",
-            "",
-            "# Add this to ${2:app_name}/views.py",
-            "",
-            "from .forms import ${1:ModelName}Form",
-            "",
-            "def displayCreate${1:ModelName}Form(request):",
-            "    form = ProjectForm()",
-            "",
-            "    if request.method == 'POST':",
-            "        form = ProjectForm(request.POST, request.FILES)",
-            "        #print(request.POST)",
-            "        if form.is_valid():",
-            "            form.save()",
-            "            return redirect('${3:some_url}')",
-            "        else:",
-            "            print(form.errors)",
-            "            return HttpResponse(form.errors.values())",
-            "",
-            "    context = {'form': form}",
-            "    return render(request, '${2:app_name}/create_${2:app_name}_form.html', context)",
-            "",
-            "",
-            "def displayUpdate${1:ModelName}Form(request, pk):",
-            "    ${4:object} = ${1:ModelName}.objects.get(id=pk)",
-            "    form = ProjectForm(instance=${4:object})",
-            "",
-            "    if request.method == 'POST':",
-            "        form = ProjectForm(request.POST, request.FILES, instance=${4:object})",
-            "        #print(request.POST)",
-            "        if form.is_valid():",
-            "            form.save()",
-            "            return redirect('${3:some_url}')",
-            "        else:",
-            "            print(form.errors)",
-            "            return HttpResponse(form.errors.values())",
-            "",
-            "    context = {'form': form}",
-            "    return render(request, '${2:app_name}/create_${2:app_name}_form.html', context)",
-            "",
-            "",
-            "def displayDelete${1:ModelName}Form(request, pk):",
-            "    ${4:object} = ${1:ModelName}.objects.get(id=pk)",
-            "    if request.method == 'POST':",
-            "        ${4:object}.delete()",
-            "        return redirect('projects')",
-            "    context = {'object': ${4:object}}",
-            "    return render(request, '${4:app_name}/delete_template.html', context)",
-            "",
-            "",
-            "# Add this to ${2:app_name}/create_${2:app_name}_form.html",
-            "",
-            "path('create-${2:app_name}/', views.displayCreate${1:ModelName}Form, name='create-${2:app_name}'),",
-            "path('update-${2:app_name}/<str:pk>', views.displayUpdate${1:ModelName}Form, name='update-${2:app_name}'),",
-            "path('delete-${2:app_name}/<str:pk>', views.displayDelete${1:ModelName}Form, name='delete-${2:app_name}'),",
-            "",
-            "# Add this to ${2:app_name}/templates/${2:app_name}/create_${2:app_name}_form.html",
-            "{% extends 'main.html' %}",
-            "{% block content %}",
-            "",
-            "",
-            "<h1>${1:ModelName} Form</h1>",
-            "",
-            "<form action='' method='POST'>",
-            "    {% csrf_token %}",
-            "",
-            "    {% for field in form %}",
-            "    {{ field.label }}: {{ field }}",
-            "    <br>",
-            "    {% endfor %}",
-            "",
-            "    <input type='submit'>",
-            "</form>",
-            "{% endblock %}",
-            "",
-            "",
-            "# Add this to whatever .html template in ${2:app_name} you need to update an instance of ${1:ModelName}",
-            "<a href=\"{% url 'update-${4:object}' ${4:object}.id %}\">Edit</a>",
-            "# Add this to whatever .html template in ${2:app_name} you need to delete an instance of ${1:ModelName}",
-            "<a href=\"{% url 'delete-${4:object}' ${4:object}.id %}\">Delete</a>",
-            "",
-            "",
-            "# Add this to ${2:app_name}/template/${2:app_name}/delete_template.html",
-            "",
-            "{% extends 'main.html' %}",
-            "{% block content %}",
-            "",
-            "<form action='' method='POST'>",
-            "    {% csrf_token %}",
-            "    <p>Are you sure you want to delete \"{{ object.title }}\"?</p>",
-            "",    
-            "    <a href=\"{% url 'project' %}\">Go Back</a>",
-            "    <input type='submit' value='Confirm'/>",
-            "</form>",
-            "{% endblock content %}",
-            "$0"
-        ],
-        "description": "Create Django form model class that inherits from ModelForm"
-    },
-    "Import User from django.contrib.auth.models": {
-        "prefix": "jj-django-contrib-auth-models-import-user",
-        "body": [
-            "from django.contrib.auth.models import User",
-            "$0"
-        ],
-        "description": "Import User from django.contrib.auth.models"
-    },
-    "Django on delete models cascade": {
-        "prefix": "jj-django-on-delete-models-cascade",
-        "body": [
-            "on_delete=models.CASCADE$0"
-        ],
-        "description": "Django on delete models cascade"
-    },
-    "Django null=True blank=True": {
-        "prefix": "jj-django-null-true-blank-true",
-        "body": [
-            "null=True, blank=True",
-            "$0"
-        ],
-        "description": "Django null=True blank=True"
-    },
-    "Django import UserCreationForm": {
-        "prefix": "jj-django-import-UserCreationForm",
-        "body": [
-            "from django.contrib.auth.forms import UserCreationForm",
-            "$0"
-        ],
-        "description": "Django import UserCreationForm"
-    },
-    "Django if request.method == POST": {
-        "prefix": "jj-django-if-request-method-post",
-        "body": [
-            "if request.method == 'POST':",
-            "    $0"
-        ],
-        "description": "Django if request.method == POST"
-    },
-    "Django import Paginator": {
-        "prefix": "jj-django-import-paginator",
-        "body": [
-            "from django.core.paginator import Paginator$0"
-        ],
-        "description": "Django import Paginator"
-    },
-    "Django EmailBackend": {
-        "prefix": "jj-django-import-paginator",
-        "body": [
-            "# Add this to the settings.py file:",
-            "EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'",
-            "EMAIL_HOST = 'smtp.gmail.com'",
-            "EMAIL_HOST = 'smtp.gmail.com'",
-            "EMAIL_PORT = 587",
-            "EMAIL_USE_TLS = True",
-            "EMAIL_HOST_USER = '@gmail.com'",
-            "EMAIL_HOST_PASSWORD = 'TBD'",
-            "",
-            "# Add the following to the signals.py file:",
-            "from django.core.mail import send_mail",
-            "from django.conf import settings",
-            "",
-            "",
-            "# Add the following to the signals.py file:",
-            "subject = 'Welcome to DevSearch'",
-            "message = 'We are glad you are here!'",
-            "",
-            "send_mail(",
-            "    subject,",
-            "    message,",
-            "    settings.EMAIL_HOST_USER,",
-            "    [profile.email],",
-            "    fail_silently=False",
-            ")",
-            "$0"
-        ],
-        "description": "Django EmailBackend"
-    },
-    "Django import JsonResponse": {
-        "prefix": "jj-django-import-json-response",
-        "body": [
-            "from django.http import JsonResponse$0"
-        ],
-        "description": "Django import JsonResponse"
-    },
-    "Django model serializer": {
-        "prefix": "jj-django-model-serializer",
-        "body": [
-            "from rest_framework import serializers",
-            "from ${1:project}.models import ${2:Project}",
-            "",            
-            "",
-            "class ${2:Project}Serializer(serializers.ModelSerializer):",
-            "    class Meta:",
-            "        model = ${2:Project}",
-            "        fields = '__all__'",
-            "        #fields = []",
-            "$0"
-        ],
-        "description": "Django model serializer"
-    },
-    "total run time including sleeps": {
-        "prefix": "jj-runtime",
-        "body": [
-            "import time",
-            "",
-            "start_time = time.perf_counter()",            
-            "",
-            "print(f\"Total run time was '{time.perf_counter() - start_time}' seconds\")",
-            "# This includes any sleeps",
-            "$0"
-        ],
-        "description": "total run time including sleeps"
-    },
-    "insert profiling": {
-        "prefix": "jj-insert-profiling",
-        "body": [
-            "import cProfile",
-            "import pstats",
-            "",
-            "# In the main function, wrap the core logic with the following:",            
-            "with cProfile.Profile() as pr:",
-            "    # core logic here",
-            "",
-            "stats = pstats.Stats(pr)",
-            "stats.sort_stats(pstats.SortKey.TIME)",
-            "#stats.print_stats()",
-            "stats.dump_stats(filename=f\"{os.path.basename(__file__).replace('.py', '_profiling.prof')}\")",
-            "$0"
-        ],
-        "description": "insert profiling"
-    },
-    "Flask app": {
-        "prefix": "jj-flask-app",
-        "body": [
-            "from flask import Flask",
-            "from flask_restful import Resource, Api",
-            "",
-            "PORT = 5000",
-            "",
-            "app = Flask(__name__)",            
-            "api = Api(app)",
-            "",
-            "class ${1:Student}(Resource):",
-            "    def get(self, name):",
-            "        return {'student': name}",
-            "",
-            "api.add_resource(Student, '/student/<string:name>')",
-            "",
-            "app.run(port=PORT)",
-            "$0"
-        ],
-        "description": "Flask app"
-    },
-    "setup logger": {
-        "prefix": "jj-setup-logger",
-        "body": [
-            "import logging",
-            "import logging.handler",
-            "",
-            "LOGFILE_MAX_BYTES = 50_000",
-            "LOGFILE_BACKUP_COUNT = 10",
-            "",
-            "# Set the root logger",
-            "logging.basicConfig(",
-            "    format=\"%(levelname)-7s : %(message)s\",",
-            "    level=logging.INFO",
-            ")",
-            "",
-            "logger = logging.getLogger(__name__)",
-            "",
-            "",            
-            "def setup_filehandler_logger(logfile: str = None):",
-            "",
-            "    # Create handlers",
-            "    # c_handler = logging.StreamHandler()",
-            "    f_handler = logging.handlers.RotatingFileHandler(",
-            "        filename=logfile,",
-            "        # maxBytes=LOGFILE_MAX_BYTES,",
-            "        # backupCount=LOGFILE_BACKUP_COUNT",
-            "    )",
-            "",
-            "    # c_handler.setLevel(logging.INFO)",
-            "    f_handler.setLevel(logging.INFO)",
-            "",            
-            "    # Create formatters and add it to handlers",
-            "    f_format = logging.Formatter(\"%(levelname)-7s : %(asctime)s : %(pathname)s : L%(lineno)d : %(message)s\")",
-            "    # c_format = logging.Formatter(\"%(levelname)-7s : %(asctime)s : %(message)s\")",
-            "",                
-            "    # c_handler.setFormatter(c_format)",
-            "    f_handler.setFormatter(f_format)",
-            "",            
-            "    # Add handlers to the logger",
-            "    # logger.addHandler(c_handler)",
-            "    logger.addHandler(f_handler)",
-            "",
-            "",
-            "setup_filehandler_logger(logfile)",
-            "",
-            "$0"
-        ],
-        "description": "Flask app"
-    },
-    "dotenv": {
-        "prefix": "jj-dotenv",
-        "body": [
-            "from dotenv load_dotenv",
-            "",
-            "load_dotenv()",
-            "",
-            "${1:variable} = os.getenv(\"${2:ENVIRONMENT_VARIABLE_NAME}\", None)",
-            "$0"
-        ],
-        "description": "dotenv"
-    },
-    "Define custom Exception class": {
-        "prefix": "jj-define-custom-exception-class",
-        "body": [
-            "class ${1:InvalidSampleName}Error(Exception):",
-            "    \"\"\"Exception raised ${2:invalid sample name values}.\"\"\"",
-            "",
-            "    ${3:sample_name}: str",
-            "    ${4:message}: str",
-            "",
-            "    def __init__(self, ${3:sample_name}: str, ${4:message}: Optional[str]):",
-            "        \"\"\"Class constructor.",
-            "        Args:",
-            "            ${3:sample_name} (str): ${5:sample name}",
-            "            ${4:message} (str): optional error message",
-            "        \"\"\"",
-            "        self.${3:sample_name} = ${3:sample_name}",
-            "        self.message = f\"${6:Invalid sample name} '{${3:sample_name}}'\"",
-            "        if message:",
-            "            self.message += \" \" + message",
-            "        super().__init__(self.message)",
-            "$0"
-        ],
-        "description": "Define custom Exception class"
-    },
-    "ipdb debugger": {
-        "prefix": "jj-ipdb-debug",
-        "body": [
-            "import ipdb",
-            "ipdb.set_trace()",
-            "# type help for commands",
-            "# n: next",
-            "# s: step into function",
-            "# p: print e.g.: p x",
-            "# whatis: display type of the variable e.g.: whatis x",
-            "$0"
-        ],
-        "description": "ipdb debugger"
-    },
-    "Selenium initialization": {
-        "prefix": "jj-selenium-initialization",
-        "body": [
-            "from selenium import webdriver",
-            "from selenium.common.exceptions import TimeoutException",
-            "from selenium.webdriver.chrome.options import Options",
-            "from selenium.webdriver.common.by import By",
-            "from selenium.webdriver.common.keys import Keys",
-            "from selenium.webdriver.support import expected_conditions as EC",
-            "from selenium.webdriver.support.ui import Select, WebDriverWait",
-            "driver = webdriver.Chrome()",
-            "wait = WebDriverWait(driver, 5)",
-            "url ='${1:yoururl}'",
-            "driver.get(url)",
-            "$0"
-        ],
-        "description": "Selenium initialization"
-    },
-    "read YAML file into dictionary": {
-        "prefix": "jj-read-yaml-into-dict",
-        "body": [
-            "# pip install PyYAML",
-            "# echo 'PyYAML' >> requirements.txt"
-            "import yaml",
-            "from pathlib import Path",
-            "",
-            "logging.info(f\"Will load contents of config file '${2:infile}'\")",
-            "${1:config} = yaml.safe_load(Path(${2:infile}).read_text())",
-            "$0"
-        ],
-        "description": "read YAML file into dictionary"
-    },
-    "MySQL database connnection": {
-        "prefix": "jj-mysql-database-connection",
-        "body": [
-            "# pip install mysql-connector-python",
-            "import logging",
-            "from typing import NamedTuple",
-            "import mysql.connector",
-            "",
-            "def get_database_connection(${1:creds}: NamedTuple):",
-            "    \"\"\"Establish database connection with MySQL database.",
-            "",
-            "    Args:",
-            "        ${1:creds} (NamedTuple): NamedTuple containing username, password, database, host, port",
-            "",
-            "    Returns:",
-            "        conn: MySQL database connection",
-            "    \"\"\"",
-            "    config = {",
-            "        \"user\": ${1:creds}.username,",
-            "        \"password\": ${1:creds}.password,",
-            "        \"host\": ${1:creds}.host,",
-            "        \"database\": ${1:creds}.database,",
-            "        \"port\": ${1:creds}.port,",
-            "    }",
-            "",
-            "    logging.info(f\"Will attempt to establish a database connection with config: {config}\")",
-            "    conn = mysql.connector.connect(**config)",
-            "    logging.info(\"Connection established\")",
-            "    return conn",
-            "$0"
-        ],
-        "description": "Establish a connection with a MySQL database via mysql-connector-python package"
-    },
-    "MySQL insert many records into a table": {
-        "prefix": "jj-mysql-insert-many-records",
-        "body": [
-            "# pip install mysql-connector-python",
-            "import logging",
-            "from typing import List",
-            "import mysql.connector",
-            "",
-            "def insert_records(conn, query: str, records: List) -> None:",
-            "    cursor = conn.cursor()",
-            "    for record in records:",
-            "        data = (record,)",
-            "        cursor.execute(query, data)",
-            "    conn.commit()",
-            "$0",
-            "",
-            "",
-            "def insert_records_into_(${1:table_name}(conn, database: str, records: List) -> None:",
-            "    \"\"\"Insert many records into table ${1:table_name}.",
-            "",
-            "    Args:",
-            "        conn (MySQL connector): MySQL connector",
-            "        database (str): target database",
-            "        records (List): array of records to be inserted into the target table ${1:table_name}",
-            "    \"\"\"",
-            "    query = f\"INSERT INTO `{database}`.`${1:table_name}` (${2:comma-separated-list-of-fields}) VALUES(%s)",
-            "    insert_records(conn, query, records)",
-            "$0"
-        ],
-        "description": "MySQL insert many records into a table"
-    },
-    "get current date": {
-        "prefix": "jj-get-current-date-YYYY-MM-DD",
-        "body": [
-            "from datetime import datetime",
-            "datetime.today().strftime('%Y-%m-%d')",
-            "$0"
-        ],
-        "description": "get current date YYYY-MM-DD"
-    },
-    "if __name__ == '__main__'": {
-        "prefix": "jj-if-name-main",
-        "body": [
-            "if __name__ == \"__main__\":",
-            "    main()",
-            "",
-            "$0"
-        ],
-        "description": "if __name__ == '__main__'"
-    },
-    "print(f\"\")" {
-        "prefix": "jj-print-f",
-        "body": [
-            "print(f\"$0\")"
-        ],
-        "description": "print(f'')"
-    },
-    "update MySQL database table" {
-        "prefix": "jj-mysql-update-database-table",
-        "body": [
-            "def update_${1:table_name}(db_creds: namedtuple, update_string: str, params: Tuple = None) -> None:",
-            "    \"\"\"Update the ${2:table name} fields.",
-            "",
-            "    Args:",
-            "        db_creds (namedtuple): contains host, username, password, database",
-            "        update_string (str): SQL update statement",
-            "        params (tuple): Tuple containing update statement query parameters",
-            "",
-            "    Returns:",
-            "        None",
-            "",
-            "    Raises:",
-            "        None",
-            "    \"\"\"",
-            "    db_conn = mysql.connector.connect(",
-            "        host=db_creds.host",
-            "        user=db_creds.username",
-            "        password=db_creds.password",
-            "        database=db_creds.database",
-            "",
-            "    cursor = db_conn.cursor()",
-            "",
-            "    cursor.execute(query_string, params)",
-            "",
-            "    db_conn.commit()",
-            "",
-            "    cursor.close()",
-            "",
-            "    db_conn.close()",
-            "$0"
-        ],
-        "description": "Establish database connection and then execute update statement with parameters"
-    },
-    "init AWS Glue job" {
-        "prefix": "jj-init-aws-glue-job-init",
-        "body": [
-            "from awsglue.context import GlueContext",
-            "from awsglue.dynamicframe import DynamicFrame",
-            "from awsglue.job import Job",
-            "from awsglue.transformers import *",
-            "from awsglue.utils import getResolvedOptions",
-            "from pyspark.context import SparkContext",
-            "from pyspark.sql.types import *",
-            "",
-            "args = getResolvedOptions(sys.argv, ['${1:arg1}', '${2:args2', '${3:arg3}'])",
-            "",
-            "sc = SparkContext()",
-            "gc = GlueContext(sc)",
-            "logger = gc.get_logger()",
-            "spark = gc.spark_session",
-            "job = Job(gc)",
-            "job.init(strr(args['${1:arg1}']) + str(args['${2:arg2}']) + str(args['${2:arg2}']), args)",
-            "$0"
-        ],
-        "description": "Init AWS Glue job"
-    },
-    "Collect records from Spark RDD" {
-        "prefix": "jj-read-spark-read-rdd-collect",
-        "body": [
-            "JDBC_DRIVER = 'com.mysql.jdbc.Driver'",
-            "query = ''",
-            "df = spark.read.format('jdbc').option('url', db_creds.url).option('driver', JDBC_DRIVER).option('dbtable', query).option('user', db_creds.username).option('password', db_creds.password).load()",
-            "data = df.rdd.collect()",
-            "$0"
-        ],
-        "description": "Collect records from Spark RDD"
-    },
-
+	"Display all Django model objects methods": {
+		"prefix": "jj-django-display-model-objects-methods",
+		"body": [
+			"${1:item}s = ${2:ModelName}.objects.all()",
+			"${1:item} = ${2:ModelName}.objects.get(${3:attribute}='value')",
+			"${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__startswith}='value')",
+			"${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__contains}='value')",
+			"${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__icontains}='value') # ignore case",
+			"${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__gt}='value')",
+			"${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__gte}='value')",
+			"${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__lt}='value')",
+			"${1:item}s = ${2:ModelName}.objects.filter(${3:attribute__lte}='value')",
+			"${1:item}s = ${2:ModelName}.objects.exclude(${3:attribute}='value')",
+			"$0"
+		],
+		"description": "Display all Django model objects methods"
+	},
+	"Create HTML template for Django project": {
+		"prefix": "jj-django-create-html-template",
+		"body": [
+			"{% extends '${1:main.html}' %}",
+			"{% block content %}",
+			"",
+			"$0",
+			"",
+			"{% endblock %}"
+		],
+		"description": "Create HTML template for Django project"
+	},
+	"Create Django form model class that inherits from ModelForm": {
+		"prefix": "jj-django-create-form-model-class",
+		"body": [
+			"# Add this to ${2:app_name}/forms.py",
+			"",
+			"from django.forms import ModelForm",
+			"from django import forms",
+			"from .models import ${1:ModelName}",
+			"",
+			"class ${1:ModelName}Form(ModelForm):",
+			"    class Meta:",
+			"        model = ${1:ModelName}",
+			"        fields = '__all__'",
+			"        #fields = [] # i.e.: list all fields to be included",
+			"        widgets = {",
+			"            'tags': forms.CheckboxSelectMultiple(),",
+			"        }",
+			"    def __init__(self, *args, **kwargs):",
+			"        super(${1:ModelName}Form, self).__init__(*args, **kwargs)",
+			"        self.fields['title'].widget.attrs.update(",
+			"            {",
+			"                'class': 'input',",
+			"                'placeholder': 'Add Title'",
+			"            }",
+			"        )",
+			"        for name, field in self.fields.items():",
+			"            field.widget.attrs.update({'class': 'input'})",
+			"",
+			"",
+			"# Add this to ${2:app_name}/views.py",
+			"",
+			"from .forms import ${1:ModelName}Form",
+			"",
+			"def displayCreate${1:ModelName}Form(request):",
+			"    form = ProjectForm()",
+			"",
+			"    if request.method == 'POST':",
+			"        form = ProjectForm(request.POST, request.FILES)",
+			"        #print(request.POST)",
+			"        if form.is_valid():",
+			"            form.save()",
+			"            return redirect('${3:some_url}')",
+			"        else:",
+			"            print(form.errors)",
+			"            return HttpResponse(form.errors.values())",
+			"",
+			"    context = {'form': form}",
+			"    return render(request, '${2:app_name}/create_${2:app_name}_form.html', context)",
+			"",
+			"",
+			"def displayUpdate${1:ModelName}Form(request, pk):",
+			"    ${4:object} = ${1:ModelName}.objects.get(id=pk)",
+			"    form = ProjectForm(instance=${4:object})",
+			"",
+			"    if request.method == 'POST':",
+			"        form = ProjectForm(request.POST, request.FILES, instance=${4:object})",
+			"        #print(request.POST)",
+			"        if form.is_valid():",
+			"            form.save()",
+			"            return redirect('${3:some_url}')",
+			"        else:",
+			"            print(form.errors)",
+			"            return HttpResponse(form.errors.values())",
+			"",
+			"    context = {'form': form}",
+			"    return render(request, '${2:app_name}/create_${2:app_name}_form.html', context)",
+			"",
+			"",
+			"def displayDelete${1:ModelName}Form(request, pk):",
+			"    ${4:object} = ${1:ModelName}.objects.get(id=pk)",
+			"    if request.method == 'POST':",
+			"        ${4:object}.delete()",
+			"        return redirect('projects')",
+			"    context = {'object': ${4:object}}",
+			"    return render(request, '${4:app_name}/delete_template.html', context)",
+			"",
+			"",
+			"# Add this to ${2:app_name}/create_${2:app_name}_form.html",
+			"",
+			"path('create-${2:app_name}/', views.displayCreate${1:ModelName}Form, name='create-${2:app_name}'),",
+			"path('update-${2:app_name}/<str:pk>', views.displayUpdate${1:ModelName}Form, name='update-${2:app_name}'),",
+			"path('delete-${2:app_name}/<str:pk>', views.displayDelete${1:ModelName}Form, name='delete-${2:app_name}'),",
+			"",
+			"# Add this to ${2:app_name}/templates/${2:app_name}/create_${2:app_name}_form.html",
+			"{% extends 'main.html' %}",
+			"{% block content %}",
+			"",
+			"",
+			"<h1>${1:ModelName} Form</h1>",
+			"",
+			"<form action='' method='POST'>",
+			"    {% csrf_token %}",
+			"",
+			"    {% for field in form %}",
+			"    {{ field.label }}: {{ field }}",
+			"    <br>",
+			"    {% endfor %}",
+			"",
+			"    <input type='submit'>",
+			"</form>",
+			"{% endblock %}",
+			"",
+			"",
+			"# Add this to whatever .html template in ${2:app_name} you need to update an instance of ${1:ModelName}",
+			"<a href=\"{% url 'update-${4:object}' ${4:object}.id %}\">Edit</a>",
+			"# Add this to whatever .html template in ${2:app_name} you need to delete an instance of ${1:ModelName}",
+			"<a href=\"{% url 'delete-${4:object}' ${4:object}.id %}\">Delete</a>",
+			"",
+			"",
+			"# Add this to ${2:app_name}/template/${2:app_name}/delete_template.html",
+			"",
+			"{% extends 'main.html' %}",
+			"{% block content %}",
+			"",
+			"<form action='' method='POST'>",
+			"    {% csrf_token %}",
+			"    <p>Are you sure you want to delete \"{{ object.title }}\"?</p>",
+			"",
+			"    <a href=\"{% url 'project' %}\">Go Back</a>",
+			"    <input type='submit' value='Confirm'/>",
+			"</form>",
+			"{% endblock content %}",
+			"$0"
+		],
+		"description": "Create Django form model class that inherits from ModelForm"
+	},
+	"Import User from django.contrib.auth.models": {
+		"prefix": "jj-django-contrib-auth-models-import-user",
+		"body": [
+			"from django.contrib.auth.models import User",
+			"$0"
+		],
+		"description": "Import User from django.contrib.auth.models"
+	},
+	"Django on delete models cascade": {
+		"prefix": "jj-django-on-delete-models-cascade",
+		"body": [
+			"on_delete=models.CASCADE$0"
+		],
+		"description": "Django on delete models cascade"
+	},
+	"Django null=True blank=True": {
+		"prefix": "jj-django-null-true-blank-true",
+		"body": [
+			"null=True, blank=True",
+			"$0"
+		],
+		"description": "Django null=True blank=True"
+	},
+	"Django import UserCreationForm": {
+		"prefix": "jj-django-import-UserCreationForm",
+		"body": [
+			"from django.contrib.auth.forms import UserCreationForm",
+			"$0"
+		],
+		"description": "Django import UserCreationForm"
+	},
+	"Django if request.method == POST": {
+		"prefix": "jj-django-if-request-method-post",
+		"body": [
+			"if request.method == 'POST':",
+			"    $0"
+		],
+		"description": "Django if request.method == POST"
+	},
+	"Django import Paginator": {
+		"prefix": "jj-django-import-paginator",
+		"body": [
+			"from django.core.paginator import Paginator$0"
+		],
+		"description": "Django import Paginator"
+	},
+	"Django EmailBackend": {
+		"prefix": "jj-django-import-paginator",
+		"body": [
+			"# Add this to the settings.py file:",
+			"EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'",
+			"EMAIL_HOST = 'smtp.gmail.com'",
+			"EMAIL_HOST = 'smtp.gmail.com'",
+			"EMAIL_PORT = 587",
+			"EMAIL_USE_TLS = True",
+			"EMAIL_HOST_USER = '@gmail.com'",
+			"EMAIL_HOST_PASSWORD = 'TBD'",
+			"",
+			"# Add the following to the signals.py file:",
+			"from django.core.mail import send_mail",
+			"from django.conf import settings",
+			"",
+			"",
+			"# Add the following to the signals.py file:",
+			"subject = 'Welcome to DevSearch'",
+			"message = 'We are glad you are here!'",
+			"",
+			"send_mail(",
+			"    subject,",
+			"    message,",
+			"    settings.EMAIL_HOST_USER,",
+			"    [profile.email],",
+			"    fail_silently=False",
+			")",
+			"$0"
+		],
+		"description": "Django EmailBackend"
+	},
+	"Django import JsonResponse": {
+		"prefix": "jj-django-import-json-response",
+		"body": [
+			"from django.http import JsonResponse$0"
+		],
+		"description": "Django import JsonResponse"
+	},
+	"Django model serializer": {
+		"prefix": "jj-django-model-serializer",
+		"body": [
+			"from rest_framework import serializers",
+			"from ${1:project}.models import ${2:Project}",
+			"",
+			"",
+			"class ${2:Project}Serializer(serializers.ModelSerializer):",
+			"    class Meta:",
+			"        model = ${2:Project}",
+			"        fields = '__all__'",
+			"        #fields = []",
+			"$0"
+		],
+		"description": "Django model serializer"
+	},
+	"total run time including sleeps": {
+		"prefix": "jj-runtime",
+		"body": [
+			"import time",
+			"",
+			"start_time = time.perf_counter()",
+			"",
+			"print(f\"Total run time was '{time.perf_counter() - start_time}' seconds\")",
+			"# This includes any sleeps",
+			"$0"
+		],
+		"description": "total run time including sleeps"
+	},
+	"insert profiling": {
+		"prefix": "jj-insert-profiling",
+		"body": [
+			"import cProfile",
+			"import pstats",
+			"",
+			"# In the main function, wrap the core logic with the following:",
+			"with cProfile.Profile() as pr:",
+			"    # core logic here",
+			"",
+			"stats = pstats.Stats(pr)",
+			"stats.sort_stats(pstats.SortKey.TIME)",
+			"#stats.print_stats()",
+			"stats.dump_stats(filename=f\"{os.path.basename(__file__).replace('.py', '_profiling.prof')}\")",
+			"$0"
+		],
+		"description": "insert profiling"
+	},
+	"Flask app": {
+		"prefix": "jj-flask-app",
+		"body": [
+			"from flask import Flask",
+			"from flask_restful import Resource, Api",
+			"",
+			"PORT = 5000",
+			"",
+			"app = Flask(__name__)",
+			"api = Api(app)",
+			"",
+			"class ${1:Student}(Resource):",
+			"    def get(self, name):",
+			"        return {'student': name}",
+			"",
+			"api.add_resource(Student, '/student/<string:name>')",
+			"",
+			"app.run(port=PORT)",
+			"$0"
+		],
+		"description": "Flask app"
+	},
+	"setup logger": {
+		"prefix": "jj-setup-logger",
+		"body": [
+			"import logging",
+			"import logging.handler",
+			"",
+			"LOGFILE_MAX_BYTES = 50_000",
+			"LOGFILE_BACKUP_COUNT = 10",
+			"",
+			"# Set the root logger",
+			"logging.basicConfig(",
+			"    format=\"%(levelname)-7s : %(message)s\",",
+			"    level=logging.INFO",
+			")",
+			"",
+			"logger = logging.getLogger(__name__)",
+			"",
+			"",
+			"def setup_filehandler_logger(logfile: str = None):",
+			"",
+			"    # Create handlers",
+			"    # c_handler = logging.StreamHandler()",
+			"    f_handler = logging.handlers.RotatingFileHandler(",
+			"        filename=logfile,",
+			"        # maxBytes=LOGFILE_MAX_BYTES,",
+			"        # backupCount=LOGFILE_BACKUP_COUNT",
+			"    )",
+			"",
+			"    # c_handler.setLevel(logging.INFO)",
+			"    f_handler.setLevel(logging.INFO)",
+			"",
+			"    # Create formatters and add it to handlers",
+			"    f_format = logging.Formatter(\"%(levelname)-7s : %(asctime)s : %(pathname)s : L%(lineno)d : %(message)s\")",
+			"    # c_format = logging.Formatter(\"%(levelname)-7s : %(asctime)s : %(message)s\")",
+			"",
+			"    # c_handler.setFormatter(c_format)",
+			"    f_handler.setFormatter(f_format)",
+			"",
+			"    # Add handlers to the logger",
+			"    # logger.addHandler(c_handler)",
+			"    logger.addHandler(f_handler)",
+			"",
+			"",
+			"setup_filehandler_logger(logfile)",
+			"",
+			"$0"
+		],
+		"description": "Flask app"
+	},
+	"dotenv": {
+		"prefix": "jj-dotenv",
+		"body": [
+			"from dotenv load_dotenv",
+			"",
+			"load_dotenv()",
+			"",
+			"${1:variable} = os.getenv(\"${2:ENVIRONMENT_VARIABLE_NAME}\", None)",
+			"$0"
+		],
+		"description": "dotenv"
+	},
+	"Define custom Exception class": {
+		"prefix": "jj-define-custom-exception-class",
+		"body": [
+			"class ${1:InvalidSampleName}Error(Exception):",
+			"    \"\"\"Exception raised ${2:invalid sample name values}.\"\"\"",
+			"",
+			"    ${3:sample_name}: str",
+			"    ${4:message}: str",
+			"",
+			"    def __init__(self, ${3:sample_name}: str, ${4:message}: Optional[str]):",
+			"        \"\"\"Class constructor.",
+			"        Args:",
+			"            ${3:sample_name} (str): ${5:sample name}",
+			"            ${4:message} (str): optional error message",
+			"        \"\"\"",
+			"        self.${3:sample_name} = ${3:sample_name}",
+			"        self.message = f\"${6:Invalid sample name} '{${3:sample_name}}'\"",
+			"        if message:",
+			"            self.message += \" \" + message",
+			"        super().__init__(self.message)",
+			"$0"
+		],
+		"description": "Define custom Exception class"
+	},
+	"ipdb debugger": {
+		"prefix": "jj-ipdb-debug",
+		"body": [
+			"import ipdb",
+			"ipdb.set_trace()",
+			"# type help for commands",
+			"# n: next",
+			"# s: step into function",
+			"# p: print e.g.: p x",
+			"# whatis: display type of the variable e.g.: whatis x",
+			"$0"
+		],
+		"description": "ipdb debugger"
+	},
+	"Selenium initialization": {
+		"prefix": "jj-selenium-initialization",
+		"body": [
+			"from selenium import webdriver",
+			"from selenium.common.exceptions import TimeoutException",
+			"from selenium.webdriver.chrome.options import Options",
+			"from selenium.webdriver.common.by import By",
+			"from selenium.webdriver.common.keys import Keys",
+			"from selenium.webdriver.support import expected_conditions as EC",
+			"from selenium.webdriver.support.ui import Select, WebDriverWait",
+			"driver = webdriver.Chrome()",
+			"wait = WebDriverWait(driver, 5)",
+			"url ='${1:yoururl}'",
+			"driver.get(url)",
+			"$0"
+		],
+		"description": "Selenium initialization"
+	},
+	"read YAML file into dictionary": {
+		"prefix": "jj-read-yaml-into-dict",
+		"body": [
+			"# pip install PyYAML",
+			"# echo 'PyYAML' >> requirements.txt""import yaml",
+			"from pathlib import Path",
+			"",
+			"logging.info(f\"Will load contents of config file '${2:infile}'\")",
+			"${1:config} = yaml.safe_load(Path(${2:infile}).read_text())",
+			"$0"
+		],
+		"description": "read YAML file into dictionary"
+	},
+	"MySQL database connnection": {
+		"prefix": "jj-mysql-database-connection",
+		"body": [
+			"# pip install mysql-connector-python",
+			"import logging",
+			"from typing import NamedTuple",
+			"import mysql.connector",
+			"",
+			"def get_database_connection(${1:creds}: NamedTuple):",
+			"    \"\"\"Establish database connection with MySQL database.",
+			"",
+			"    Args:",
+			"        ${1:creds} (NamedTuple): NamedTuple containing username, password, database, host, port",
+			"",
+			"    Returns:",
+			"        conn: MySQL database connection",
+			"    \"\"\"",
+			"    config = {",
+			"        \"user\": ${1:creds}.username,",
+			"        \"password\": ${1:creds}.password,",
+			"        \"host\": ${1:creds}.host,",
+			"        \"database\": ${1:creds}.database,",
+			"        \"port\": ${1:creds}.port,",
+			"    }",
+			"",
+			"    logging.info(f\"Will attempt to establish a database connection with config: {config}\")",
+			"    conn = mysql.connector.connect(**config)",
+			"    logging.info(\"Connection established\")",
+			"    return conn",
+			"$0"
+		],
+		"description": "Establish a connection with a MySQL database via mysql-connector-python package"
+	},
+	"MySQL insert many records into a table": {
+		"prefix": "jj-mysql-insert-many-records",
+		"body": [
+			"# pip install mysql-connector-python",
+			"import logging",
+			"from typing import List",
+			"import mysql.connector",
+			"",
+			"def insert_records(conn, query: str, records: List) -> None:",
+			"    cursor = conn.cursor()",
+			"    for record in records:",
+			"        data = (record,)",
+			"        cursor.execute(query, data)",
+			"    conn.commit()",
+			"$0",
+			"",
+			"",
+			"def insert_records_into_(${1:table_name}(conn, database: str, records: List) -> None:",
+			"    \"\"\"Insert many records into table ${1:table_name}.",
+			"",
+			"    Args:",
+			"        conn (MySQL connector): MySQL connector",
+			"        database (str): target database",
+			"        records (List): array of records to be inserted into the target table ${1:table_name}",
+			"    \"\"\"",
+			"    query = f\"INSERT INTO `{database}`.`${1:table_name}` (${2:comma-separated-list-of-fields}) VALUES(%s)",
+			"    insert_records(conn, query, records)",
+			"$0"
+		],
+		"description": "MySQL insert many records into a table"
+	},
+	"get current date": {
+		"prefix": "jj-get-current-date-YYYY-MM-DD",
+		"body": [
+			"from datetime import datetime",
+			"datetime.today().strftime('%Y-%m-%d')",
+			"$0"
+		],
+		"description": "get current date YYYY-MM-DD"
+	},
+	"if __name__ == '__main__'": {
+		"prefix": "jj-if-name-main",
+		"body": [
+			"if __name__ == \"__main__\":",
+			"    main()",
+			"",
+			"$0"
+		],
+		"description": "if __name__ == '__main__'"
+	},
+	"print(f\"\")"{
+		"prefix": "jj-print-f",
+		"body": [
+			"print(f\"$0\")"
+		],
+		"description": "print(f'')"
+	},
+	"update MySQL database table"{
+		"prefix": "jj-mysql-update-database-table",
+		"body": [
+			"def update_${1:table_name}(db_creds: namedtuple, update_string: str, params: Tuple = None) -> None:",
+			"    \"\"\"Update the ${2:table name} fields.",
+			"",
+			"    Args:",
+			"        db_creds (namedtuple): contains host, username, password, database",
+			"        update_string (str): SQL update statement",
+			"        params (tuple): Tuple containing update statement query parameters",
+			"",
+			"    Returns:",
+			"        None",
+			"",
+			"    Raises:",
+			"        None",
+			"    \"\"\"",
+			"    db_conn = mysql.connector.connect(",
+			"        host=db_creds.host",
+			"        user=db_creds.username",
+			"        password=db_creds.password",
+			"        database=db_creds.database",
+			"",
+			"    cursor = db_conn.cursor()",
+			"",
+			"    cursor.execute(query_string, params)",
+			"",
+			"    db_conn.commit()",
+			"",
+			"    cursor.close()",
+			"",
+			"    db_conn.close()",
+			"$0"
+		],
+		"description": "Establish database connection and then execute update statement with parameters"
+	},
+	"init AWS Glue job"{
+		"prefix": "jj-init-aws-glue-job-init",
+		"body": [
+			"from awsglue.context import GlueContext",
+			"from awsglue.dynamicframe import DynamicFrame",
+			"from awsglue.job import Job",
+			"from awsglue.transformers import *",
+			"from awsglue.utils import getResolvedOptions",
+			"from pyspark.context import SparkContext",
+			"from pyspark.sql.types import *",
+			"",
+			"args = getResolvedOptions(sys.argv, ['${1:arg1}', '${2:args2', '${3:arg3}'])",
+			"",
+			"sc = SparkContext()",
+			"gc = GlueContext(sc)",
+			"logger = gc.get_logger()",
+			"spark = gc.spark_session",
+			"job = Job(gc)",
+			"job.init(strr(args['${1:arg1}']) + str(args['${2:arg2}']) + str(args['${2:arg2}']), args)",
+			"$0"
+		],
+		"description": "Init AWS Glue job"
+	},
+	"Collect records from Spark RDD"{
+		"prefix": "jj-read-spark-read-rdd-collect",
+		"body": [
+			"JDBC_DRIVER = 'com.mysql.jdbc.Driver'",
+			"query = ''",
+			"df = spark.read.format('jdbc').option('url', db_creds.url).option('driver', JDBC_DRIVER).option('dbtable', query).option('user', db_creds.username).option('password', db_creds.password).load()",
+			"data = df.rdd.collect()",
+			"$0"
+		],
+		"description": "Collect records from Spark RDD"
+	},
 }
