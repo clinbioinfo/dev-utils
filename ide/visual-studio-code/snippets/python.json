@@ -1508,6 +1508,12 @@
 			"import logging",
 			"",
 			"with open(${1:outfile}, 'w') as of:",
+			"    of.write(f\"## method-created: {os.path.abspath(__file__)}\\n\")",
+			"    of.write(f\"## date-created: {str(datetime.today().strftime('%Y-%m-%d-%H%M%S'))}\\n\")",
+			"    of.write(f\"## created-by: {os.environ.get('USER')}\\n\")",
+			"    of.write(f\"## infile: {infile}\\n\")",
+			"    of.write(f\"## logfile: {logfile}\\n\")",
+			"",
 			"    of.write(f\"{${2:line}}\\n\")",
 			"    $0",
 			"",
@@ -1736,11 +1742,11 @@
 	"jj-write-provenance-to-outfile": {
 		"prefix": "jj-write-provenance-to-outfile",
 		"body": [
-			"fh.write(f\"## method-created: {os.path.abspath(__file__)}\\n\")",
-			"fh.write(f\"## date-created: {str(datetime.today().strftime('%Y-%m-%d-%H%M%S'))}\\n\")",
-			"fh.write(f\"## created-by: {os.environ.get('USER')}\\n\")",
-			"fh.write(f\"## infile: {infile}\\n\")",
-			"fh.write(f\"## logfile: {logfile}\\n\")",
+			"of.write(f\"## method-created: {os.path.abspath(__file__)}\\n\")",
+			"of.write(f\"## date-created: {str(datetime.today().strftime('%Y-%m-%d-%H%M%S'))}\\n\")",
+			"of.write(f\"## created-by: {os.environ.get('USER')}\\n\")",
+			"of.write(f\"## infile: {infile}\\n\")",
+			"of.write(f\"## logfile: {logfile}\\n\")",
 			"$0"
 		],
 		"description": "write provenance info to the output file"
@@ -2276,14 +2282,14 @@
 		],
 		"description": "if __name__ == '__main__'"
 	},
-	"print(f\"\")"{
+	"print(f\"\")": {
 		"prefix": "jj-print-f",
 		"body": [
 			"print(f\"$0\")"
 		],
 		"description": "print(f'')"
 	},
-	"update MySQL database table"{
+	"update MySQL database table": {
 		"prefix": "jj-mysql-update-database-table",
 		"body": [
 			"def update_${1:table_name}(db_creds: namedtuple, update_string: str, params: Tuple = None) -> None:",
@@ -2319,7 +2325,7 @@
 		],
 		"description": "Establish database connection and then execute update statement with parameters"
 	},
-	"init AWS Glue job"{
+	"init AWS Glue job": {
 		"prefix": "jj-init-aws-glue-job-init",
 		"body": [
 			"from awsglue.context import GlueContext",
@@ -2342,7 +2348,7 @@
 		],
 		"description": "Init AWS Glue job"
 	},
-	"Collect records from Spark RDD"{
+	"Collect records from Spark RDD": {
 		"prefix": "jj-read-spark-read-rdd-collect",
 		"body": [
 			"JDBC_DRIVER = 'com.mysql.jdbc.Driver'",
@@ -2352,5 +2358,95 @@
 			"$0"
 		],
 		"description": "Collect records from Spark RDD"
+	},
+	"Prompt user for text answer": {
+		"prefix": "jj-prompt-user-for-text-answer",
+		"body": [
+			"import sys",
+			"",
+			"",
+			"def prompt_user_for_text_answer() -> str:",
+			"    answer = None",
+			"    attempt_ctr = 0",
+			"    max_attempts = 3",
+			"",
+			"    while answer is None or answer == \"\":",
+			"",
+			"        if attempt_ctr == max_attempts:",
+			"            print(",
+			"                f\"You have not been able to supply an answer after {attempt_ctr} attempts.  Please try again.\"",
+			"            )",
+			"            sys.exit(1)",
+			"",
+			"        attempt_ctr += 1",
+			"        answer = input(\"${1:What is the answer}?: \")",
+			"",
+			"        if answer is not None or answer != \"\":",
+			"            answer = answer.strip()",
+			"            if answer != \"\":",
+			"                return answer",
+			"",
+			"",
+			"answer = prompt_user_for_text_answer()",
+			"print(f\"The anwer was '{answer}'\")",
+			"$0"
+		],
+		"description": "Prompt user for text answer"
+	},
+	"Prompt user for yes or no answer": {
+		"prefix": "jj-prompt-user-for-yes-or-no-answer",
+		"body": [
+			"import sys",
+			"",
+			"",
+			"def prompt_user_for_yes_no_answer() -> str:",
+			"    answer = None",
+			"    attempt_ctr = 0",
+			"    max_attempts = 3",
+			"",
+			"    while answer is None or answer == \"\":",
+			"",
+			"        if attempt_ctr == max_attempts:",
+			"            print(",
+			"                f\"You have not been able to supply an answer after {attempt_ctr} attempts.  Please try again.\"",
+			"            )",
+			"            sys.exit(1)",
+			"",
+			"        attempt_ctr += 1",
+			"        answer = input(\"${1:Shall I run all pipelines now}? [Y/n]: \")",
+			"",
+			"        if answer is None or answer == \"\":",
+			"            answer = \"y\"",
+			"            return answer",
+			"",
+			"        answer = answer.strip()",
+			"",
+			"        if (",
+			"            answer.lower() == \"y\"",
+			"            or answer.lower() == \"yes\"",
+			"            or answer.lower() == \"n\"",
+			"            or answer.lower() == \"no\"",
+			"        ):",
+			"            return answer.lower()",
+			"        else:",
+			"            answer = None",
+			"",
+			"",
+			"answer = prompt_user_for_yes_no_answer()",
+			"print(f\"The anwer was '{answer}'\")",
+			"$0"
+		],
+		"description": "Prompt user for yes or no answer"
+	},
+	"Write dictionary to JSON file": {
+		"prefix": "jj-write-dict-to-json-file",
+		"body": [
+			"import json",
+			"",
+			"with open(${1:outfile}, 'w') as write_file:",
+			"    json.dump(${2:dictionary}, write_file, indent=4, sort_keys=True)",
+			"$0"
+		],
+		"description": "Write dictionary to JSON file"
 	},
 }
