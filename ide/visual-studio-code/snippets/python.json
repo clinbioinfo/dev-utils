@@ -2449,4 +2449,34 @@
 		],
 		"description": "Write dictionary to JSON file"
 	},
+	"Instantiate singleton class": {
+		"prefix": "jj-instantiate-singleton-class",
+		"body": [
+			"import logging",
+			"import os",
+			"from datetime import datetime",
+			"",
+			"from singleton_decorator import singleton",
+			"",
+			"DEFAULT_OUTDIR = os.path.join(",
+			"    \"/tmp\",",
+			"    os.path.splitext(os.path.basename(__file__))[0],",
+			"    str(datetime.today().strftime(\"%Y-%m-%d-%H%M%S\")),",
+			")",
+			"",
+			"",
+			"@singleton",
+			"class ${1:Manager}:",
+			"    \"\"\"Class for xyz\"\"\"",
+			"",
+			"    def __init__(self, **kwargs):",
+			"        \"\"\"Constructor for class ${1:Manager}\"\"\"",
+			"        self.logfile = kwargs.get(\"logfile\", None)",
+			"        self.outdir = kwargs.get(\"outdir\", DEFAULT_OUTDIR)",
+			"",
+			"        logging.info(f\"Instantiated Manager in {os.path.abspath(__file__)}\")",
+			"$0"
+		],
+		"description": "Instantiate singleton class"
+	},
 }
