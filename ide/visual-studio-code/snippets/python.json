@@ -2116,7 +2116,7 @@
 			"",
 			"$0"
 		],
-		"description": "Flask app"
+		"description": "setup logger"
 	},
 	"dotenv": {
 		"prefix": "jj-dotenv",
