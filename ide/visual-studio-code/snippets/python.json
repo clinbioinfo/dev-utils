@@ -2524,5 +2524,14 @@
 			"$0"
 		],
 		"description": "Define method for analyzing"
+	},
+	"Print execution of program completed": {
+		"prefix": "jj-print-execution-of-program-completed",
+		"body": [
+			"print(f\"The log file is '{logfile}'\")",
+			"print_green(f\"Execution of '{os.path.abspath(__file__)}' completed\")",
+			"$0"
+		],
+		"description": "Print execution of program completed"
 	}
 }
