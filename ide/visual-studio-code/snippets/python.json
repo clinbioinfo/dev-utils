@@ -2128,12 +2128,13 @@
 	"dotenv": {
 		"prefix": "jj-dotenv",
 		"body": [
-			"from dotenv load_dotenv",
+			"from dotenv import load_dotenv",
 			"",
 			"load_dotenv()",
 			"",
 			"${1:variable} = os.getenv(\"${2:ENVIRONMENT_VARIABLE_NAME}\", None)",
-			"$0"
+			"$0#pip install python-dotenv",
+			"#import os"
 		],
 		"description": "dotenv"
 	},
