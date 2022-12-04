@@ -2536,5 +2536,14 @@
 			"$0"
 		],
 		"description": "Print execution of program completed"
+	},
+	"logging.exception with sys.exit(1)": {
+		"prefix": "jj-log-exception-sys-exit",
+		"body": [
+			"logging.exception(f\"${1:msg}\")",
+			"sys.exit(1)",
+			"$0#import sys"
+		],
+		"description": "logging.exception with sys.exit(1)"
 	}
 }
