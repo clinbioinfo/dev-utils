@@ -1508,7 +1508,7 @@
 	"Open file in write mode": {
 		"prefix": "jj-open-write-file",
 		"body": [
-			"import logging",
+			"$0#import logging",
 			"",
 			"with open(${1:outfile}, 'w') as of:",
 			"    of.write(f\"## method-created: {os.path.abspath(__file__)}\\n\")",
@@ -1518,7 +1518,6 @@
 			"    of.write(f\"## logfile: {logfile}\\n\")",
 			"",
 			"    of.write(f\"{${2:line}}\\n\")",
-			"    $0",
 			"",
 			"logging.info(f\"Wrote file '{${1:outfile}}'\")",
 			"if verbose: ",
