@@ -1575,36 +1575,29 @@
 	"Print statement in bold red": {
 		"prefix": "jj-print-bold-red",
 		"body": [
-			"from colorama import Fore, Style",
-			"",
-			"print(Fore.RED + \"${1:message}\", end='')",
-			"print(Style.RESET_ALL + '', end='')",
-			"",
-			"$0"
+			"$0#from rich.console import Console",
+			"#error_console = Console(stderr=True, style=\"bold red\"",
+			"#console = Console()",
+			"error_console.print(\"${1:message}\")",
+			"console.print(\"[bold red]${1:message}[/]\")"
 		],
 		"description": "Print statement in bold red"
 	},
 	"Print statement in bold green": {
 		"prefix": "jj-print-bold-green",
 		"body": [
-			"from colorama import Fore, Style",
-			"",
-			"print(Fore.GREEN + \"${1:message}\", end='')",
-			"print(Style.RESET_ALL + '', end='')",
-			"",
-			"$0"
+			"$0#from rich.console import Console",
+			"#console = Console()",
+			"console.print(\"[bold green]${1:message}[/]\")"
 		],
 		"description": "Print statement in bold green"
 	},
 	"Print statement in bold yellow": {
 		"prefix": "jj-print-bold-yellow",
 		"body": [
-			"from colorama import Fore, Style",
-			"",
-			"print(Fore.YELLOW + \"${1:message}\", end='')",
-			"print(Style.RESET_ALL + '', end='')",
-			"",
-			"$0"
+			"$0#from rich.console import Console",
+			"#console = Console()",
+			"console.print(\"[bold yellow]${1:message}[/]\")"
 		],
 		"description": "Print statement in bold yellow"
 	},
