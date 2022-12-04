@@ -2554,5 +2554,41 @@
 			"$0"
 		],
 		"description": "if var is None"
+	},
+	"Define function generate report": {
+		"prefix": "jj-def-generate-report",
+		"body": [
+			"#import os",
+			"#import logging",
+			"#from datetime import datetime",
+			"#from typing import Union",
+			"",
+			"",
+			"def _generate_${1:SOME_NAME}_report(self, outfile: Union[str,None] = None) -> None:",
+			"    \"\"\"Write report file for ${2: SOME_DESCRIPTION}.",
+			"",
+			"    Args:",
+			"        outfile (str): the output file",
+			"    \"\"\"",
+			"    if outfile is None:",
+			"        outfile = os.path.join(self.outdir, \"${1:SOME_NAME}_report.txt\")",
+			"",
+			"    with open(outfile, \"w\") as of:",
+			"        of.write(f\"## method-created: {os.path.abspath(__file__)}\\n\")",
+			"        of.write(",
+			"            f\"## date-created: {str(datetime.today().strftime('%Y-%m-%d-%H%M%S'))}\\n\"",
+			"        )",
+			"        of.write(f\"## created-by: {os.environ.get('USER')}\\n\")",
+			"        of.write(f\"## infile: {self.infile}\\n\")",
+			"        of.write(f\"## logfile: {self.logfile}\\n\")",
+			"",
+			"        of.write(f\"{line}\\n\")",
+			"",
+			"    logger.info(f\"Wrote ${3:SOME_DESC} report file '{outfile}'\")",
+			"    if self.verbose:",
+			"        print(f\"Wrote ${3:SOME_DESC} report file '{outfile}'\")",
+			"$0"
+		],
+		"description": "Define function generate report"
 	}
 }
