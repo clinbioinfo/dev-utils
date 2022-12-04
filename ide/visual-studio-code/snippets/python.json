@@ -2544,5 +2544,14 @@
 			"$0#import sys"
 		],
 		"description": "logging.exception with sys.exit(1)"
+	},
+	"if var is None": {
+		"prefix": "jj-if-var-is-none",
+		"body": [
+			"if ${1:var} is None:",
+			"    ${2:pass}",
+			"$0"
+		],
+		"description": "if var is None"
 	}
 }
