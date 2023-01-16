@@ -2602,6 +2602,38 @@
 			"if error_ctr > 0:",
 			"    print(f\"${1:error count is:} {error_ctr}\")"
 		],
-		"description": "inrement the error counter by 1"
+		"description": "increment the error counter by 1"
+	},
+	"jj-import-rich-print": {
+		"prefix": "jj-import-rich-print",
+		"body": [
+			"from rich import print as rprint",
+			"$0"
+		],
+		"description": "from rich import print as rprint"
+	},
+	"jj-print-rich-green": {
+		"prefix": "jj-print-rich-green",
+		"body": [
+			"rprint(\"[green]${1:your text here}[/]\")",
+			"$0"
+		],
+		"description": "print green text to STDOUT using rich"
+	},
+	"jj-print-rich-yellow": {
+		"prefix": "jj-print-rich-yellow",
+		"body": [
+			"rprint(\"[yellow]${1:your text here}[/]\")",
+			"$0"
+		],
+		"description": "print yellow text to STDOUT using rich"
+	},
+	"jj-print-rich-red": {
+		"prefix": "jj-print-rich-red",
+		"body": [
+			"rprint(\"[bold red]${1:your text here}[/]\")",
+			"$0"
+		],
+		"description": "print red text to STDOUT using rich"
 	},
 }
