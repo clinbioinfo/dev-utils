@@ -2593,5 +2593,15 @@
 			"$0"
 		],
 		"description": "Define function generate report"
-	}
+	},
+	"jj-error-ctr-increment": {
+		"prefix": "jj-error-ctr-inrement",
+		"body": [
+			"error_ctr += 1",
+			"$0",
+			"if error_ctr > 0:",
+			"    print(f\"${1:error count is:} {error_ctr}\")"
+		],
+		"description": "inrement the error counter by 1"
+	},
 }
