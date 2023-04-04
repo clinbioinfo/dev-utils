@@ -2690,4 +2690,17 @@
 		],
 		"description": "assignment of private variable in constructor from kwargs"
 	},
+	"jj-default-config-file": {
+		"prefix": "jj-default-config-file",
+		"body": [
+			"DEFAULT_CONFIG_FILE = os.path.join(",
+			"    os.path.dirname(os.path.abspath(__file__)),",
+			"    '..',",
+			"    'conf',",
+			"    'config.${1:yaml}'",
+			")",
+			"$0"
+		],
+		"description": "Set the DEFAULT_CONFIG_FILE"
+	},
 }
