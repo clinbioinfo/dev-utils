@@ -2703,4 +2703,21 @@
 		],
 		"description": "Set the DEFAULT_CONFIG_FILE"
 	},
+	"jj-time-execution": {
+		"prefix": "jj-time-execution",
+		"body": [
+			"import time",
+			"",
+			"start_time = time.time()",
+			"",
+			"end_time = time.time()",
+			"",
+			"execution_time = end_time - start_time",
+			"",
+			"print(f\"Execution time: '{execution_time}' seconds\")",
+			"logging.info(f\"Execution time: '{execution_time}' seconds\")",
+			"$0"
+		],
+		"description": "Insert code for timing the execution of the Python program"
+	},
 }
