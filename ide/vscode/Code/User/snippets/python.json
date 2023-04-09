@@ -2720,4 +2720,35 @@
 		],
 		"description": "Insert code for timing the execution of the Python program"
 	},
+	"jj-django-cheatsheet": {
+		"prefix": "jj-django-cheatsheet",
+		"body": [
+			"# Creating new project",
+			"# django-admin startproject projectname",
+			"",
+			"# Add app to project",
+			"# python manage.py startapp appname",
+			"# ",
+			"# Start server",
+			"# python manage.py runserver",
+			"# ",
+			"# Create migrations",
+			"# python manage.py makemigrations",
+			"# ",
+			"# Run migrations",
+			"# python manage.py migrate",
+			"# ",
+			"# Create superuser for the admin panel",
+			"# python manage.py createsuperuser",
+			"# ",
+			"# Change user password",
+			"# python manage.py changepassword",
+			"# ",
+			"# Collect static files into single folder",
+			"# python manage.py collectstatic",
+			"# ",
+			"$0"
+		],
+		"description": "Display the Django Cheatsheet"
+	}
 }
