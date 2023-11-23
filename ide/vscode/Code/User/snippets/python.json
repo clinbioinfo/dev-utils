@@ -1588,7 +1588,7 @@
 	"Description of param in docstring of method": {
 		"prefix": "jj-param-docstring-method",
 		"body": [
-			":param ${1:variable}: ${2:datatype} - ${3:description}",
+			"${1:variable} (${2:datatype}): ${3:description}",
 			"$0"
 		],
 		"description": "Description of param in docstring of method"
@@ -2519,14 +2519,16 @@
 			"",
 			"@singleton",
 			"class ${1:Manager}:",
-			"    \"\"\"Class for xyz\"\"\"",
+			"    \"\"\"Class for ${2:purpose}\"\"\"",
 			"",
 			"    def __init__(self, **kwargs):",
 			"        \"\"\"Constructor for class ${1:Manager}\"\"\"",
+			"        self.config = kwargs.get(\"config\", None)",
+			"        self.config_file = kwargs.get(\"config_file\", None)",
 			"        self.logfile = kwargs.get(\"logfile\", None)",
 			"        self.outdir = kwargs.get(\"outdir\", DEFAULT_OUTDIR)",
 			"",
-			"        logging.info(f\"Instantiated Manager in {os.path.abspath(__file__)}\")",
+			"        logging.info(f\"Instantiated ${1:Manager} in {os.path.abspath(__file__)}\")",
 			"$0"
 		],
 		"description": "Instantiate singleton class"
@@ -2750,5 +2752,174 @@
 			"$0"
 		],
 		"description": "Display the Django Cheatsheet"
+	},
+	"jj-invoke-private-method": {
+		"prefix": "jj-invoke-private-method",
+		"body": [
+			"${1:variable} = self._${2:private_method_name}(${3:parameters})",
+			"$0"
+		],
+		"description": "Invoke a private method and assign to a variable"
+	},
+	"jj-def-private-method": {
+		"prefix": "jj-define-private-method",
+		"body": [
+			"def _${1:method_name}(self, ${2:parameters}) -> ${3:return_type}:",
+			"    \"\"\"${4:description}.",
+			"",
+			"    Args:",
+			"        [use jj-param-docstring-method]",
+			"",
+			"    Returns:",
+			"        ${3:return_type}: ${5:description of return type}"
+			"    \"\"\"",
+			"    $0"
+		],
+		"description": "Define a private method"
+	},
+	"jj-basename": {
+		"prefix": "jj-basename",
+		"body": [
+			 "import os"
+			 "${1:basename} = os.path.basename(${2:filepath})",
+			 "$0"
+		 ],
+		"description": "Derive the basename for the file path"
+	},
+	"jj-basename-not-extension": {
+		"prefix": "jj-basename-not-extension",
+		"body": [
+			 "import os"
+			 "${1:basename} = os.path.splitext(os.path.basename(${2:filepath})[0]",
+			 "$0"
+		 ],
+		"description": "Derive the basename for the file path without extension"
+	},
+	"jj-join-path": {
+		"prefix": "jj-join-path",
+		"body": [
+			 "import os"
+			 "${1:fullpath} = os.path.join(${2:file_parts_here})",
+			 "$0"
+		 ],
+		"description": "Join file parts to create full path"
+	},
+	"jj-absolute-path": {
+		"prefix": "jj-absolute-path",
+		"body": [
+			 "import os"
+			 "${1:absolute_file_path} = os.path.abspath(${2:file})",
+			 "$0"
+		 ],
+		"description": "Get the absolute path of the file or directory"
+	},
+	"jj-log-initialized-class-instance": {
+		"prefix": "jj-log-initialized-class-instance",
+		"body": [
+			 "logging.info(f\"Initialized '${1:class}' in file '{__file__}'\")",
+			 "$0"
+		 ],
+		"description": "Get the absolute path of the file or directory"
+	},
+	"jj-declare-enum-class": {
+		"prefix": "jj-declare-enum-class",
+		"body": [
+			 "class ${1:class}Enum(Enum):",
+			 "    ${2:key} = \"${3:value}\""
+			 "$0"
+		 ],
+		"description": "Declare a custom enum class"
+	},
+	"jj-declare-invalid-error-class": {
+		"prefix": "jj-declare-invalid-error-class",
+		"body": [
+			"class Invalid${1:name}Error(Exception):",
+			"    \"\"\"Custom error that is raised when the ${1:name} is not valid.\"\"\"",
+			"    def __init__(self, value: str, message: str) -> None:",
+			"        self.value = value",
+			"        self.message = message",
+			"",
+			"        super().__init__(message)",
+			"",
+			"",
+			"$0"
+		 ],
+		"description": "Declare a custom InvalidError class"
 	}
+	"jj-define-validator-classmethod": {
+		"prefix": "jj-define-validator-classmethod",
+		"body": [
+			"@pydantic.validator(\"${1:attribute}\")"
+			"@classmethod",
+			"def is_${1:attribute}_valid(cls, value):",
+			"    \"\"\"Validator to check the ${2:attribute_description} value.\"\"\"",
+			"    if ${3:condition}:",
+			"        return value",
+			"    else:",
+			"        raise Invalid${4:type}Error(value=value, message=\"${2:attribute_descripton} should be ${5:explanation}\")",
+			"",
+			"$0"
+		 ],
+		"description": "Define a pydantic validator classmethod"
+	},
+	"jj-instantiate-class-instance": {
+        "prefix": "jj-instantiate-class-instance",
+        "body": [
+            "${1:manager} = ${2:Manager}(",
+            "    config=config,",
+            "    config_file=config_file,",
+            "    outdir=outdir,",
+            "    outfile=outfile,",
+            "    verbose=verbose,",
+            ")",
+            "$0"
+        ],
+        "description": "jj-instantiate-class-instance"
+    },
+	"jj-not-yet-implemented": {
+        "prefix": "jj-not-yet-implemented",
+        "body": [
+            "logging.error(\"NOT YET IMPLEMENTED\")",
+            "sys.exit(1)",
+            "$0"
+        ],
+        "description": "Insert: logging.error(\"NOT YET IMPLEMENTED\")"
+    }
+	"jj-rest-api-request": {
+        "prefix": "jj-rest-api-request",
+        "body": [
+            "import requests",
+			"",
+			"from typing import Any, Dict, Optional",
+			"",
+			"def submit_request(url: str, headers: Optional[Dict[str, str]] = None, payload: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]:",
+			"    \"\"\"Submit a GET or POST request to REST API endpoint.",
+			""
+			"    Args:",
+			"        url (str): the REST API endpoint",
+			"        headers (dict): the request headers",
+			"        payload (dict): the request object",
+			"",
+			"    Returns:",
+			"        dict: the response payload"
+			"    \"\"\"",
+			"    logging.info(f\"Will attempt to submit ${1:POST} request to '{url}'\")",
+			"",
+			"    if headers is None:",
+			"        headers = {\"Accept\": \"application/json\"}",
+			"        logging.info(f\"Set headers to '{headers}'\")",
+			"",
+			"",
+			"    response = requests.${1:post}(url, headers=headers, json=payload)",
+			"    if response is None:",
+			"        raise Exception(f\"Encountered some error while attempting to ${1:post} to '{url}'\")",
+			"    if response.status_code != 200:",
+			"        raise Exception(f\"Received status code '{response.status_code}'\")",
+			"",
+			"    return response.json()",
+            "$0"
+        ],
+        "description": "Perform POST or GET to REST API endpoint"
+    }
+
 }
