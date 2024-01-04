@@ -1376,6 +1376,7 @@
 			"        error_ctr += 1",
 			"",
 			"    if error_ctr > 0:",
+			"        click.echo(click.get_current_context().get_help())",
 			"        sys.exit(1)",
 			"",
 			"",
@@ -2920,6 +2921,28 @@
             "$0"
         ],
         "description": "Perform POST or GET to REST API endpoint"
+    },
+	"jj-interactive-check": {
+        "prefix": "jj-interactive-check",
+        "body": [
+            "if interactive:",
+            "    print(f\"{os.path.abspath(__file__)} needs missing command-line parameter\")",
+            "    print(main.params[${1:index_position_of_cli_param}].help)",
+            "    ${2:param_name} = click.prompt(\"Provide value for --${2:param_name}\")",
+			"else:",
+            "$0"
+        ],
+        "description": "Add if interactive check"
+    },
+	"jj-interactive-click-option": {
+        "prefix": "jj-interactive-click-option",
+        "body": [
+            "@click.option(\"--interactive\", \"-i\", is_flag=True, default=False, help=\"Optional: Run in interactive mode\")",
+			"# Add this to the main() parameter list:"
+			"interactive: bool, ",
+            "$0"
+        ],
+        "description": "Add click.option for interactive mode"
     }
 
 }
