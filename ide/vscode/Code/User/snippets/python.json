@@ -2910,8 +2910,8 @@
         ],
         "description": "Add click.option for interactive mode"
     },
-	"jj-csv2pickle": {
-        "prefix": "jj-csv2pickle",
+	"jj-def-csv2pickle": {
+        "prefix": "jj-def-csv2pickle",
         "body": [
             "import csv",
             "import pickle",
@@ -2936,8 +2936,8 @@
         ],
         "description": "Function for converting csv to pickle format"
     },
-	"jj-pickle2csv": {
-        "prefix": "jj-pickle2csv",
+	"jj-def-pickle2csv": {
+        "prefix": "jj-def-pickle2csv",
         "body": [
             "import csv",
             "import logging",
@@ -2963,8 +2963,8 @@
         ],
         "description": "Function for converting pickle to csv format"
     },
-	"jj-tsv2pickle": {
-        "prefix": "jj-tsv2pickle",
+	"jj-def-tsv2pickle": {
+        "prefix": "jj-def-tsv2pickle",
         "body": [
             "import logging",
             "import pickle",
@@ -2989,8 +2989,8 @@
         ],
         "description": "Function for converting tab-delimited file to pickle format"
     },
-	"jj-pickle2tsv": {
-        "prefix": "jj-pickle2tsv",
+	"jj-def-pickle2tsv": {
+        "prefix": "jj-def-pickle2tsv",
         "body": [
             "import logging",
             "import pickle",
@@ -3015,8 +3015,8 @@
         ],
         "description": "Function for converting pickle to tab-delimited file format"
     },
-	"jj-json2pickle": {
-        "prefix": "jj-json2pickle",
+	"jj-def-json2pickle": {
+        "prefix": "jj-def-json2pickle",
         "body": [
             "import logging",
             "import json",
@@ -3041,8 +3041,8 @@
         ],
         "description": "Function for converting JSON format to pickle file format"
     },
-	"jj-pickle2json": {
-        "prefix": "jj-pickle2json",
+	"jj-def-pickle2json": {
+        "prefix": "jj-def-pickle2json",
         "body": [            
             "import logging",
             "import json",
