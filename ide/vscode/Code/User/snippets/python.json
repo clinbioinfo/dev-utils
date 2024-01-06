@@ -3066,5 +3066,17 @@
             "$0"
         ],
         "description": "Function for converting pickle file format to JSON file format"
+    },
+	"jj-init-basic-logging": {
+        "prefix": "jj-init-basic-logging",
+        "body": [            
+            "logging.basicConfig(",
+			"    filename=logfile,",
+			"    format=LOGGING_FORMAT,",
+			"    level=LOG_LEVEL"
+			")",
+            "$0"
+        ],
+        "description": "Initialize basic logging with filename, format and log level"
     }
 }
