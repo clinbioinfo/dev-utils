@@ -3084,5 +3084,36 @@
             "$0"
         ],
         "description": "Initialize basic logging with filename, format and log level"
+    },
+	"jj-validate-verbose": {
+        "prefix": "jj-validate-verbose",
+        "body": [            
+			"DEFAULT_VERBOSE = False",
+			"",
+			"def validate_verbose(ctx, param, value):",
+			"    if value is None:",
+			"        click.secho(\"--verbose was not specified and therefore was set to 'True'\", fg='yellow')",
+			"        return DEFAULT_VERBOSE",
+			"    return value",
+			"",
+			"@click.option('--verbose', is_flag=True, help=f\"Will print more info to STDOUT - default is '{DEFAULT_VERBOSE}'.\", callback=validate_verbose)",
+            "$0"
+        ],
+        "description": "Support for --verbose command-line option"
+    },
+	"jj-progress-bar": {
+        "prefix": "jj-progress-bar",
+        "body": [            
+			"from rich.progress import Progress",
+			"",
+			"with Progress() as progress:",
+			"    task = progress.add_task(f\"[cyan]${1:description}\", total=${2:count})",
+			"    # INSERT ITERATION HERE e.g.:",
+			"    # for i in range(${2:count}):",
+			"        # Do something in your loop",
+			"        progress.update(task, advance=1)",
+            "$0"
+        ],
+        "description": "Add use of Rich progress bar"
     }
 }
