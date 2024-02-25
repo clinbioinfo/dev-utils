@@ -3126,5 +3126,25 @@
             "$0"
         ],
         "description": "Add use of Rich progress bar"
+    },
+	"Create a table in the console using Rich": {
+        "prefix": "jj-rich-table",
+        "body": [            
+			"from rich.table import Table",
+			"",
+			"table = Table(",
+			"    show_header=True,",
+			"    header_style=\"bold #2070b2\",",
+			"    title=\"[bold]${1:title}[/]\"",
+			")",
+			"",
+			"table.add_column(\"Number\", justify=\"center\")",
+			"table.add_column(\"Number\", justify=\"left\")",
+			"table.add_column(\"Number\", justify=\"right\")",
+			"",
+			"table.add_row(f\"{i}\", \"val\")",
+            "$0"
+        ],
+        "description": "Create a table in the console using Rich"
     }
 }
